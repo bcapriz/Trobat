@@ -14,5 +14,7 @@ data class MockMissingPersonCase(
     val age: Int,
     val physicalDescription: String,
     val lastSeenLocation: String,
-    val lastSeenDate: String
+    val lastSeenDate: String,
+    val latitude: Double,
+    val longitude: Double
 )
