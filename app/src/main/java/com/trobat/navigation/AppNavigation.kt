@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.trobat.ui.screen.TrobatMainScreen
 
 object AppRoutes {
     const val SPLASH = "splash"
@@ -32,7 +33,7 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.MAIN) {
-            _root_ide_package_.com.trobat.ui.screen.TrobatMainScreen()
+            TrobatMainScreen()
         }
     }
 }
