@@ -15,9 +15,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.trobat.ui.screen.CitizenHomeScreen
 import com.trobat.ui.navigation.BottomRoutes
 import com.trobat.ui.navigation.TrobatBottomBar
 import com.trobat.ui.navigation.MainRoutes
+
+
 @Composable
 fun TrobatMainScreen() {
     val navController = rememberNavController()
