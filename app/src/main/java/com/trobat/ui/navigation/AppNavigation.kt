@@ -1,4 +1,4 @@
-package com.trobat.navigation
+package com.trobat.ui.navigation
 
 
 import androidx.compose.runtime.Composable
