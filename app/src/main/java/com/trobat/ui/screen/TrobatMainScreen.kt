@@ -5,12 +5,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.trobat.ui.screen.CitizenHomeScreen
+import com.trobat.ui.navigation.BottomRoutes
+import com.trobat.ui.navigation.TrobatBottomBar
+import com.trobat.ui.navigation.MainRoutes
+
 
 @Composable
 fun TrobatMainScreen() {
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            TrobatBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = { route ->
+                    if (currentRoute != route) {
+                        navController.navigate(route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
+            )
+        }
     ) { paddingValues ->
 
         HeatMapScreen(
@@ -19,5 +51,72 @@ fun TrobatMainScreen() {
                 .padding(paddingValues)
         )
 
+        NavHost(
+            navController = navController,
+            startDestination = BottomRoutes.CASES,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            composable(BottomRoutes.CASES) {
+                CitizenHomeScreen(
+                    onOpenMap = {
+                        navController.navigate(BottomRoutes.HEATMAP)
+                    },
+                    onCaptureEvidence = {
+                        navController.navigate(BottomRoutes.CAMERA)
+                    }
+                )
+            }
+
+            composable(BottomRoutes.HEATMAP) {
+                HeatMapScreen()
+            }
+
+            composable(BottomRoutes.CAMERA) {
+                CaptureEvidenceScreen(
+                    onConfirmReport = {
+                        navController.navigate(MainRoutes.CONFIRM_REPORT)
+                    }
+                )
+            }
+
+            composable(MainRoutes.CONFIRM_REPORT) {
+                ConfirmReportScreen(
+                    onSendReport = {
+                        navController.navigate(BottomRoutes.HEATMAP) {
+                            popUpTo(BottomRoutes.CAMERA)
+                        }
+                    },
+                    onRetakePhoto = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(BottomRoutes.NOTIFICATIONS) {
+                NotificationsScreen()
+            }
+
+            composable(BottomRoutes.PROFILE) {
+                ProfileScreen()
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlaceholderScreen(
+    title: String
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
