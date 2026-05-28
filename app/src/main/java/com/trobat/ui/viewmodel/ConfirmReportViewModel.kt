@@ -2,10 +2,10 @@ package com.trobat.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trobat.data.model.ActiveCase
-import com.trobat.data.model.CapturedEvidenceHolder
 import com.trobat.data.model.CitizenReport
+import com.trobat.data.model.CapturedEvidenceHolder
 import com.trobat.data.model.ReportStatus
+import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.RepositoryProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 class ConfirmReportViewModel : ViewModel() {
 
     private val reportRepository: CitizenReportRepository = RepositoryProvider.citizenReportRepository
+    private val caseRepository: CaseRepository = RepositoryProvider.caseRepository
+
     private val _uiState = MutableStateFlow(ConfirmReportUiState())
     val uiState: StateFlow<ConfirmReportUiState> = _uiState.asStateFlow()
 
@@ -26,17 +28,16 @@ class ConfirmReportViewModel : ViewModel() {
     val effect: SharedFlow<ConfirmReportEffect> = _effect.asSharedFlow()
 
     init {
-        loadActiveCases()
+        observeCases()
         loadCapturedEvidence()
     }
 
-    private fun loadActiveCases() {
-        val fakeCases = listOf(
-            ActiveCase(id = "1", title = "Búsqueda activa - Zona Palermo", personName = "Juan Pérez", area = "Palermo, CABA"),
-            ActiveCase(id = "2", title = "Búsqueda activa - Zona Once", personName = "María Gómez", area = "Once, CABA"),
-            ActiveCase(id = "3", title = "Búsqueda activa - Zona Caballito", personName = "Lucas Fernández", area = "Caballito, CABA")
-        )
-        _uiState.value = _uiState.value.copy(activeCases = fakeCases)
+    private fun observeCases() {
+        viewModelScope.launch {
+            caseRepository.cases.collect { cases ->
+                _uiState.value = _uiState.value.copy(activeCases = cases)
+            }
+        }
     }
 
     private fun loadCapturedEvidence() {
@@ -102,6 +103,7 @@ class ConfirmReportViewModel : ViewModel() {
             )
 
             reportRepository.sendReport(newReport)
+            CapturedEvidenceHolder.clear()
             _uiState.value = _uiState.value.copy(isSending = false)
             _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
         }
@@ -113,8 +115,6 @@ class ConfirmReportViewModel : ViewModel() {
     }
 
     private fun retakePhoto() {
-        viewModelScope.launch {
-            _effect.emit(ConfirmReportEffect.NavigateBackToCamera)
-        }
+        viewModelScope.launch { _effect.emit(ConfirmReportEffect.NavigateBackToCamera) }
     }
 }

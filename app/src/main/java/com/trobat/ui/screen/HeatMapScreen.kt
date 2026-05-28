@@ -22,9 +22,9 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.trobat.data.model.MissingPersonCase
 import com.trobat.ui.viewmodel.HeatMapUiState
 import com.trobat.ui.viewmodel.HeatMapViewModel
-import com.trobat.ui.viewmodel.MockMissingPersonCase
 
 @Composable
 fun HeatMapScreen(
@@ -115,7 +115,7 @@ private fun HeatMapContent(
 
 @Composable
 private fun HeatMapCard(
-    cases: List<MockMissingPersonCase>
+    cases: List<MissingPersonCase>
 ) {
     val firstCase = cases.firstOrNull()
     // Si hay casos, centra la cámara en el primero. Si no, centra por defecto en Wilde/Avellaneda.
@@ -221,7 +221,7 @@ private fun StatItem(
 
 @Composable
 private fun HeatMapCaseCard(
-    caseItem: MockMissingPersonCase
+    caseItem: MissingPersonCase
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),

@@ -49,7 +49,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.trobat.data.model.ActiveCase
+import com.trobat.data.model.MissingPersonCase
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 
@@ -307,8 +307,8 @@ private fun ConfirmReportContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ActiveCaseDropdown(
-    activeCases: List<ActiveCase>,
-    selectedCase: ActiveCase?,
+    activeCases: List<MissingPersonCase>,
+    selectedCase: MissingPersonCase?,
     showError: Boolean,
     onCaseSelected: (String) -> Unit
 ) {
@@ -323,7 +323,7 @@ private fun ActiveCaseDropdown(
         }
     ) {
         OutlinedTextField(
-            value = selectedCase?.title ?: "",
+            value = selectedCase?.let { "${it.fullName}, ${it.age} años" } ?: "",
             onValueChange = {},
             readOnly = true,
             label = {
@@ -362,13 +362,13 @@ private fun ActiveCaseDropdown(
                     text = {
                         Column {
                             Text(
-                                text = activeCase.title,
+                                text = "${activeCase.fullName}, ${activeCase.age} años",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
 
                             Text(
-                                text = "${activeCase.personName} • ${activeCase.area}",
+                                text = "${activeCase.lastSeenLocation} • ${activeCase.area}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

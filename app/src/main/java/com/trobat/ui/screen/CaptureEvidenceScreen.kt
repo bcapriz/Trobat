@@ -58,6 +58,7 @@ import coil.compose.AsyncImage
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.trobat.data.model.CapturedEvidenceHolder
 import com.trobat.ui.viewmodel.CaptureEvidenceEffect
 import com.trobat.ui.viewmodel.CaptureEvidenceEvent
 import com.trobat.ui.viewmodel.CaptureEvidenceUiState
@@ -136,6 +137,12 @@ fun CaptureEvidenceScreen(
     }
 
     LaunchedEffect(Unit) {
+        // If state was restored with a photo but the evidence was already sent (holder cleared),
+        // reset so the user starts a fresh capture instead of seeing the old photo
+        if (viewModel.uiState.value.hasPhoto && CapturedEvidenceHolder.photoUri == null) {
+            viewModel.onEvent(CaptureEvidenceEvent.RetakePhotoClicked)
+        }
+
         viewModel.effect.collect { effect ->
             when (effect) {
                 CaptureEvidenceEffect.NavigateToConfirmReport -> onConfirmReport()
@@ -271,9 +278,10 @@ private fun CameraCard(
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
 
-    // Re-bind camera whenever permissions are granted
-    LaunchedEffect(uiState.hasRequiredPermissions) {
+    // Re-bind camera when permissions are granted or when returning to preview after a capture
+    LaunchedEffect(uiState.hasRequiredPermissions, uiState.capturedPhotoUri) {
         if (!uiState.hasRequiredPermissions) return@LaunchedEffect
+        if (uiState.capturedPhotoUri != null) return@LaunchedEffect
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()

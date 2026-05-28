@@ -1,10 +1,10 @@
 package com.trobat.ui.viewmodel
 
 import android.net.Uri
-import com.trobat.data.model.ActiveCase
+import com.trobat.data.model.MissingPersonCase
 
 data class ConfirmReportUiState(
-    val activeCases: List<ActiveCase> = emptyList(),
+    val activeCases: List<MissingPersonCase> = emptyList(),
     val selectedCaseId: String? = null,
     val requiredDescription: String = "",
     val optionalDetails: String = "",
@@ -15,7 +15,7 @@ data class ConfirmReportUiState(
     val latitude: Double? = null,
     val longitude: Double? = null
 ) {
-    val selectedCase: ActiveCase?
+    val selectedCase: MissingPersonCase?
         get() = activeCases.firstOrNull { it.id == selectedCaseId }
 
     val canSendReport: Boolean
