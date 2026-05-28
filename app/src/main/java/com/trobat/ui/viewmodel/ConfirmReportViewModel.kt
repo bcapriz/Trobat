@@ -115,6 +115,7 @@ class ConfirmReportViewModel : ViewModel() {
     }
 
     private fun retakePhoto() {
+        CapturedEvidenceHolder.clear()
         viewModelScope.launch { _effect.emit(ConfirmReportEffect.NavigateBackToCamera) }
     }
 }
