@@ -2,6 +2,7 @@ package com.trobat.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.RepositoryProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -10,75 +11,55 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class CitizenHomeViewModel : ViewModel() {
 
-    private val repository: CitizenReportRepository =
-        RepositoryProvider.citizenReportRepository
+    private val reportRepository: CitizenReportRepository = RepositoryProvider.citizenReportRepository
+    private val caseRepository: CaseRepository = RepositoryProvider.caseRepository
 
-    private val _uiState = MutableStateFlow(
-        CitizenHomeUiState(isLoading = true)
-    )
+    private val _uiState = MutableStateFlow(CitizenHomeUiState(isLoading = true))
     val uiState: StateFlow<CitizenHomeUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<CitizenHomeEffect>()
     val effect: SharedFlow<CitizenHomeEffect> = _effect.asSharedFlow()
 
     init {
-        observeReports()
+        observeData()
     }
 
     fun onEvent(event: CitizenHomeEvent) {
         when (event) {
-            CitizenHomeEvent.OpenMapClicked -> {
-                navigateToMap()
-            }
-
-            CitizenHomeEvent.CaptureEvidenceClicked -> {
-                navigateToCamera()
-            }
-
-            CitizenHomeEvent.RefreshClicked -> {
-                loadHomeData()
-            }
+            CitizenHomeEvent.OpenMapClicked -> navigateToMap()
+            CitizenHomeEvent.CaptureEvidenceClicked -> navigateToCamera()
+            CitizenHomeEvent.RefreshClicked -> Unit
         }
     }
 
-    private fun observeReports() {
+    private fun observeData() {
         viewModelScope.launch {
-            repository.reports.collect { reports ->
-                _uiState.value = _uiState.value.copy(
+            combine(
+                reportRepository.reports,
+                caseRepository.cases
+            ) { reports, cases ->
+                CitizenHomeUiState(
+                    activeCases = cases,
                     nearbyReports = reports,
-                    unreadNotifications = repository.getUnreadNotificationsCount(),
-                    isLoading = false,
-                    errorMessage = null
+                    unreadNotifications = reports.count { it.status.name == "NEW" },
+                    isLoading = false
                 )
+            }.collect { state ->
+                _uiState.value = state
             }
         }
-    }
-
-    fun loadHomeData() {
-        val reports = repository.getNearbyReports()
-        val unreadNotifications = repository.getUnreadNotificationsCount()
-
-        _uiState.value = _uiState.value.copy(
-            nearbyReports = reports,
-            unreadNotifications = unreadNotifications,
-            isLoading = false,
-            errorMessage = null
-        )
     }
 
     private fun navigateToMap() {
-        viewModelScope.launch {
-            _effect.emit(CitizenHomeEffect.NavigateToMap)
-        }
+        viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToMap) }
     }
 
     private fun navigateToCamera() {
-        viewModelScope.launch {
-            _effect.emit(CitizenHomeEffect.NavigateToCamera)
-        }
+        viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToCamera) }
     }
 }
