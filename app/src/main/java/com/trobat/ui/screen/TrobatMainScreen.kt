@@ -34,12 +34,13 @@ fun TrobatMainScreen() {
                 currentRoute = currentRoute,
                 onNavigate = { route ->
                     if (currentRoute != route) {
+                        val goingToStart = route == BottomRoutes.CASES
                         navController.navigate(route) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                                saveState = !goingToStart
                             }
                             launchSingleTop = true
-                            restoreState = true
+                            restoreState = !goingToStart
                         }
                     }
                 }
@@ -81,7 +82,7 @@ fun TrobatMainScreen() {
                 ConfirmReportScreen(
                     onSendReport = {
                         navController.navigate(BottomRoutes.HEATMAP) {
-                            popUpTo(BottomRoutes.CAMERA)
+                            popUpTo(BottomRoutes.CAMERA) { inclusive = true }
                         }
                     },
                     onRetakePhoto = {
