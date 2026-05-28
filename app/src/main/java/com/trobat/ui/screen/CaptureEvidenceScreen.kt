@@ -1,6 +1,18 @@
 package com.trobat.ui.screen
 
-
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,26 +38,67 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.trobat.ui.viewmodel.CaptureEvidenceEffect
 import com.trobat.ui.viewmodel.CaptureEvidenceEvent
 import com.trobat.ui.viewmodel.CaptureEvidenceUiState
 import com.trobat.ui.viewmodel.CaptureEvidenceViewModel
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
+import java.io.File
+
+@SuppressLint("MissingPermission")
+private fun takePictureWithLocation(
+    context: Context,
+    imageCapture: ImageCapture,
+    onResult: (Uri, Double, Double) -> Unit,
+    onError: (String?) -> Unit
+) {
+    val photoFile = File(context.cacheDir, "evidence_${System.currentTimeMillis()}.jpg")
+    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+    imageCapture.takePicture(
+        outputOptions,
+        ContextCompat.getMainExecutor(context),
+        object : ImageCapture.OnImageSavedCallback {
+            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                val photoUri = Uri.fromFile(photoFile)
+                val fusedLocation = LocationServices.getFusedLocationProviderClient(context)
+                val tokenSource = CancellationTokenSource()
+
+                fusedLocation.getCurrentLocation(
+                    Priority.PRIORITY_HIGH_ACCURACY,
+                    tokenSource.token
+                ).addOnSuccessListener { location ->
+                    onResult(photoUri, location?.latitude ?: -34.6037, location?.longitude ?: -58.3816)
+                }.addOnFailureListener {
+                    onResult(photoUri, -34.6037, -58.3816)
+                }
+            }
+
+            override fun onError(exception: ImageCaptureException) {
+                onError(exception.message)
+            }
+        }
+    )
+}
 
 @Composable
 fun CaptureEvidenceScreen(
@@ -90,16 +143,31 @@ fun CaptureEvidenceScreen(
         }
     }
 
+    val imageCapture = remember { ImageCapture.Builder().build() }
+
+    val onTakePhoto: () -> Unit = {
+        viewModel.onEvent(CaptureEvidenceEvent.TakePhotoClicked)
+        takePictureWithLocation(
+            context = context,
+            imageCapture = imageCapture,
+            onResult = { uri, lat, lng ->
+                viewModel.onEvent(CaptureEvidenceEvent.PhotoCaptured(uri, lat, lng))
+            },
+            onError = { msg ->
+                viewModel.onEvent(CaptureEvidenceEvent.CaptureError(msg))
+            }
+        )
+    }
+
     CaptureEvidenceContent(
         uiState = uiState,
+        imageCapture = imageCapture,
         onRequestPermissions = {
             permissionsLauncher.launch(
-                arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION)
             )
         },
+        onTakePhoto = onTakePhoto,
         onEvent = viewModel::onEvent
     )
 }
@@ -107,7 +175,9 @@ fun CaptureEvidenceScreen(
 @Composable
 private fun CaptureEvidenceContent(
     uiState: CaptureEvidenceUiState,
+    imageCapture: ImageCapture,
     onRequestPermissions: () -> Unit,
+    onTakePhoto: () -> Unit,
     onEvent: (CaptureEvidenceEvent) -> Unit
 ) {
     Column(
@@ -129,6 +199,7 @@ private fun CaptureEvidenceContent(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
         if (!uiState.hasRequiredPermissions) {
             PermissionInfoCard(
                 hasCameraPermission = uiState.hasCameraPermission,
@@ -137,9 +208,9 @@ private fun CaptureEvidenceContent(
             )
         }
 
-        CameraMockCard(
-            hasPhoto = uiState.hasPhoto,
-            isCapturing = uiState.isCapturing
+        CameraCard(
+            uiState = uiState,
+            imageCapture = imageCapture
         )
 
         uiState.errorMessage?.let { message ->
@@ -152,84 +223,73 @@ private fun CaptureEvidenceContent(
 
         if (!uiState.hasPhoto) {
             Button(
-                onClick = {
-                    onEvent(CaptureEvidenceEvent.TakePhotoClicked)
-                },
+                onClick = onTakePhoto,
                 enabled = !uiState.isCapturing && uiState.hasRequiredPermissions,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .semantics {
-                        contentDescription = "Tomar foto para reportar evidencia"
-                    }
+                    .semantics { contentDescription = "Tomar foto para reportar evidencia" }
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.PhotoCamera,
-                    contentDescription = null
-                )
-
+                Icon(imageVector = Icons.Outlined.PhotoCamera, contentDescription = null)
                 Text(
-                    text = if (uiState.isCapturing) {
-                        "Tomando foto..."
-                    } else {
-                        "Tomar foto"
-                    },
+                    text = if (uiState.isCapturing) "Tomando foto..." else "Tomar foto",
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
         } else {
             Button(
-                onClick = {
-                    onEvent(CaptureEvidenceEvent.UseEvidenceClicked)
-                },
+                onClick = { onEvent(CaptureEvidenceEvent.UseEvidenceClicked) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .semantics {
-                        contentDescription = "Usar esta evidencia para continuar"
-                    }
+                    .semantics { contentDescription = "Usar esta evidencia para continuar" }
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.CheckCircle,
-                    contentDescription = null
-                )
-
-                Text(
-                    text = "Usar esta evidencia",
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+                Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = null)
+                Text(text = "Usar esta evidencia", modifier = Modifier.padding(start = 8.dp))
             }
 
             OutlinedButton(
-                onClick = {
-                    onEvent(CaptureEvidenceEvent.RetakePhotoClicked)
-                },
+                onClick = { onEvent(CaptureEvidenceEvent.RetakePhotoClicked) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .semantics {
-                        contentDescription = "Rehacer foto"
-                    }
+                    .semantics { contentDescription = "Rehacer foto" }
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Refresh,
-                    contentDescription = null
-                )
-
-                Text(
-                    text = "Rehacer foto",
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+                Icon(imageVector = Icons.Outlined.Refresh, contentDescription = null)
+                Text(text = "Rehacer foto", modifier = Modifier.padding(start = 8.dp))
             }
         }
     }
 }
 
 @Composable
-private fun CameraMockCard(
-    hasPhoto: Boolean,
-    isCapturing: Boolean
+private fun CameraCard(
+    uiState: CaptureEvidenceUiState,
+    imageCapture: ImageCapture
 ) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val previewView = remember { PreviewView(context) }
+
+    // Re-bind camera whenever permissions are granted
+    LaunchedEffect(uiState.hasRequiredPermissions) {
+        if (!uiState.hasRequiredPermissions) return@LaunchedEffect
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            val preview = Preview.Builder().build().also {
+                it.surfaceProvider = previewView.surfaceProvider
+            }
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                CameraSelector.DEFAULT_BACK_CAMERA,
+                preview,
+                imageCapture
+            )
+        }, ContextCompat.getMainExecutor(context))
+    }
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,17 +302,26 @@ private fun CameraMockCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clip(RoundedCornerShape(28.dp)),
             contentAlignment = Alignment.Center
         ) {
             when {
-                isCapturing -> {
+                uiState.capturedPhotoUri != null -> {
+                    AsyncImage(
+                        model = uiState.capturedPhotoUri,
+                        contentDescription = "Foto capturada",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                uiState.isCapturing -> {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         CircularProgressIndicator()
-
                         Text(
                             text = "Capturando evidencia...",
                             style = MaterialTheme.typography.bodyMedium,
@@ -261,30 +330,11 @@ private fun CameraMockCard(
                     }
                 }
 
-                hasPhoto -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.CheckCircle,
-                            contentDescription = "Foto tomada correctamente",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-
-                        Text(
-                            text = "Foto tomada",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Text(
-                            text = "Vista previa mockeada",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                uiState.hasRequiredPermissions -> {
+                    AndroidView(
+                        factory = { previewView },
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
 
                 else -> {
@@ -297,16 +347,14 @@ private fun CameraMockCard(
                             contentDescription = "Vista previa de cámara",
                             tint = MaterialTheme.colorScheme.primary
                         )
-
                         Text(
                             text = "Vista previa de cámara",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
-
                         Text(
-                            text = "Luego conectaremos CameraX real.",
+                            text = "Habilitá los permisos para continuar.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -340,33 +388,21 @@ private fun PermissionInfoCard(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
-
             Text(
-                text = "Para reportar evidencia, Trobat necesita acceder a la cámara y a tu ubicación aproximada.",
+                text = "Para reportar evidencia, Trobat necesita acceder a la cámara y a tu ubicación.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
             Text(
                 text = "Cámara: ${if (hasCameraPermission) "habilitada" else "pendiente"}",
                 style = MaterialTheme.typography.bodySmall,
-                color = if (hasCameraPermission) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.error
-                }
+                color = if (hasCameraPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
-
             Text(
                 text = "Ubicación: ${if (hasLocationPermission) "habilitada" else "pendiente"}",
                 style = MaterialTheme.typography.bodySmall,
-                color = if (hasLocationPermission) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.error
-                }
+                color = if (hasLocationPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
-
             Button(
                 onClick = onRequestPermissions,
                 modifier = Modifier

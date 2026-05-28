@@ -1,9 +1,13 @@
 package com.trobat.ui.viewmodel
 
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.model.ActiveCase
+import com.trobat.data.model.CapturedEvidenceHolder
+import com.trobat.data.model.CitizenReport
+import com.trobat.data.model.ReportStatus
+import com.trobat.data.repository.CitizenReportRepository
+import com.trobat.data.repository.RepositoryProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -11,10 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.trobat.data.model.CitizenReport
-import com.trobat.data.model.ReportStatus
-import com.trobat.data.repository.CitizenReportRepository
-import com.trobat.data.repository.RepositoryProvider
+
 class ConfirmReportViewModel : ViewModel() {
 
     private val reportRepository: CitizenReportRepository = RepositoryProvider.citizenReportRepository
@@ -26,64 +27,38 @@ class ConfirmReportViewModel : ViewModel() {
 
     init {
         loadActiveCases()
+        loadCapturedEvidence()
     }
 
     private fun loadActiveCases() {
         val fakeCases = listOf(
-            ActiveCase(
-                id = "1",
-                title = "Búsqueda activa - Zona Palermo",
-                personName = "Juan Pérez",
-                area = "Palermo, CABA"
-            ),
-            ActiveCase(
-                id = "2",
-                title = "Búsqueda activa - Zona Once",
-                personName = "María Gómez",
-                area = "Once, CABA"
-            ),
-            ActiveCase(
-                id = "3",
-                title = "Búsqueda activa - Zona Caballito",
-                personName = "Lucas Fernández",
-                area = "Caballito, CABA"
-            )
+            ActiveCase(id = "1", title = "Búsqueda activa - Zona Palermo", personName = "Juan Pérez", area = "Palermo, CABA"),
+            ActiveCase(id = "2", title = "Búsqueda activa - Zona Once", personName = "María Gómez", area = "Once, CABA"),
+            ActiveCase(id = "3", title = "Búsqueda activa - Zona Caballito", personName = "Lucas Fernández", area = "Caballito, CABA")
         )
+        _uiState.value = _uiState.value.copy(activeCases = fakeCases)
+    }
 
+    private fun loadCapturedEvidence() {
         _uiState.value = _uiState.value.copy(
-            activeCases = fakeCases
+            photoUri = CapturedEvidenceHolder.photoUri,
+            latitude = CapturedEvidenceHolder.latitude,
+            longitude = CapturedEvidenceHolder.longitude
         )
     }
 
     fun onEvent(event: ConfirmReportEvent) {
         when (event) {
-            is ConfirmReportEvent.CaseSelected -> {
-                onCaseSelected(event.caseId)
-            }
-
-            is ConfirmReportEvent.RequiredDescriptionChanged -> {
-                onRequiredDescriptionChanged(event.value)
-            }
-
-            is ConfirmReportEvent.OptionalDetailsChanged -> {
-                onOptionalDetailsChanged(event.value)
-            }
-
-            ConfirmReportEvent.SendReportClicked -> {
-                sendReport()
-            }
-
-            ConfirmReportEvent.RetakePhotoClicked -> {
-                retakePhoto()
-            }
+            is ConfirmReportEvent.CaseSelected -> onCaseSelected(event.caseId)
+            is ConfirmReportEvent.RequiredDescriptionChanged -> onRequiredDescriptionChanged(event.value)
+            is ConfirmReportEvent.OptionalDetailsChanged -> onOptionalDetailsChanged(event.value)
+            ConfirmReportEvent.SendReportClicked -> sendReport()
+            ConfirmReportEvent.RetakePhotoClicked -> retakePhoto()
         }
     }
 
     private fun onCaseSelected(caseId: String) {
-        _uiState.value = _uiState.value.copy(
-            selectedCaseId = caseId,
-            showCaseError = false
-        )
+        _uiState.value = _uiState.value.copy(selectedCaseId = caseId, showCaseError = false)
     }
 
     private fun onRequiredDescriptionChanged(value: String) {
@@ -94,14 +69,11 @@ class ConfirmReportViewModel : ViewModel() {
     }
 
     private fun onOptionalDetailsChanged(value: String) {
-        _uiState.value = _uiState.value.copy(
-            optionalDetails = value
-        )
+        _uiState.value = _uiState.value.copy(optionalDetails = value)
     }
 
     private fun sendReport() {
         val currentState = _uiState.value
-
         val hasCaseError = currentState.selectedCaseId == null
         val hasDescriptionError = currentState.requiredDescription.isBlank()
 
@@ -114,9 +86,7 @@ class ConfirmReportViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            _uiState.value = currentState.copy(
-                isSending = true
-            )
+            _uiState.value = currentState.copy(isSending = true)
 
             val newReport = CitizenReport(
                 id = System.currentTimeMillis().toString(),
@@ -124,21 +94,22 @@ class ConfirmReportViewModel : ViewModel() {
                 title = "Reporte ciudadano",
                 description = currentState.requiredDescription,
                 optionalDetails = currentState.optionalDetails.ifBlank { null },
-                address = "Av. Siempre Viva, CABA",
+                address = formatAddress(currentState.latitude, currentState.longitude),
                 createdAt = "Ahora",
-                latitude = -34.6037,
-                longitude = -58.3816,
+                latitude = currentState.latitude ?: -34.6037,
+                longitude = currentState.longitude ?: -58.3816,
                 status = ReportStatus.SENT
             )
 
             reportRepository.sendReport(newReport)
-
-            _uiState.value = _uiState.value.copy(
-                isSending = false
-            )
-
+            _uiState.value = _uiState.value.copy(isSending = false)
             _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
         }
+    }
+
+    private fun formatAddress(lat: Double?, lng: Double?): String {
+        if (lat == null || lng == null) return "Ubicación desconocida"
+        return "Lat: ${"%.5f".format(lat)}  •  Long: ${"%.5f".format(lng)}"
     }
 
     private fun retakePhoto() {

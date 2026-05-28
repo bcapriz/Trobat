@@ -1,5 +1,6 @@
 package com.trobat.ui.viewmodel
 
+import android.net.Uri
 import com.trobat.data.model.ActiveCase
 
 data class ConfirmReportUiState(
@@ -9,7 +10,10 @@ data class ConfirmReportUiState(
     val optionalDetails: String = "",
     val showCaseError: Boolean = false,
     val showRequiredDescriptionError: Boolean = false,
-    val isSending: Boolean = false
+    val isSending: Boolean = false,
+    val photoUri: Uri? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 ) {
     val selectedCase: ActiveCase?
         get() = activeCases.firstOrNull { it.id == selectedCaseId }
