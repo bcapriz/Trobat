@@ -134,5 +134,5 @@ app/src/main/java/com/trobat/
 
 ## Links
 
-- Figma (flujo de pantallas y design system): _[agregar link_franco]_
-- Tablero de seguimiento: _[agregar link_bruno]_
+- Figma (flujo de pantallas y design system): https://www.figma.com/design/c8Y4VgXszaah9vzOz8LAhx/Trobat?node-id=1001-2&p=f&t=X3ZS3yEfJMH3nEUE-0
+- Tablero de seguimiento: https://parallel-music-ae7.notion.site/365c32da677c802aae3ae8c387124d63?v=365c32da677c80ccbde1000c0dbd736b
