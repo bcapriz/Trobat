@@ -74,6 +74,9 @@ fun TrobatMainScreen() {
                 CaptureEvidenceScreen(
                     onConfirmReport = {
                         navController.navigate(MainRoutes.CONFIRM_REPORT)
+                    },
+                    onCancel = {
+                        navController.popBackStack()
                     }
                 )
             }
@@ -87,6 +90,11 @@ fun TrobatMainScreen() {
                     },
                     onRetakePhoto = {
                         navController.popBackStack()
+                    },
+                    onCancel = {
+                        navController.navigate(BottomRoutes.CASES) {
+                            popUpTo(BottomRoutes.CAMERA) { inclusive = true }
+                        }
                     }
                 )
             }

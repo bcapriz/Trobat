@@ -55,6 +55,8 @@ class ConfirmReportViewModel : ViewModel() {
             is ConfirmReportEvent.OptionalDetailsChanged -> onOptionalDetailsChanged(event.value)
             ConfirmReportEvent.SendReportClicked -> sendReport()
             ConfirmReportEvent.RetakePhotoClicked -> retakePhoto()
+            is ConfirmReportEvent.IdentificationToggled -> _uiState.value =
+                _uiState.value.copy(isIdentified = event.isIdentified)
         }
     }
 

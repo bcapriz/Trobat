@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -21,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +59,7 @@ import androidx.compose.foundation.verticalScroll
 fun ConfirmReportScreen(
     onSendReport: () -> Unit = {},
     onRetakePhoto: () -> Unit = {},
+    onCancel: () -> Unit = {},
     viewModel: ConfirmReportViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -77,6 +80,7 @@ fun ConfirmReportScreen(
 
     ConfirmReportContent(
         uiState = uiState,
+        onCancel = onCancel,
         onEvent = viewModel::onEvent
     )
 }
@@ -85,6 +89,7 @@ fun ConfirmReportScreen(
 @Composable
 private fun ConfirmReportContent(
     uiState: ConfirmReportUiState,
+    onCancel: () -> Unit,
     onEvent: (ConfirmReportEvent) -> Unit
 ) {
     Column(
@@ -260,12 +265,31 @@ private fun ConfirmReportContent(
             }
         }
 
-        Text(
-            text = "Este reporte será enviado de forma anónima.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Medium
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Identificarme en el reporte",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = if (uiState.isIdentified)
+                        "El reporte se enviará con tus datos de contacto."
+                    else
+                        "El reporte se enviará de forma anónima.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = uiState.isIdentified,
+                onCheckedChange = { onEvent(ConfirmReportEvent.IdentificationToggled(it)) }
+            )
+        }
 
         Button(
             onClick = {
@@ -292,14 +316,21 @@ private fun ConfirmReportContent(
         }
 
         OutlinedButton(
-            onClick = {
-                onEvent(ConfirmReportEvent.RetakePhotoClicked)
-            },
+            onClick = { onEvent(ConfirmReportEvent.RetakePhotoClicked) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
             Text(text = "Rehacer foto")
+        }
+
+        OutlinedButton(
+            onClick = onCancel,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+        ) {
+            Text(text = "Cancelar")
         }
     }
 }
