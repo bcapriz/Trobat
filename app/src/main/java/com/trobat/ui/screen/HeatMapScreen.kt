@@ -54,7 +54,10 @@ private fun HeatMapContent(
     val density = LocalDensity.current
     val maxMapHeightPx = with(density) { (360.dp + 24.dp).toPx() }
     var mapHeightPx by remember { mutableFloatStateOf(maxMapHeightPx) }
+<<<<<<< HEAD
     var expandedCaseId by remember { mutableStateOf<String?>(null) }
+=======
+>>>>>>> c366c54 (Refactor: extract ActiveCaseCard to shared components and reuse in HeatMapScreen)
 
     // Collapse map on scroll-up; expand after list bounces back on scroll-down
     val nestedScrollConnection = remember {
@@ -161,6 +164,7 @@ private fun HeatMapContent(
                 }
             } else {
                 items(uiState.cases) { caseItem ->
+<<<<<<< HEAD
                     ActiveCaseCard(
                         case = caseItem,
                         isExpanded = expandedCaseId == caseItem.id,
@@ -168,6 +172,9 @@ private fun HeatMapContent(
                             expandedCaseId = if (expandedCaseId == caseItem.id) null else caseItem.id
                         }
                     )
+=======
+                    ActiveCaseCard(case = caseItem)
+>>>>>>> c366c54 (Refactor: extract ActiveCaseCard to shared components and reuse in HeatMapScreen)
                 }
             }
         }
