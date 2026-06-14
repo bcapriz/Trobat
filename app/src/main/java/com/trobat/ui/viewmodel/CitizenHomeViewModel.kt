@@ -3,7 +3,6 @@ package com.trobat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.repository.CaseRepository
-import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.RepositoryProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,14 +15,16 @@ import kotlinx.coroutines.launch
 
 class CitizenHomeViewModel : ViewModel() {
 
-    private val reportRepository: CitizenReportRepository = RepositoryProvider.citizenReportRepository
     private val caseRepository: CaseRepository = RepositoryProvider.caseRepository
 
-    private val _uiState = MutableStateFlow(CitizenHomeUiState(isLoading = true))
+    private val _uiState = MutableStateFlow(CitizenHomeUiState())
     val uiState: StateFlow<CitizenHomeUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<CitizenHomeEffect>()
     val effect: SharedFlow<CitizenHomeEffect> = _effect.asSharedFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    private val _expandedCaseId = MutableStateFlow<String?>(null)
 
     init {
         observeData()
@@ -33,21 +34,29 @@ class CitizenHomeViewModel : ViewModel() {
         when (event) {
             CitizenHomeEvent.OpenMapClicked -> navigateToMap()
             CitizenHomeEvent.CaptureEvidenceClicked -> navigateToCamera()
-            CitizenHomeEvent.RefreshClicked -> Unit
+            CitizenHomeEvent.RefreshClicked -> {
+                _searchQuery.value = ""
+                _expandedCaseId.value = null
+            }
+            is CitizenHomeEvent.SearchQueryChanged -> _searchQuery.value = event.query
+            is CitizenHomeEvent.CaseCardClicked -> {
+                _expandedCaseId.value =
+                    if (_expandedCaseId.value == event.caseId) null else event.caseId
+            }
         }
     }
 
     private fun observeData() {
         viewModelScope.launch {
             combine(
-                reportRepository.reports,
-                caseRepository.cases
-            ) { reports, cases ->
+                caseRepository.cases,
+                _searchQuery,
+                _expandedCaseId
+            ) { cases, query, expandedId ->
                 CitizenHomeUiState(
                     activeCases = cases,
-                    nearbyReports = reports,
-                    unreadNotifications = reports.count { it.status.name == "NEW" },
-                    isLoading = false
+                    searchQuery = query,
+                    expandedCaseId = expandedId
                 )
             }.collect { state ->
                 _uiState.value = state
