@@ -50,7 +50,7 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         }
     }
 
-    override fun sendReport(report: CitizenReport) {
+    override suspend fun sendReport(report: CitizenReport) {
         _reports.value = _reports.value + report
     }
 }

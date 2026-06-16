@@ -12,8 +12,6 @@ class SplashViewModel : ViewModel() {
     val uiState: StateFlow<SplashUiState> = _uiState.asStateFlow()
 
     fun showLoadingScreen() {
-        _uiState.update {
-            it.copy(showLoading = true)
-        }
+        _uiState.update { it.copy(showLoading = true) }
     }
 }

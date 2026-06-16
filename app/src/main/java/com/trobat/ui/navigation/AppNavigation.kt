@@ -1,6 +1,5 @@
 package com.trobat.ui.navigation
 
-
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,9 +23,7 @@ fun AppNavigation() {
             SplashRoute(
                 onNavigateToHome = {
                     navController.navigate(AppRoutes.MAIN) {
-                        popUpTo(AppRoutes.SPLASH) {
-                            inclusive = true
-                        }
+                        popUpTo(AppRoutes.SPLASH) { inclusive = true }
                     }
                 }
             )

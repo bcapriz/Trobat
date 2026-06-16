@@ -11,5 +11,5 @@ interface CitizenReportRepository {
 
     fun getUnreadNotificationsCount(): Int
 
-    fun sendReport(report: CitizenReport)
+    suspend fun sendReport(report: CitizenReport)
 }

@@ -1,6 +1,5 @@
 package com.trobat.ui.navigation
 
-
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -28,7 +27,6 @@ fun SplashRoute(
     LaunchedEffect(Unit) {
         delay(1800)
         viewModel.showLoadingScreen()
-
         delay(1800)
         onNavigateToHome()
     }
@@ -36,18 +34,11 @@ fun SplashRoute(
     AnimatedContent(
         targetState = uiState.showLoading,
         transitionSpec = {
-            fadeIn(
-                animationSpec = tween(durationMillis = 700)
-            ) togetherWith fadeOut(
-                animationSpec = tween(durationMillis = 700)
-            )
+            fadeIn(animationSpec = tween(durationMillis = 700)) togetherWith
+                    fadeOut(animationSpec = tween(durationMillis = 700))
         },
         label = "Splash to Loading transition"
     ) { showLoading ->
-        if (showLoading) {
-            LoadingScreen()
-        } else {
-            SplashScreen()
-        }
+        if (showLoading) LoadingScreen() else SplashScreen()
     }
 }
