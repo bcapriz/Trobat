@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,6 +54,7 @@ private fun HeatMapContent(
     val density = LocalDensity.current
     val maxMapHeightPx = with(density) { (360.dp + 24.dp).toPx() }
     var mapHeightPx by remember { mutableFloatStateOf(maxMapHeightPx) }
+    var expandedCaseId by remember { mutableStateOf<String?>(null) }
 
     // Collapse map on scroll-up; expand after list bounces back on scroll-down
     val nestedScrollConnection = remember {
@@ -159,7 +161,13 @@ private fun HeatMapContent(
                 }
             } else {
                 items(uiState.cases) { caseItem ->
-                    ActiveCaseCard(case = caseItem)
+                    ActiveCaseCard(
+                        case = caseItem,
+                        isExpanded = expandedCaseId == caseItem.id,
+                        onClick = {
+                            expandedCaseId = if (expandedCaseId == caseItem.id) null else caseItem.id
+                        }
+                    )
                 }
             }
         }
