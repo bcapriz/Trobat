@@ -6,5 +6,6 @@ data class HeatMapUiState(
     val cases: List<MissingPersonCase> = emptyList(),
     val totalCases: Int = 0,
     val mostActiveArea: String = "-",
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val expandedCaseId: String? = null
 )

@@ -7,6 +7,7 @@ import com.trobat.data.repository.RepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HeatMapViewModel : ViewModel() {
@@ -20,18 +21,26 @@ class HeatMapViewModel : ViewModel() {
         observeCases()
     }
 
+    fun onCaseClicked(caseId: String) {
+        _uiState.update { state ->
+            state.copy(expandedCaseId = if (state.expandedCaseId == caseId) null else caseId)
+        }
+    }
+
     private fun observeCases() {
         viewModelScope.launch {
             caseRepository.cases.collect { cases ->
                 val areaFrequency = cases.groupingBy { it.area }.eachCount()
                 val mostActive = areaFrequency.maxByOrNull { it.value }?.key ?: "-"
 
-                _uiState.value = HeatMapUiState(
-                    cases = cases,
-                    totalCases = cases.size,
-                    mostActiveArea = mostActive,
-                    isLoading = false
-                )
+                _uiState.update { state ->
+                    state.copy(
+                        cases = cases,
+                        totalCases = cases.size,
+                        mostActiveArea = mostActive,
+                        isLoading = false
+                    )
+                }
             }
         }
     }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,7 +75,7 @@ fun TrobatBottomBar(
                         bottomEnd = 0.dp
                     )
                 ),
-            color = Color(0xFFF7F4FC),
+            color = MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(
                 topStart = 24.dp,
                 topEnd = 24.dp,
@@ -131,8 +132,8 @@ private fun RowScope.TrobatNavigationBarItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val selectedColor = Color(0xFF5E1DD3)
-    val unselectedColor = Color(0xFF6D6778)
+    val selectedColor = MaterialTheme.colorScheme.primary
+    val unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     val itemScale by animateFloatAsState(
         targetValue = if (selected) 1.02f else 1f,
