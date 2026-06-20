@@ -4,15 +4,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PersonSearch
-import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,6 +29,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.trobat.data.model.MissingPersonCase
+import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.viewmodel.HeatMapUiState
 import com.trobat.ui.viewmodel.HeatMapViewModel
 
@@ -44,70 +51,124 @@ private fun HeatMapContent(
     uiState: HeatMapUiState,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
+    val density = LocalDensity.current
+    val maxMapHeightPx = with(density) { (360.dp + 24.dp).toPx() }
+    var mapHeightPx by remember { mutableFloatStateOf(maxMapHeightPx) }
+    var expandedCaseId by remember { mutableStateOf<String?>(null) }
+
+    // Collapse map on scroll-up; expand after list bounces back on scroll-down
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                if (delta < 0f) {
+                    val newH = (mapHeightPx + delta).coerceIn(0f, maxMapHeightPx)
+                    val consumed = newH - mapHeightPx
+                    mapHeightPx = newH
+                    return Offset(0f, consumed)
+                }
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                val delta = available.y
+                if (delta > 0f) {
+                    val newH = (mapHeightPx + delta).coerceIn(0f, maxMapHeightPx)
+                    val expanded = newH - mapHeightPx
+                    mapHeightPx = newH
+                    return Offset(0f, expanded)
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 22.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp)
+            .nestedScroll(nestedScrollConnection)
     ) {
-        item {
-            Text(
-                text = "Zonas de búsqueda",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        // Map lives outside the scroll container — panning always works
+        HeatMapCard(
+            cases = uiState.cases,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(with(density) { mapHeightPx.toDp() })
+        )
 
-        item {
-            Text(
-                text = "Visualizá las áreas con mayor concentración de casos activos.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        item {
-            HeatMapCard(cases = uiState.cases)
-        }
-
-        item {
-            HeatMapStatsCard(
-                totalCases = uiState.totalCases,
-                mostActiveArea = uiState.mostActiveArea
-            )
-        }
-
-        item {
-            Text(
-                text = "Últimas búsquedas registradas",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        if (uiState.isLoading) {
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        } else if (uiState.cases.isEmpty()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 22.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
+        ) {
             item {
                 Text(
-                    text = "No hay casos activos registrados en esta zona.",
+                    text = "Zonas de búsqueda",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            item {
+                Text(
+                    text = "Visualizá las áreas con mayor concentración de casos activos.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        } else {
-            items(uiState.cases) { caseItem ->
-                HeatMapCaseCard(caseItem = caseItem)
+
+            item {
+                HeatMapStatsCard(
+                    totalCases = uiState.totalCases,
+                    mostActiveArea = uiState.mostActiveArea
+                )
+            }
+
+            item {
+                Text(
+                    text = "Casos activos",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            if (uiState.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else if (uiState.cases.isEmpty()) {
+                item {
+                    Text(
+                        text = "No hay casos activos registrados en esta zona.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                items(uiState.cases) { caseItem ->
+                    ActiveCaseCard(
+                        case = caseItem,
+                        isExpanded = expandedCaseId == caseItem.id,
+                        onClick = {
+                            expandedCaseId = if (expandedCaseId == caseItem.id) null else caseItem.id
+                        }
+                    )
+                }
             }
         }
     }
@@ -115,24 +176,21 @@ private fun HeatMapContent(
 
 @Composable
 private fun HeatMapCard(
-    cases: List<MissingPersonCase>
+    cases: List<MissingPersonCase>,
+    modifier: Modifier = Modifier
 ) {
-    val firstCase = cases.firstOrNull()
-    // Si hay casos, centra la cámara en el primero. Si no, centra por defecto en Wilde/Avellaneda.
-    val initialPosition = if (firstCase != null) {
-        LatLng(firstCase.latitude, firstCase.longitude)
-    } else {
-        LatLng(-34.6980, -58.3195)
-    }
+    val initialPosition = cases.firstOrNull()
+        ?.let { LatLng(it.latitude, it.longitude) }
+        ?: LatLng(-34.6980, -58.3195)
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(initialPosition, 14f)
     }
 
     ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(360.dp),
+        modifier = modifier
+            .padding(top = 24.dp)
+            .padding(horizontal = 22.dp),
         shape = RoundedCornerShape(28.dp)
     ) {
         GoogleMap(
@@ -219,70 +277,3 @@ private fun StatItem(
     }
 }
 
-@Composable
-private fun HeatMapCaseCard(
-    caseItem: MissingPersonCase
-) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        shape = RoundedCornerShape(20.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.PersonSearch,
-                    contentDescription = "Búsqueda activa",
-                    tint = MaterialTheme.colorScheme.error
-                )
-                Text(
-                    text = "${caseItem.fullName}, ${caseItem.age} años",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Text(
-                text = caseItem.physicalDescription,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Outlined.Place,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Visto por última vez: ${caseItem.lastSeenLocation}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Text(
-                text = caseItem.lastSeenDate,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 20.dp)
-            )
-        }
-    }
-}

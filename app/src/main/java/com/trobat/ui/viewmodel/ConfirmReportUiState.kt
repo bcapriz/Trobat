@@ -13,7 +13,8 @@ data class ConfirmReportUiState(
     val isSending: Boolean = false,
     val photoUri: Uri? = null,
     val latitude: Double? = null,
-    val longitude: Double? = null
+    val longitude: Double? = null,
+    val isIdentified: Boolean = false
 ) {
     val selectedCase: MissingPersonCase?
         get() = activeCases.firstOrNull { it.id == selectedCaseId }

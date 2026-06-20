@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -104,6 +106,7 @@ private fun takePictureWithLocation(
 @Composable
 fun CaptureEvidenceScreen(
     onConfirmReport: () -> Unit = {},
+    onCancel: () -> Unit = {},
     viewModel: CaptureEvidenceViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -175,6 +178,7 @@ fun CaptureEvidenceScreen(
             )
         },
         onTakePhoto = onTakePhoto,
+        onCancel = onCancel,
         onEvent = viewModel::onEvent
     )
 }
@@ -185,11 +189,13 @@ private fun CaptureEvidenceContent(
     imageCapture: ImageCapture,
     onRequestPermissions: () -> Unit,
     onTakePhoto: () -> Unit,
+    onCancel: () -> Unit,
     onEvent: (CaptureEvidenceEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp)
             .padding(top = 48.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -265,6 +271,15 @@ private fun CaptureEvidenceContent(
                 Icon(imageVector = Icons.Outlined.Refresh, contentDescription = null)
                 Text(text = "Rehacer foto", modifier = Modifier.padding(start = 8.dp))
             }
+        }
+
+        OutlinedButton(
+            onClick = onCancel,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+        ) {
+            Text(text = "Cancelar")
         }
     }
 }
