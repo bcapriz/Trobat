@@ -1,6 +1,6 @@
 package com.trobat.ui.viewmodel
 
-import com.trobat.data.model.CitizenReport
+import com.trobat.domain.model.CitizenReport
 
 data class NotificationsUiState(
     val reports: List<CitizenReport> = emptyList(),

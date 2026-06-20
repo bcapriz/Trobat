@@ -77,6 +77,9 @@ dependencies {
     // Corrutinas
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
+    // Almacenamiento cifrado (tokens de sesión)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
     // Iconos
     implementation("androidx.compose.material:material-icons-extended")
 

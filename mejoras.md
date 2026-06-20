@@ -75,17 +75,13 @@ Ahora se genera con la hora real: `"Hoy, HH:mm"`.
 
 ---
 
-## Pendientes — buenas prácticas del parcial (a aplicar)
-
 ### 11. Token JWT en `SharedPreferences` sin cifrar
 El resumen del parcial indica: *"no se deben guardar datos sensibles ya que los SharedPreferences
 se pueden burlar"* y los marca como deprecados (recomienda migrar a DataStore).
 
-`SessionManager.kt` guarda `token`, `userId` y `userName` en SharedPreferences en texto plano.
-El token JWT es el dato más sensible de la app.
-
-**Plan:** migrar a `EncryptedSharedPreferences` (misma API de SP, agrega cifrado AES-256).
-Archivos: `SessionManager.kt`, `RepositoryProvider.kt`, `build.gradle.kts`.
+`SessionManager.kt` guardaba `token`, `userId` y `userName` en texto plano.
+Migrado a `EncryptedSharedPreferences` con cifrado AES-256-GCM.
+Archivos: `RepositoryProvider.kt`, `build.gradle.kts` (dependencia `security-crypto:1.1.0-alpha06`).
 
 ---
 
@@ -93,48 +89,36 @@ Archivos: `SessionManager.kt`, `RepositoryProvider.kt`, `build.gradle.kts`.
 El parcial indica: *"no se deben poner funciones en el mismo archivo o clase en el que está el
 composable, sino en archivos a parte"*.
 
-`CaptureEvidenceScreen.kt:71` tiene una función top-level no-composable mezclada con la UI.
-
-**Plan:** mover a `ui/utils/CameraUtils.kt`.
+Movida a `ui/utils/CameraUtils.kt`. Imports de GMS Location y `java.io.File` removidos de
+`CaptureEvidenceScreen.kt`.
 
 ---
 
 ### 13. `formatLastSeenDate()` en archivo de composable
-Misma regla. `ActiveCaseCard.kt:133` tiene una función utilitaria de fechas en el mismo archivo
-que el composable.
-
-**Plan:** mover a `ui/utils/DateUtils.kt`.
+Misma regla. Movida a `ui/utils/DateUtils.kt`. Imports de `java.time` removidos de
+`ActiveCaseCard.kt`.
 
 ---
 
 ### 14. Modelos de dominio en `data/model` en lugar de `domain/`
-El parcial establece la estructura de capas: `Data/Model` = DTOs de red, `Domain` = modelos
-usados por la UI.
+El parcial establece: `Data/Model` = DTOs de red, `Domain` = modelos usados por la UI.
 
-`MissingPersonCase.kt` y `CitizenReport.kt` son los modelos que consume la UI, no DTOs.
-Deberían estar en `domain/model/`. Los DTOs (`CasoDto`, `AuthDto`, etc.) ya están correctamente
-en `data/remote/dto/`.
-
-**Plan:** crear carpeta `domain/model/` y mover los dos modelos.
+`MissingPersonCase.kt` y `CitizenReport.kt` movidos a `domain/model/` (package
+`com.trobat.domain.model`). Imports actualizados en 16 archivos. Los DTOs permanecen en
+`data/remote/dto/`.
 
 ---
 
 ### 15. Mapper `toDomain()` acoplado al repositorio
-El parcial establece que el repositorio "orquesta datos", no los transforma.
-`RemoteCaseRepository.kt:38` tiene una extension function `CasoDto.toDomain()` pegada al final
-del archivo del repositorio.
-
-**Plan:** mover a `data/repository/mapper/CasoMapper.kt`.
+Movido a `data/repository/mapper/CasoMapper.kt`. `RemoteCaseRepository` ahora solo importa
+la función del mapper, sin lógica de transformación propia.
 
 ---
 
 ### 16. `RemoteCaseRepository` usa `CoroutineScope` no lifecycle-aware
-El parcial dedica una sección a este escenario: *"hilo secundario mal acotado... el GC no puede
-liberar la Activity... memory leak"*. `CoroutineScope(Dispatchers.IO + SupervisorJob())` en el
-repositorio nunca se cancela.
-
-**Plan:** crear `TrobatApplication.kt`, registrarla en el `AndroidManifest.xml`, exponer un
-`applicationScope` y pasarlo al repositorio vía `RepositoryProvider.init()`.
+Creada `TrobatApplication.kt` con `applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)`.
+Registrada en `AndroidManifest.xml`. `RemoteCaseRepository` ahora recibe el scope por constructor.
+`RepositoryProvider.init()` obtiene el scope de la Application y lo inyecta.
 
 ---
 

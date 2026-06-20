@@ -27,7 +27,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.trobat.data.model.MissingPersonCase
+import com.trobat.domain.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.viewmodel.HeatMapUiState
 import com.trobat.ui.viewmodel.HeatMapViewModel

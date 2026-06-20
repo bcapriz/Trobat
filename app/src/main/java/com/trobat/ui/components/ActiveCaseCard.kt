@@ -17,10 +17,6 @@ import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.Place
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
@@ -32,7 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.trobat.data.model.MissingPersonCase
+import com.trobat.domain.model.MissingPersonCase
+import com.trobat.ui.utils.formatLastSeenDate
 
 @Composable
 fun ActiveCaseCard(
@@ -130,13 +127,3 @@ fun ActiveCaseCard(
     }
 }
 
-private fun formatLastSeenDate(isoString: String): String {
-    return try {
-        val instant = Instant.parse(isoString)
-        val zdt = instant.atZone(ZoneId.of("America/Argentina/Buenos_Aires"))
-        val formatter = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy, HH:mm", Locale.forLanguageTag("es-AR"))
-        zdt.format(formatter)
-    } catch (_: Exception) {
-        isoString
-    }
-}

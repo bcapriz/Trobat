@@ -2,9 +2,9 @@ package com.trobat.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trobat.data.model.CitizenReport
+import com.trobat.domain.model.CitizenReport
 import com.trobat.data.model.CapturedEvidenceHolder
-import com.trobat.data.model.ReportStatus
+import com.trobat.domain.model.ReportStatus
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import com.trobat.data.repository.CaseRepository

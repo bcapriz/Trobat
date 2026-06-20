@@ -1,7 +1,7 @@
 package com.trobat.data.repository
 
-import com.trobat.data.model.CitizenReport
-import com.trobat.data.model.ReportStatus
+import com.trobat.domain.model.CitizenReport
+import com.trobat.domain.model.ReportStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

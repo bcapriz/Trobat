@@ -1,7 +1,6 @@
 package com.trobat.ui.screen
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -57,52 +56,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.trobat.data.model.CapturedEvidenceHolder
+import com.trobat.ui.utils.takePictureWithLocation
 import com.trobat.ui.viewmodel.CaptureEvidenceEffect
 import com.trobat.ui.viewmodel.CaptureEvidenceEvent
 import com.trobat.ui.viewmodel.CaptureEvidenceUiState
 import com.trobat.ui.viewmodel.CaptureEvidenceViewModel
-import java.io.File
-
-@SuppressLint("MissingPermission")
-private fun takePictureWithLocation(
-    context: Context,
-    imageCapture: ImageCapture,
-    onResult: (Uri, Double, Double) -> Unit,
-    onError: (String?) -> Unit
-) {
-    val photoFile = File(context.cacheDir, "evidence_${System.currentTimeMillis()}.jpg")
-    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-    imageCapture.takePicture(
-        outputOptions,
-        ContextCompat.getMainExecutor(context),
-        object : ImageCapture.OnImageSavedCallback {
-            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                val photoUri = Uri.fromFile(photoFile)
-                val fusedLocation = LocationServices.getFusedLocationProviderClient(context)
-                val tokenSource = CancellationTokenSource()
-
-                fusedLocation.getCurrentLocation(
-                    Priority.PRIORITY_HIGH_ACCURACY,
-                    tokenSource.token
-                ).addOnSuccessListener { location ->
-                    onResult(photoUri, location?.latitude ?: -34.6037, location?.longitude ?: -58.3816)
-                }.addOnFailureListener {
-                    onResult(photoUri, -34.6037, -58.3816)
-                }
-            }
-
-            override fun onError(exception: ImageCaptureException) {
-                onError(exception.message)
-            }
-        }
-    )
-}
-
 @Composable
 fun CaptureEvidenceScreen(
     onConfirmReport: () -> Unit = {},

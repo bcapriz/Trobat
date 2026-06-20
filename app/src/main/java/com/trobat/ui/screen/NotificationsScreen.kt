@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trobat.data.model.CitizenReport
+import com.trobat.domain.model.CitizenReport
 import com.trobat.ui.viewmodel.NotificationsViewModel
 
 @Composable

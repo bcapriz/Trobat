@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trobat.data.model.MissingPersonCase
+import com.trobat.domain.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.viewmodel.CitizenHomeEffect
 import com.trobat.ui.viewmodel.CitizenHomeEvent

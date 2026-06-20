@@ -3,8 +3,8 @@ package com.trobat.data.repository
 import android.content.Context
 import com.google.gson.Gson
 import com.trobat.data.model.CapturedEvidenceHolder
-import com.trobat.data.model.CitizenReport
-import com.trobat.data.model.ReportStatus
+import com.trobat.domain.model.CitizenReport
+import com.trobat.domain.model.ReportStatus
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.remote.dto.CrearReporteRequestDto
 import com.trobat.data.remote.dto.DatosContactoDto
