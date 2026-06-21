@@ -244,24 +244,11 @@ private fun ConfirmReportContent(
                     fontWeight = FontWeight.Bold
                 )
 
-                if (uiState.latitude != null && uiState.longitude != null) {
-                    Text(
-                        text = "Lat: ${"%.5f".format(uiState.latitude)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "Long: ${"%.5f".format(uiState.longitude)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    Text(
-                        text = "Ubicación no disponible",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = uiState.locationLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 
