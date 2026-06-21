@@ -10,19 +10,21 @@ data class HeatMapUiState(
     val isLoading: Boolean = true,
     val userLat: Double? = null,
     val userLng: Double? = null,
-    val radiusKm: Float = 10f
+    val radiusKm: Float = 50f
 ) {
-    val filteredCases: List<MissingPersonCase> get() =
-        if (userLat != null && userLng != null) {
-            cases
-                .filter { GeoUtils.haversineKm(userLat, userLng, it.latitude, it.longitude) <= radiusKm }
-                .sortedBy { GeoUtils.haversineKm(userLat, userLng, it.latitude, it.longitude) }
-        } else {
-            cases
-        }
+    val filteredCases: List<MissingPersonCase> get() {
+        val lat = userLat ?: return cases
+        val lng = userLng ?: return cases
+        val (withCoords, withoutCoords) = cases.partition { it.latitude != 0.0 || it.longitude != 0.0 }
+        val nearby = withCoords
+            .filter { GeoUtils.haversineKm(lat, lng, it.latitude, it.longitude) <= radiusKm }
+            .sortedBy { GeoUtils.haversineKm(lat, lng, it.latitude, it.longitude) }
+        return nearby + withoutCoords
+    }
 
     fun distanceTo(case: MissingPersonCase): Double? {
-        if (userLat == null || userLng == null) return null
-        return GeoUtils.haversineKm(userLat, userLng, case.latitude, case.longitude)
+        val lat = userLat ?: return null
+        val lng = userLng ?: return null
+        return GeoUtils.haversineKm(lat, lng, case.latitude, case.longitude)
     }
 }

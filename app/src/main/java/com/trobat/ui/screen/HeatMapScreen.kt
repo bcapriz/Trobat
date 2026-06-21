@@ -220,11 +220,10 @@ private fun HeatMapCard(
     userLng: Double? = null,
     modifier: Modifier = Modifier
 ) {
-    val initialPosition = when {
-        userLat != null && userLng != null -> LatLng(userLat, userLng)
-        cases.isNotEmpty() -> LatLng(cases.first().latitude, cases.first().longitude)
-        else -> LatLng(-34.6980, -58.3195)
-    }
+    val initialPosition =
+        (if (userLat != null && userLng != null) LatLng(userLat, userLng) else null)
+            ?: cases.firstOrNull()?.let { LatLng(it.latitude, it.longitude) }
+            ?: LatLng(-34.6980, -58.3195)
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(initialPosition, 13f)

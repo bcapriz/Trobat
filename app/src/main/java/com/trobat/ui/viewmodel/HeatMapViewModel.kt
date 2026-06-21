@@ -1,7 +1,9 @@
 package com.trobat.ui.viewmodel
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.app.Application
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
@@ -22,7 +24,7 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
     private val _uiState = MutableStateFlow(HeatMapUiState())
     val uiState: StateFlow<HeatMapUiState> = _uiState.asStateFlow()
 
-    private val _radiusKm = MutableStateFlow(10f)
+    private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
 
     init {
@@ -30,9 +32,15 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
         observeCases()
     }
 
-    @SuppressLint("MissingPermission")
     private fun fetchUserLocation() {
-        val client = LocationServices.getFusedLocationProviderClient(getApplication<Application>())
+        val app = getApplication<Application>()
+        val granted = ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
+        if (!granted) return
+
+        val client = LocationServices.getFusedLocationProviderClient(app)
         val tokenSource = CancellationTokenSource()
         client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
             .addOnSuccessListener { location ->

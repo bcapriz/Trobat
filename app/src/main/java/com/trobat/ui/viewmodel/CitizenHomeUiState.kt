@@ -10,7 +10,7 @@ data class CitizenHomeUiState(
     val expandedCaseId: String? = null,
     val userLat: Double? = null,
     val userLng: Double? = null,
-    val radiusKm: Float = 10f
+    val radiusKm: Float = 50f
 ) {
     val filteredCases: List<MissingPersonCase> get() {
         val bySearch = if (searchQuery.isBlank()) activeCases
@@ -19,17 +19,19 @@ data class CitizenHomeUiState(
             case.lastSeenLocation.contains(searchQuery, ignoreCase = true) ||
             case.area.contains(searchQuery, ignoreCase = true)
         }
-        return if (userLat != null && userLng != null) {
-            bySearch
-                .filter { GeoUtils.haversineKm(userLat, userLng, it.latitude, it.longitude) <= radiusKm }
-                .sortedBy { GeoUtils.haversineKm(userLat, userLng, it.latitude, it.longitude) }
-        } else {
-            bySearch
-        }
+        val lat = userLat ?: return bySearch
+        val lng = userLng ?: return bySearch
+
+        val (withCoords, withoutCoords) = bySearch.partition { it.latitude != 0.0 || it.longitude != 0.0 }
+        val nearby = withCoords
+            .filter { GeoUtils.haversineKm(lat, lng, it.latitude, it.longitude) <= radiusKm }
+            .sortedBy { GeoUtils.haversineKm(lat, lng, it.latitude, it.longitude) }
+        return nearby + withoutCoords
     }
 
     fun distanceTo(case: MissingPersonCase): Double? {
-        if (userLat == null || userLng == null) return null
-        return GeoUtils.haversineKm(userLat, userLng, case.latitude, case.longitude)
+        val lat = userLat ?: return null
+        val lng = userLng ?: return null
+        return GeoUtils.haversineKm(lat, lng, case.latitude, case.longitude)
     }
 }
