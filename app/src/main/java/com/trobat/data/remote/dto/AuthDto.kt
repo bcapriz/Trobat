@@ -1,15 +1,20 @@
 package com.trobat.data.remote.dto
 
+data class PersonalInfoDto(
+    val national_id: String = "",
+    val full_name: String = "",
+    val phone: String = ""
+)
+
 data class LoginRequestDto(
     val email: String,
-    val password: String,
-    val fcm_token: String? = null
+    val password: String
 )
 
 data class RegistroRequestDto(
-    val name: String,
     val email: String,
-    val password: String
+    val password: String,
+    val personal_info: PersonalInfoDto
 )
 
 data class LogoutRequestDto(
@@ -24,10 +29,10 @@ data class TokenResponseDto(
 )
 
 data class MensajeResponseDto(
-    val mensaje: String
+    val message: String
 )
 
 data class CrearResponseDto(
     val id: String,
-    val mensaje: String
+    val message: String
 )

@@ -6,9 +6,9 @@ import com.trobat.data.model.CapturedEvidenceHolder
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.ReportStatus
 import com.trobat.data.remote.TrobatApi
+import com.trobat.data.remote.dto.ContactInfoDto
 import com.trobat.data.remote.dto.CrearReporteRequestDto
-import com.trobat.data.remote.dto.DatosContactoDto
-import com.trobat.data.remote.dto.MetadataSeguridadDto
+import com.trobat.data.remote.dto.SecurityMetadataDto
 import com.trobat.data.remote.dto.UbicacionDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,15 +32,15 @@ class RemoteCitizenReportRepository(
 
     override suspend fun sendReport(report: CitizenReport) {
         val datos = CrearReporteRequestDto(
-            caso_id = report.caseId,
+            case_id = report.caseId,
             location = UbicacionDto(
                 type = "Point",
                 coordinates = listOf(report.longitude, report.latitude)
             ),
-            descripcion = report.description,
-            prioridad_policial = false,
-            metadata_seguridad = MetadataSeguridadDto(anonimo = report.optionalDetails == null),
-            datos_contacto = DatosContactoDto()
+            description = report.description,
+            police_priority = false,
+            security_metadata = SecurityMetadataDto(anonymous = report.optionalDetails == null),
+            contact_info = ContactInfoDto()
         )
 
         val datosJson = Gson().toJson(datos)
