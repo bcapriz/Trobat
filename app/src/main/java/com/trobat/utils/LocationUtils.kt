@@ -15,12 +15,16 @@ fun AndroidViewModel.fetchCurrentLocation(onLocation: (Pair<Double, Double>?) ->
             PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
-    if (!granted) return
+    if (!granted) {
+        onLocation(null)
+        return
+    }
 
     val client = LocationServices.getFusedLocationProviderClient(app)
     val tokenSource = CancellationTokenSource()
     client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
         .addOnSuccessListener { location ->
-            if (location != null) onLocation(Pair(location.latitude, location.longitude))
+            onLocation(if (location != null) Pair(location.latitude, location.longitude) else null)
         }
+        .addOnFailureListener { onLocation(null) }
 }

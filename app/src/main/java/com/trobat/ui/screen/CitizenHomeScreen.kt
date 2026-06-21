@@ -135,80 +135,80 @@ private fun CitizenHomeContent(
             onClick = { onEvent(CitizenHomeEvent.CaptureEvidenceClicked) }
         )
 
-        if (uiState.activeCases.isNotEmpty()) {
-            Text(
-                text = "Casos activos",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
-            )
+        Text(
+            text = "Casos activos",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
+        )
 
-            OutlinedTextField(
-                value = uiState.searchQuery,
-                onValueChange = { onEvent(CitizenHomeEvent.SearchQueryChanged(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(
-                        text = "Buscar por nombre, zona o ubicación...",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = null
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp)
-            )
-
-            if (uiState.userLat != null) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Radio de búsqueda",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "${uiState.radiusKm.roundToInt()} km",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                        )
-                    }
-                    Slider(
-                        value = uiState.radiusKm,
-                        onValueChange = { onEvent(CitizenHomeEvent.RadiusChanged(it)) },
-                        valueRange = 5f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-
-            if (uiState.filteredCases.isEmpty()) {
+        OutlinedTextField(
+            value = uiState.searchQuery,
+            onValueChange = { onEvent(CitizenHomeEvent.SearchQueryChanged(it)) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = {
                 Text(
-                    text = if (uiState.searchQuery.isNotBlank())
-                        "Sin resultados para \"${uiState.searchQuery}\""
-                    else
-                        "No hay casos activos en un radio de ${uiState.radiusKm.roundToInt()} km.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Buscar por nombre, zona o ubicación...",
+                    style = MaterialTheme.typography.bodyMedium
                 )
-            } else {
-                uiState.filteredCases.forEach { case ->
-                    ActiveCaseCard(
-                        case = case,
-                        isExpanded = uiState.expandedCaseId == case.id,
-                        distanceKm = uiState.distanceTo(case),
-                        onClick = { onEvent(CitizenHomeEvent.CaseCardClicked(case.id)) }
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = null
+                )
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(16.dp)
+        )
+
+        if (uiState.userLat != null && !uiState.isLoading) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Radio de búsqueda",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${uiState.radiusKm.roundToInt()} km",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
                     )
                 }
+                Slider(
+                    value = uiState.radiusKm,
+                    onValueChange = { onEvent(CitizenHomeEvent.RadiusChanged(it)) },
+                    valueRange = 5f..100f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        if (uiState.filteredCases.isEmpty()) {
+            Text(
+                text = when {
+                    uiState.isLoading -> "Cargando casos..."
+                    uiState.searchQuery.isNotBlank() -> "Sin resultados para \"${uiState.searchQuery}\""
+                    uiState.userLat != null -> "No se encontraron casos cercanos en un radio de ${uiState.radiusKm.roundToInt()} km."
+                    else -> "Cargando casos..."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            uiState.filteredCases.forEach { case ->
+                ActiveCaseCard(
+                    case = case,
+                    isExpanded = uiState.expandedCaseId == case.id,
+                    distanceKm = uiState.distanceTo(case),
+                    onClick = { onEvent(CitizenHomeEvent.CaseCardClicked(case.id)) }
+                )
             }
         }
 

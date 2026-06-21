@@ -17,11 +17,7 @@ class RemoteCaseRepository(
     private val _cases = MutableStateFlow<List<MissingPersonCase>>(emptyList())
     override val cases: StateFlow<List<MissingPersonCase>> = _cases.asStateFlow()
 
-    init {
-        scope.launch { fetchCases() }
-    }
-
-    suspend fun refresh() = fetchCases()
+    override suspend fun refresh() = fetchCases()
 
     override suspend fun refreshCercanos(lat: Double, lng: Double, radioKm: Double) {
         try {
@@ -31,6 +27,21 @@ class RemoteCaseRepository(
             }
         } catch (_: Exception) {
         }
+    }
+
+    override suspend fun refreshCercanosConFallback(lat: Double, lng: Double, initialRadioKm: Double) {
+        val pasos = buildRadiusSteps(initialRadioKm)
+        for (radio in pasos) {
+            refreshCercanos(lat, lng, radio)
+            if (_cases.value.isNotEmpty()) return
+        }
+        refresh()
+    }
+
+    private fun buildRadiusSteps(initialKm: Double): List<Double> {
+        if (initialKm >= 100.0) return listOf(100.0)
+        val step = (100.0 - initialKm) / 4.0
+        return (0..4).map { (initialKm + it * step).coerceAtMost(100.0) }
     }
 
     private suspend fun fetchCases() {

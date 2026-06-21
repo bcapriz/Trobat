@@ -22,6 +22,7 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    private val _isLoading = MutableStateFlow(true)
 
     init {
         fetchUserLocation()
@@ -31,10 +32,18 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
     private fun fetchUserLocation() {
         fetchCurrentLocation { location ->
             _userLocation.value = location
-            if (location != null) {
-                viewModelScope.launch {
-                    caseRepository.refreshCercanos(location.first, location.second, _radiusKm.value.toDouble())
+            viewModelScope.launch {
+                if (caseRepository.cases.value.isNotEmpty()) {
+                    _isLoading.value = false
+                    return@launch
                 }
+                _isLoading.value = true
+                if (location != null) {
+                    caseRepository.refreshCercanosConFallback(location.first, location.second, _radiusKm.value.toDouble())
+                } else {
+                    caseRepository.refresh()
+                }
+                _isLoading.value = false
             }
         }
     }
@@ -62,12 +71,13 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
                     cases = cases,
                     totalCases = cases.size,
                     mostActiveArea = mostActive,
-                    isLoading = false,
                     expandedCaseId = _uiState.value.expandedCaseId,
                     userLat = location?.first,
                     userLng = location?.second,
                     radiusKm = radius
                 )
+            }.combine(_isLoading) { state, loading ->
+                state.copy(isLoading = loading)
             }.collect { state ->
                 _uiState.value = state
             }

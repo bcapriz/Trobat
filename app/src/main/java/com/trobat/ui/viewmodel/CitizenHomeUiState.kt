@@ -10,7 +10,8 @@ data class CitizenHomeUiState(
     val expandedCaseId: String? = null,
     val userLat: Double? = null,
     val userLng: Double? = null,
-    val radiusKm: Float = 50f
+    val radiusKm: Float = 50f,
+    val isLoading: Boolean = true
 ) {
     val filteredCases: List<MissingPersonCase> get() {
         val bySearch = if (searchQuery.isBlank()) activeCases

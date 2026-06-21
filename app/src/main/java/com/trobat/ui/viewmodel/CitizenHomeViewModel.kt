@@ -29,6 +29,7 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     private val _expandedCaseId = MutableStateFlow<String?>(null)
     private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    private val _isLoading = MutableStateFlow(true)
 
     init {
         fetchUserLocation()
@@ -38,10 +39,14 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     private fun fetchUserLocation() {
         fetchCurrentLocation { location ->
             _userLocation.value = location
-            if (location != null) {
-                viewModelScope.launch {
-                    caseRepository.refreshCercanos(location.first, location.second, _radiusKm.value.toDouble())
+            viewModelScope.launch {
+                _isLoading.value = true
+                if (location != null) {
+                    caseRepository.refreshCercanosConFallback(location.first, location.second, _radiusKm.value.toDouble())
+                } else {
+                    caseRepository.refresh()
                 }
+                _isLoading.value = false
             }
         }
     }
@@ -81,6 +86,8 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                     userLng = location?.second,
                     radiusKm = radius
                 )
+            }.combine(_isLoading) { state, loading ->
+                state.copy(isLoading = loading)
             }.collect { state ->
                 _uiState.value = state
             }
