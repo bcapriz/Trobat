@@ -1,16 +1,11 @@
 package com.trobat.ui.viewmodel
 
-import android.Manifest
 import android.app.Application
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.RepositoryProvider
+import com.trobat.utils.fetchCurrentLocation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,21 +29,14 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun fetchUserLocation() {
-        val app = getApplication<Application>()
-        val granted = ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED
-        if (!granted) return
-
-        val client = LocationServices.getFusedLocationProviderClient(app)
-        val tokenSource = CancellationTokenSource()
-        client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    _userLocation.value = Pair(location.latitude, location.longitude)
+        fetchCurrentLocation { location ->
+            _userLocation.value = location
+            if (location != null) {
+                viewModelScope.launch {
+                    caseRepository.refreshCercanos(location.first, location.second, _radiusKm.value.toDouble())
                 }
             }
+        }
     }
 
     fun onCaseClicked(caseId: String) {

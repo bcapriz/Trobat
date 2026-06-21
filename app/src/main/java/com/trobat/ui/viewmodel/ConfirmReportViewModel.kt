@@ -141,7 +141,7 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                 description = currentState.requiredDescription,
                 optionalDetails = currentState.optionalDetails.ifBlank { null },
                 address = currentState.locationLabel,
-                createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}"
+                createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}",
                 latitude = currentState.latitude ?: -34.6037,
                 longitude = currentState.longitude ?: -58.3816,
                 status = ReportStatus.SENT

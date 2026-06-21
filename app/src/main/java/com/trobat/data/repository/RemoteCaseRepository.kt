@@ -23,6 +23,16 @@ class RemoteCaseRepository(
 
     suspend fun refresh() = fetchCases()
 
+    override suspend fun refreshCercanos(lat: Double, lng: Double, radioKm: Double) {
+        try {
+            val response = api.getCasosCercanos(lat = lat, lng = lng, radioKm = radioKm)
+            if (response.isSuccessful) {
+                _cases.value = response.body()?.data?.map { it.caso.toDomain() } ?: emptyList()
+            }
+        } catch (_: Exception) {
+        }
+    }
+
     private suspend fun fetchCases() {
         try {
             val response = api.getCasos()
