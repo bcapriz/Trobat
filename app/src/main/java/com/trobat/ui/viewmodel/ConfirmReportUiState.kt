@@ -14,6 +14,7 @@ data class ConfirmReportUiState(
     val photoUri: Uri? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
+    val locationLabel: String = "Obteniendo dirección...",
     val isIdentified: Boolean = false
 ) {
     val selectedCase: MissingPersonCase?

@@ -4,6 +4,7 @@ import com.trobat.data.local.SessionManager
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.remote.dto.LoginRequestDto
 import com.trobat.data.remote.dto.LogoutRequestDto
+import com.trobat.data.remote.dto.PersonalInfoDto
 import com.trobat.data.remote.dto.RegistroRequestDto
 
 class RemoteAuthRepository(
@@ -30,7 +31,11 @@ class RemoteAuthRepository(
 
     override suspend fun register(name: String, email: String, password: String): Result<Unit> {
         return try {
-            val response = api.registro(RegistroRequestDto(name = name, email = email, password = password))
+            val response = api.registro(RegistroRequestDto(
+                email = email,
+                password = password,
+                personal_info = PersonalInfoDto(full_name = name)
+            ))
             if (response.isSuccessful) Result.success(Unit)
             else Result.failure(Exception("El email ya está registrado"))
         } catch (e: Exception) {

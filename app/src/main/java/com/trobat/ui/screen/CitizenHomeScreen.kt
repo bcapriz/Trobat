@@ -21,7 +21,9 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import kotlin.math.roundToInt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -161,9 +163,40 @@ private fun CitizenHomeContent(
                 shape = RoundedCornerShape(16.dp)
             )
 
+            if (uiState.userLat != null) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Radio de búsqueda",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${uiState.radiusKm.roundToInt()} km",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        )
+                    }
+                    Slider(
+                        value = uiState.radiusKm,
+                        onValueChange = { onEvent(CitizenHomeEvent.RadiusChanged(it)) },
+                        valueRange = 5f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
             if (uiState.filteredCases.isEmpty()) {
                 Text(
-                    text = "Sin resultados para \"${uiState.searchQuery}\"",
+                    text = if (uiState.searchQuery.isNotBlank())
+                        "Sin resultados para \"${uiState.searchQuery}\""
+                    else
+                        "No hay casos activos en un radio de ${uiState.radiusKm.roundToInt()} km.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -172,6 +205,7 @@ private fun CitizenHomeContent(
                     ActiveCaseCard(
                         case = case,
                         isExpanded = uiState.expandedCaseId == case.id,
+                        distanceKm = uiState.distanceTo(case),
                         onClick = { onEvent(CitizenHomeEvent.CaseCardClicked(case.id)) }
                     )
                 }

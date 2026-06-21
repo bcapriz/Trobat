@@ -24,13 +24,13 @@ import retrofit2.http.Query
 
 interface TrobatApi {
 
-    @POST("auth/registro")
+    @POST("usuarios-reportantes/registro")
     suspend fun registro(@Body body: RegistroRequestDto): Response<CrearResponseDto>
 
-    @POST("auth/login")
+    @POST("usuarios-reportantes/login")
     suspend fun login(@Body body: LoginRequestDto): Response<TokenResponseDto>
 
-    @POST("auth/logout")
+    @POST("usuarios-reportantes/logout")
     suspend fun logout(@Body body: LogoutRequestDto): Response<MensajeResponseDto>
 
     @GET("casos")
@@ -54,7 +54,7 @@ interface TrobatApi {
 
     @GET("reportes")
     suspend fun getReportes(
-        @Query("caso_id") casoId: String? = null,
+        @Query("case_id") casoId: String? = null,
         @Query("page") page: Int = 0,
         @Query("limit") limit: Int = 20
     ): Response<ReportesPaginadosDto>

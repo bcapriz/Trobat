@@ -62,6 +62,7 @@ import com.trobat.ui.viewmodel.CaptureEvidenceEffect
 import com.trobat.ui.viewmodel.CaptureEvidenceEvent
 import com.trobat.ui.viewmodel.CaptureEvidenceUiState
 import com.trobat.ui.viewmodel.CaptureEvidenceViewModel
+
 @Composable
 fun CaptureEvidenceScreen(
     onConfirmReport: () -> Unit = {},

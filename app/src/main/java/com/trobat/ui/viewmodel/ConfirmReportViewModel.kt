@@ -1,6 +1,9 @@
 package com.trobat.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.location.Geocoder
+import android.os.Build
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.CapturedEvidenceHolder
@@ -10,6 +13,7 @@ import java.time.format.DateTimeFormatter
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.RepositoryProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,8 +21,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import java.util.Locale
+import kotlin.coroutines.resume
 
-class ConfirmReportViewModel : ViewModel() {
+class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
 
     private val reportRepository: CitizenReportRepository = RepositoryProvider.citizenReportRepository
     private val caseRepository: CaseRepository = RepositoryProvider.caseRepository
@@ -43,11 +51,44 @@ class ConfirmReportViewModel : ViewModel() {
     }
 
     private fun loadCapturedEvidence() {
+        val lat = CapturedEvidenceHolder.latitude
+        val lng = CapturedEvidenceHolder.longitude
         _uiState.value = _uiState.value.copy(
             photoUri = CapturedEvidenceHolder.photoUri,
-            latitude = CapturedEvidenceHolder.latitude,
-            longitude = CapturedEvidenceHolder.longitude
+            latitude = lat,
+            longitude = lng,
+            locationLabel = if (lat != null && lng != null) "Obteniendo dirección..." else "Ubicación no disponible"
         )
+        if (lat != null && lng != null) {
+            viewModelScope.launch {
+                val label = reverseGeocode(lat, lng)
+                _uiState.value = _uiState.value.copy(locationLabel = label)
+            }
+        }
+    }
+
+    private suspend fun reverseGeocode(lat: Double, lng: Double): String = withContext(Dispatchers.IO) {
+        try {
+            val geocoder = Geocoder(getApplication(), Locale.getDefault())
+            val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                suspendCancellableCoroutine { cont ->
+                    geocoder.getFromLocation(lat, lng, 1) { list -> cont.resume(list) }
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                geocoder.getFromLocation(lat, lng, 1) ?: emptyList()
+            }
+            addresses.firstOrNull()?.let { addr ->
+                buildString {
+                    addr.thoroughfare?.let { append(it) }
+                    addr.subThoroughfare?.let { if (isNotEmpty()) append(" $it") else append(it) }
+                    addr.locality?.let { if (isNotEmpty()) append(", $it") else append(it) }
+                    addr.adminArea?.let { if (isNotEmpty()) append(", $it") else append(it) }
+                }.ifBlank { "${"%.5f".format(lat)}, ${"%.5f".format(lng)}" }
+            } ?: "${"%.5f".format(lat)}, ${"%.5f".format(lng)}"
+        } catch (_: Exception) {
+            "${"%.5f".format(lat)}, ${"%.5f".format(lng)}"
+        }
     }
 
     fun onEvent(event: ConfirmReportEvent) {
@@ -99,8 +140,8 @@ class ConfirmReportViewModel : ViewModel() {
                 title = "Reporte ciudadano",
                 description = currentState.requiredDescription,
                 optionalDetails = currentState.optionalDetails.ifBlank { null },
-                address = formatAddress(currentState.latitude, currentState.longitude),
-                createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}",
+                address = currentState.locationLabel,
+                createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}"
                 latitude = currentState.latitude ?: -34.6037,
                 longitude = currentState.longitude ?: -58.3816,
                 status = ReportStatus.SENT
@@ -111,11 +152,6 @@ class ConfirmReportViewModel : ViewModel() {
             _uiState.value = _uiState.value.copy(isSending = false)
             _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
         }
-    }
-
-    private fun formatAddress(lat: Double?, lng: Double?): String {
-        if (lat == null || lng == null) return "Ubicación desconocida"
-        return "Lat: ${"%.5f".format(lat)}  •  Long: ${"%.5f".format(lng)}"
     }
 
     private fun retakePhoto() {

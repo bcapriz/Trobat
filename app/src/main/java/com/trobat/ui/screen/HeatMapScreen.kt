@@ -6,11 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.google.android.gms.maps.CameraUpdateFactory
+import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -42,6 +45,7 @@ fun HeatMapScreen(
     HeatMapContent(
         uiState = uiState,
         onCaseClicked = viewModel::onCaseClicked,
+        onRadiusChanged = viewModel::onRadiusChanged,
         modifier = modifier
     )
 }
@@ -50,6 +54,7 @@ fun HeatMapScreen(
 private fun HeatMapContent(
     uiState: HeatMapUiState,
     onCaseClicked: (String) -> Unit,
+    onRadiusChanged: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -94,7 +99,9 @@ private fun HeatMapContent(
     ) {
         // Map lives outside the scroll container — panning always works
         HeatMapCard(
-            cases = uiState.cases,
+            cases = uiState.filteredCases,
+            userLat = uiState.userLat,
+            userLng = uiState.userLng,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(with(density) { mapHeightPx.toDp() })
@@ -140,6 +147,36 @@ private fun HeatMapContent(
                 )
             }
 
+            if (uiState.userLat != null) {
+                item {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Radio de búsqueda",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "${uiState.radiusKm.roundToInt()} km",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Slider(
+                            value = uiState.radiusKm,
+                            onValueChange = onRadiusChanged,
+                            valueRange = 5f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
             if (uiState.isLoading) {
                 item {
                     Box(
@@ -151,19 +188,23 @@ private fun HeatMapContent(
                         CircularProgressIndicator()
                     }
                 }
-            } else if (uiState.cases.isEmpty()) {
+            } else if (uiState.filteredCases.isEmpty()) {
                 item {
                     Text(
-                        text = "No hay casos activos registrados en esta zona.",
+                        text = if (uiState.cases.isEmpty())
+                            "No hay casos activos registrados."
+                        else
+                            "No hay casos activos en un radio de ${uiState.radiusKm.roundToInt()} km.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
-                items(uiState.cases) { caseItem ->
+                items(uiState.filteredCases) { caseItem ->
                     ActiveCaseCard(
                         case = caseItem,
                         isExpanded = uiState.expandedCaseId == caseItem.id,
+                        distanceKm = uiState.distanceTo(caseItem),
                         onClick = { onCaseClicked(caseItem.id) }
                     )
                 }
@@ -175,14 +216,24 @@ private fun HeatMapContent(
 @Composable
 private fun HeatMapCard(
     cases: List<MissingPersonCase>,
+    userLat: Double? = null,
+    userLng: Double? = null,
     modifier: Modifier = Modifier
 ) {
-    val initialPosition = cases.firstOrNull()
-        ?.let { LatLng(it.latitude, it.longitude) }
-        ?: LatLng(-34.6980, -58.3195)
+    val fallbackPosition =
+        cases.firstOrNull()?.let { LatLng(it.latitude, it.longitude) }
+            ?: LatLng(-34.6980, -58.3195)
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(initialPosition, 14f)
+        position = CameraPosition.fromLatLngZoom(fallbackPosition, 13f)
+    }
+
+    LaunchedEffect(userLat, userLng) {
+        if (userLat != null && userLng != null) {
+            cameraPositionState.animate(
+                CameraUpdateFactory.newLatLngZoom(LatLng(userLat, userLng), 13f)
+            )
+        }
     }
 
     ElevatedCard(
