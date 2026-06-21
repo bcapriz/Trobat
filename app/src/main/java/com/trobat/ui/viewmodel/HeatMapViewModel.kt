@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.RepositoryProvider
+import com.trobat.utils.ConcentrationUtil
 import com.trobat.utils.fetchCurrentLocation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -65,12 +66,12 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
                 _radiusKm,
                 _userLocation
             ) { cases, radius, location ->
-                val areaFrequency = cases.groupingBy { it.area }.eachCount()
-                val mostActive = areaFrequency.maxByOrNull { it.value }?.key ?: "-"
+                val concentration = ConcentrationUtil.mostConcentrated(cases)
                 HeatMapUiState(
                     cases = cases,
                     totalCases = cases.size,
-                    mostActiveArea = mostActive,
+                    mostActiveArea = concentration?.label ?: "-",
+                    mostActiveCount = concentration?.count ?: 0,
                     expandedCaseId = _uiState.value.expandedCaseId,
                     userLat = location?.first,
                     userLng = location?.second,
