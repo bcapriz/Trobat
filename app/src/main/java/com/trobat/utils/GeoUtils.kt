@@ -1,5 +1,6 @@
 package com.trobat.utils
 
+import com.trobat.data.model.MissingPersonCase
 import kotlin.math.*
 
 object GeoUtils {
@@ -10,6 +11,19 @@ object GeoUtils {
         val a = sin(dLat / 2).pow(2) +
                 cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLng / 2).pow(2)
         return 6371.0 * 2 * asin(sqrt(a))
+    }
+
+    fun filterAndSortByProximity(
+        cases: List<MissingPersonCase>,
+        userLat: Double,
+        userLng: Double,
+        radiusKm: Float
+    ): List<MissingPersonCase> {
+        val (withCoords, withoutCoords) = cases.partition { it.latitude != 0.0 || it.longitude != 0.0 }
+        val nearby = withCoords
+            .filter { haversineKm(userLat, userLng, it.latitude, it.longitude) <= radiusKm }
+            .sortedBy { haversineKm(userLat, userLng, it.latitude, it.longitude) }
+        return nearby + withoutCoords
     }
 
     fun formatDistance(km: Double): String =

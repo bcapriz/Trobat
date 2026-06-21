@@ -21,12 +21,7 @@ data class CitizenHomeUiState(
         }
         val lat = userLat ?: return bySearch
         val lng = userLng ?: return bySearch
-
-        val (withCoords, withoutCoords) = bySearch.partition { it.latitude != 0.0 || it.longitude != 0.0 }
-        val nearby = withCoords
-            .filter { GeoUtils.haversineKm(lat, lng, it.latitude, it.longitude) <= radiusKm }
-            .sortedBy { GeoUtils.haversineKm(lat, lng, it.latitude, it.longitude) }
-        return nearby + withoutCoords
+        return GeoUtils.filterAndSortByProximity(bySearch, lat, lng, radiusKm)
     }
 
     fun distanceTo(case: MissingPersonCase): Double? {

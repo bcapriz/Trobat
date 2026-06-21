@@ -1,4 +1,4 @@
-package com.trobat.ui.utils
+package com.trobat.utils
 
 import java.time.Instant
 import java.time.ZoneId

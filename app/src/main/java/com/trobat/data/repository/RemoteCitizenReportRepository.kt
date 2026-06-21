@@ -22,6 +22,7 @@ class RemoteCitizenReportRepository(
     private val context: Context
 ) : CitizenReportRepository {
 
+    private val gson = Gson()
     private val _reports = MutableStateFlow<List<CitizenReport>>(emptyList())
     override val reports: StateFlow<List<CitizenReport>> = _reports.asStateFlow()
 
@@ -43,7 +44,7 @@ class RemoteCitizenReportRepository(
             contact_info = ContactInfoDto()
         )
 
-        val datosJson = Gson().toJson(datos)
+        val datosJson = gson.toJson(datos)
         val datosPart = datosJson.toRequestBody("application/json".toMediaType())
 
         val fotoPart = CapturedEvidenceHolder.photoUri?.let { uri ->

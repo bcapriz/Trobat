@@ -122,6 +122,55 @@ Registrada en `AndroidManifest.xml`. `RemoteCaseRepository` ahora recibe el scop
 
 ---
 
+---
+
+## Corregidos — Ronda 3 (análisis de cambios de develop)
+
+### 17. `domain/model` como capa incompleta de Clean Architecture
+Se había creado `domain/model/` en la ronda anterior interpretando que el parcial pedía
+Clean Architecture. Sin use cases ni interfaces de repositorio en `domain/`, la capa no aportaba
+nada real. Los modelos (`MissingPersonCase`, `CitizenReport`) volvieron a `data/model/`.
+Archivos: 17 archivos actualizados con el nuevo import.
+
+---
+
+### F. `CameraUtils.kt` — GPS obtenido después de guardar la foto
+La foto se guardaba primero; el GPS se pedía en `onImageSaved`. Si el usuario navegaba antes de
+que llegara el callback de location, el reporte usaba coordenadas por defecto sin aviso.
+Corregido: el GPS se obtiene primero y luego se captura la foto. Se restauró además el EXIF
+embedding con las coordenadas en los metadatos del archivo.
+Archivo: `ui/utils/CameraUtils.kt`.
+
+### G. `RemoteCitizenReportRepository` — `Gson()` instanciado en cada llamada
+`Gson()` se construía dentro de `sendReport()`, creando una instancia nueva por cada reporte.
+Movido a `val gson = Gson()` a nivel de clase.
+Archivo: `data/repository/RemoteCitizenReportRepository.kt`.
+
+### H. `fetchUserLocation()` duplicada en dos ViewModels
+`CitizenHomeViewModel` y `HeatMapViewModel` tenían exactamente el mismo método privado.
+Extraído a `utils/LocationUtils.kt` como función de extensión sobre `AndroidViewModel`.
+Archivos: `utils/LocationUtils.kt`, `ui/viewmodel/CitizenHomeViewModel.kt`, `ui/viewmodel/HeatMapViewModel.kt`.
+
+### I. Lógica de `filteredCases` duplicada en dos UiStates
+`CitizenHomeUiState` y `HeatMapUiState` tenían la misma lógica de filtrado por radio y ordenamiento
+por proximidad. Extraída a `GeoUtils.filterAndSortByProximity()`.
+Archivos: `utils/GeoUtils.kt`, `ui/viewmodel/CitizenHomeUiState.kt`, `ui/viewmodel/HeatMapUiState.kt`.
+
+### J. Inconsistencia de paquetes entre utils
+`DateUtils.kt` estaba en `com.trobat.ui.utils` sin dependencias de UI. Movido a `com.trobat.utils`
+junto a `GeoUtils`. `CameraUtils.kt` permanece en `ui/utils/` por su dependencia con CameraX.
+Archivos: `utils/DateUtils.kt` (movido desde `ui/utils/`), import actualizado en `ActiveCaseCard.kt`.
+
+---
+
+## Descartados
+
+### E. `GeoUtils.kt` — `Math.toRadians()` en lugar de `kotlin.math.toRadians()`
+`kotlin.math.toRadians()` no existe en el target Android de Kotlin. `Math.toRadians()` es la
+forma correcta para este proyecto.
+
+---
+
 ## Documentados (no corregidos en este ciclo)
 
 ### A. `RemoteCaseRepository` crea su propio `CoroutineScope`
