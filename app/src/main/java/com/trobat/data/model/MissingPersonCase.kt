@@ -9,5 +9,6 @@ data class MissingPersonCase(
     val lastSeenDate: String,
     val area: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val imageUrl: String? = null
 )

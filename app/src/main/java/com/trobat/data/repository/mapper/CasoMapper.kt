@@ -19,6 +19,7 @@ fun CasoDto.toDomain(): MissingPersonCase {
         lastSeenDate = missing_person.last_seen_date.ifBlank { created_at },
         area = status,
         latitude = lat,
-        longitude = lng
+        longitude = lng,
+        imageUrl = missing_person.image.ifBlank { null }
     )
 }
