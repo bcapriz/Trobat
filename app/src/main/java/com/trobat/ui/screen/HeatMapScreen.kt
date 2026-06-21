@@ -134,7 +134,8 @@ private fun HeatMapContent(
             item {
                 HeatMapStatsCard(
                     totalCases = uiState.totalCases,
-                    mostActiveArea = uiState.mostActiveArea
+                    mostActiveArea = uiState.mostActiveArea,
+                    mostActiveCount = uiState.mostActiveCount
                 )
             }
 
@@ -264,7 +265,8 @@ private fun HeatMapCard(
 @Composable
 private fun HeatMapStatsCard(
     totalCases: Int,
-    mostActiveArea: String
+    mostActiveArea: String,
+    mostActiveCount: Int
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -295,7 +297,7 @@ private fun HeatMapStatsCard(
 
                 StatItem(
                     title = "Mayor concentración",
-                    value = mostActiveArea,
+                    value = if (mostActiveCount > 0) "$mostActiveArea ($mostActiveCount)" else mostActiveArea,
                     modifier = Modifier.weight(1f)
                 )
             }

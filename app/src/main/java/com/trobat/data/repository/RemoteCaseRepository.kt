@@ -49,7 +49,8 @@ private fun CasoDto.toDomain(): MissingPersonCase {
         physicalDescription = missing_person.description,
         lastSeenLocation = location,
         lastSeenDate = missing_person.last_seen_date.ifBlank { created_at },
-        area = status,
+        area = missing_person.location_description.ifBlank { location },
+        status = status,
         latitude = lat,
         longitude = lng
     )

@@ -11,6 +11,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.RepositoryProvider
+import com.trobat.utils.ConcentrationUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,12 +62,12 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
                 _radiusKm,
                 _userLocation
             ) { cases, radius, location ->
-                val areaFrequency = cases.groupingBy { it.area }.eachCount()
-                val mostActive = areaFrequency.maxByOrNull { it.value }?.key ?: "-"
+                val concentration = ConcentrationUtil.mostConcentrated(cases)
                 HeatMapUiState(
                     cases = cases,
                     totalCases = cases.size,
-                    mostActiveArea = mostActive,
+                    mostActiveArea = concentration?.label ?: "-",
+                    mostActiveCount = concentration?.count ?: 0,
                     isLoading = false,
                     userLat = location?.first,
                     userLng = location?.second,
