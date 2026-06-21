@@ -6,12 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.google.android.gms.maps.CameraUpdateFactory
 import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -220,13 +222,20 @@ private fun HeatMapCard(
     userLng: Double? = null,
     modifier: Modifier = Modifier
 ) {
-    val initialPosition =
-        (if (userLat != null && userLng != null) LatLng(userLat, userLng) else null)
-            ?: cases.firstOrNull()?.let { LatLng(it.latitude, it.longitude) }
+    val fallbackPosition =
+        cases.firstOrNull()?.let { LatLng(it.latitude, it.longitude) }
             ?: LatLng(-34.6980, -58.3195)
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(initialPosition, 13f)
+        position = CameraPosition.fromLatLngZoom(fallbackPosition, 13f)
+    }
+
+    LaunchedEffect(userLat, userLng) {
+        if (userLat != null && userLng != null) {
+            cameraPositionState.animate(
+                CameraUpdateFactory.newLatLngZoom(LatLng(userLat, userLng), 13f)
+            )
+        }
     }
 
     ElevatedCard(
