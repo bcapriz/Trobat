@@ -1,7 +1,7 @@
 package com.trobat.ui.viewmodel
 
 import android.net.Uri
-import com.trobat.domain.model.MissingPersonCase
+import com.trobat.data.model.MissingPersonCase
 
 data class ConfirmReportUiState(
     val activeCases: List<MissingPersonCase> = emptyList(),

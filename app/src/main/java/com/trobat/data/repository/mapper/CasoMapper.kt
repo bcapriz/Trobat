@@ -1,7 +1,7 @@
 package com.trobat.data.repository.mapper
 
 import com.trobat.data.remote.dto.CasoDto
-import com.trobat.domain.model.MissingPersonCase
+import com.trobat.data.model.MissingPersonCase
 
 fun CasoDto.toDomain(): MissingPersonCase {
     val coords = desaparecido.ultima_ubicacion_oficial?.coordinates

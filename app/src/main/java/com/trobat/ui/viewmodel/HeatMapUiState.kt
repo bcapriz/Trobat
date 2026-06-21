@@ -1,6 +1,6 @@
 package com.trobat.ui.viewmodel
 
-import com.trobat.domain.model.MissingPersonCase
+import com.trobat.data.model.MissingPersonCase
 
 data class HeatMapUiState(
     val cases: List<MissingPersonCase> = emptyList(),

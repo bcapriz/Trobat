@@ -1,4 +1,4 @@
-package com.trobat.domain.model
+package com.trobat.data.model
 
 data class MissingPersonCase(
     val id: String,

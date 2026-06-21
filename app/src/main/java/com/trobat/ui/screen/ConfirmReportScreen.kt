@@ -51,7 +51,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.trobat.domain.model.MissingPersonCase
+import com.trobat.data.model.MissingPersonCase
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 

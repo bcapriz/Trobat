@@ -2,7 +2,7 @@ package com.trobat.data.repository
 
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.repository.mapper.toDomain
-import com.trobat.domain.model.MissingPersonCase
+import com.trobat.data.model.MissingPersonCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -1,6 +1,6 @@
 package com.trobat.data.repository
 
-import com.trobat.domain.model.CitizenReport
+import com.trobat.data.model.CitizenReport
 import kotlinx.coroutines.flow.StateFlow
 
 interface CitizenReportRepository {
