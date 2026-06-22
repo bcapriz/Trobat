@@ -10,10 +10,12 @@ data class CitizenReport(
     val createdAt: String,
     val latitude: Double,
     val longitude: Double,
-    val status: ReportStatus
+    val isAnonymous: Boolean = true,
+    val status: ReportStatus = ReportStatus.NEW
 )
 
 enum class ReportStatus {
     NEW,
-    SENT
+    SENT,
+    PENDING_SYNC
 }

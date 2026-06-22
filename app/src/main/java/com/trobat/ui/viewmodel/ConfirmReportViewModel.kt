@@ -144,7 +144,8 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                 createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}",
                 latitude = currentState.latitude ?: -34.6037,
                 longitude = currentState.longitude ?: -58.3816,
-                status = ReportStatus.SENT
+                isAnonymous = !currentState.isIdentified,
+                status = ReportStatus.NEW
             )
 
             reportRepository.sendReport(newReport)

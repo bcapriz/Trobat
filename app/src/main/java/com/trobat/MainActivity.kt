@@ -1,18 +1,26 @@
 package com.trobat
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.trobat.data.repository.RepositoryProvider
+import androidx.activity.result.contract.ActivityResultContracts
 import com.trobat.ui.navigation.AppNavigation
 import com.trobat.ui.theme.TrobatTheme
 
 class MainActivity : ComponentActivity() {
+
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op */ }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        RepositoryProvider.init(this)
         enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
         setContent {
             TrobatTheme {
                 AppNavigation()

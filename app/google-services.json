@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "649062617042",
+    "project_id": "trobat-40cea",
+    "storage_bucket": "trobat-40cea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649062617042:android:f9175d80527f6dc6e3820b",
+        "android_client_info": {
+          "package_name": "com.trobat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUj_knXioW30eos2cMP8_rIOvcBZYgSxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
