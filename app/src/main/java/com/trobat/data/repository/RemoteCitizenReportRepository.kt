@@ -57,16 +57,13 @@ class RemoteCitizenReportRepository(
 
         val sent = trySendToApi(report, localPhotoPath)
         if (sent) {
-            pendingReportDao.markAsSent(report.id)
+            markSent(report.id)
             localPhotoPath?.let { File(it).delete() }
         }
         return sent
     }
 
     override suspend fun retrySyncPending() {
-        val twoDaysAgo = System.currentTimeMillis() - 2L * 24 * 60 * 60 * 1000
-        pendingReportDao.deleteSentOlderThan(twoDaysAgo)
-
         val pending = pendingReportDao.getAll().filter { it.status == "PENDING_SYNC" }
         for (entity in pending) {
             val report = CitizenReport(
@@ -83,9 +80,20 @@ class RemoteCitizenReportRepository(
                 status = ReportStatus.PENDING_SYNC
             )
             if (trySendToApi(report, entity.localPhotoPath)) {
-                pendingReportDao.markAsSent(entity.id)
+                markSent(entity.id)
                 entity.localPhotoPath?.let { File(it).delete() }
             }
+        }
+    }
+
+    override suspend fun cleanupSentReports() {
+        val twoDaysAgo = System.currentTimeMillis() - 2L * 24 * 60 * 60 * 1000
+        pendingReportDao.deleteSentOlderThan(twoDaysAgo)
+    }
+
+    private suspend fun markSent(id: String) {
+        pendingReportDao.getById(id)?.let { entity ->
+            pendingReportDao.insert(entity.copy(status = "SENT", localPhotoPath = null))
         }
     }
 

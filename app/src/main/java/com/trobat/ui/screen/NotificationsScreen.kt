@@ -216,8 +216,11 @@ private fun PendingReportCard(report: PendingReportEntity) {
                     )
                 }
             }
+            val addressDisplay = report.address.takeUnless {
+                it.startsWith("Obteniendo") || it == "Ubicación no disponible"
+            }
             Text(
-                text = "${report.address} • ${report.createdAt}",
+                text = if (addressDisplay != null) "$addressDisplay • ${report.createdAt}" else report.createdAt,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

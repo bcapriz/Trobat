@@ -59,4 +59,6 @@ class FakeCitizenReportRepository : CitizenReportRepository {
     }
 
     override suspend fun retrySyncPending() {}
+
+    override suspend fun cleanupSentReports() {}
 }

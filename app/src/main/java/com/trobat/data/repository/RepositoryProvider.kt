@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.trobat.TrobatApplication
+import com.trobat.data.local.LastLocationPrefs
 import com.trobat.data.local.SessionManager
 import com.trobat.data.local.TrobatDatabase
 import com.trobat.data.remote.NetworkProvider
@@ -20,6 +21,9 @@ object RepositoryProvider {
         private set
 
     lateinit var notificationRepository: NotificationRepository
+        private set
+
+    lateinit var lastLocationPrefs: LastLocationPrefs
         private set
 
     fun init(context: Context) {
@@ -39,6 +43,7 @@ object RepositoryProvider {
         val appScope = (context.applicationContext as TrobatApplication).applicationScope
         val db = TrobatDatabase.build(context.applicationContext)
 
+        lastLocationPrefs = LastLocationPrefs(context.applicationContext)
         authRepository = RemoteAuthRepository(api, sessionManager)
         caseRepository = RemoteCaseRepository(api, appScope, db)
         citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao())

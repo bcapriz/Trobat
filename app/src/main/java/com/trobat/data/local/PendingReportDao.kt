@@ -17,8 +17,8 @@ interface PendingReportDao {
     @Query("SELECT * FROM pending_reports")
     suspend fun getAll(): List<PendingReportEntity>
 
-    @Query("UPDATE pending_reports SET status = 'SENT', localPhotoPath = NULL WHERE id = :id")
-    suspend fun markAsSent(id: String)
+    @Query("SELECT * FROM pending_reports WHERE id = :id")
+    suspend fun getById(id: String): PendingReportEntity?
 
     @Query("DELETE FROM pending_reports WHERE id = :id")
     suspend fun deleteById(id: String)

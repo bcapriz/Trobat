@@ -33,6 +33,7 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
     private fun fetchUserLocation() {
         fetchCurrentLocation { location ->
             _userLocation.value = location
+            if (location != null) RepositoryProvider.lastLocationPrefs.save(location.first, location.second)
             viewModelScope.launch {
                 if (caseRepository.cases.value.isNotEmpty()) {
                     _isLoading.value = false

@@ -23,6 +23,7 @@ class NotificationsViewModel : ViewModel() {
 
     init {
         observeData()
+        viewModelScope.launch { reportRepository.cleanupSentReports() }
     }
 
     private fun observeData() {

@@ -3,6 +3,10 @@ package com.trobat
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import com.google.firebase.messaging.FirebaseMessaging
 import com.trobat.data.repository.RepositoryProvider
 import kotlinx.coroutines.CoroutineScope
@@ -17,8 +21,29 @@ class TrobatApplication : Application() {
         super.onCreate()
         RepositoryProvider.init(this)
         applicationScope.launch { RepositoryProvider.citizenReportRepository.retrySyncPending() }
+        registerConnectivityCallback()
         createAlertsChannel()
         subscribeToAlertsTopic()
+    }
+
+    private fun registerConnectivityCallback() {
+        val cm = getSystemService(ConnectivityManager::class.java)
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        cm.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                applicationScope.launch {
+                    RepositoryProvider.citizenReportRepository.retrySyncPending()
+                    val location = RepositoryProvider.lastLocationPrefs.load()
+                    if (location != null) {
+                        RepositoryProvider.caseRepository.refreshCercanosConFallback(location.first, location.second)
+                    } else {
+                        RepositoryProvider.caseRepository.refresh()
+                    }
+                }
+            }
+        })
     }
 
     private fun createAlertsChannel() {
