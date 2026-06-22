@@ -16,17 +16,28 @@ import kotlinx.coroutines.launch
 
 class TrobatFirebaseMessagingService : FirebaseMessagingService() {
 
+    // handleIntent se llama para TODOS los mensajes FCM sin importar el estado de la app.
+    // onMessageReceived solo se llama en foreground para mensajes con notification payload.
+    override fun handleIntent(intent: Intent) {
+        val title = intent.getStringExtra("gcm.notification.title")
+            ?: intent.getStringExtra("titulo")
+        if (title != null) {
+            val body = intent.getStringExtra("gcm.notification.body")
+                ?: intent.getStringExtra("descripcion") ?: ""
+            val id = intent.getStringExtra("google.message_id")?.hashCode()
+                ?: (title + body).hashCode()
+            CoroutineScope(Dispatchers.IO).launch {
+                RepositoryProvider.notificationRepository.save(title, body, id)
+            }
+        }
+        super.handleIntent(intent)
+    }
+
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {
         val title = message.notification?.title ?: message.data["titulo"] ?: return
         val body = message.notification?.body ?: message.data["descripcion"] ?: ""
-        val notificationId = message.messageId?.hashCode() ?: title.hashCode()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            RepositoryProvider.notificationRepository.save(title, body, notificationId)
-        }
-
-        showNotification(title, body, notificationId)
+        showNotification(title, body, notificationId = message.messageId?.hashCode() ?: title.hashCode())
     }
 
     // FCM rota el token periódicamente; re-subscribimos para no perder el topic
