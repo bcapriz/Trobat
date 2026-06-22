@@ -24,7 +24,21 @@ fun AndroidViewModel.fetchCurrentLocation(onLocation: (Pair<Double, Double>?) ->
     val tokenSource = CancellationTokenSource()
     client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
         .addOnSuccessListener { location ->
-            onLocation(if (location != null) Pair(location.latitude, location.longitude) else null)
+            if (location != null) {
+                onLocation(Pair(location.latitude, location.longitude))
+            } else {
+                client.lastLocation
+                    .addOnSuccessListener { last ->
+                        onLocation(if (last != null) Pair(last.latitude, last.longitude) else null)
+                    }
+                    .addOnFailureListener { onLocation(null) }
+            }
         }
-        .addOnFailureListener { onLocation(null) }
+        .addOnFailureListener {
+            client.lastLocation
+                .addOnSuccessListener { last ->
+                    onLocation(if (last != null) Pair(last.latitude, last.longitude) else null)
+                }
+                .addOnFailureListener { onLocation(null) }
+        }
 }

@@ -29,11 +29,12 @@ class NotificationsViewModel : ViewModel() {
         viewModelScope.launch {
             combine(
                 notificationRepository.observeAll(),
-                notificationRepository.observeUnreadCount()
-            ) { alerts, unread ->
+                notificationRepository.observeUnreadCount(),
+                reportRepository.pendingReports
+            ) { alerts, unread, pending ->
                 NotificationsUiState(
                     alerts = alerts,
-                    reports = reportRepository.reports.value,
+                    pendingReports = pending,
                     unreadCount = unread
                 )
             }.collect { _uiState.value = it }

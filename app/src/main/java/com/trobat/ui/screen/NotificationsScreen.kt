@@ -12,6 +12,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Campaign
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CardDefaults
@@ -29,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.data.local.NotificationEntity
-import com.trobat.data.model.CitizenReport
+import com.trobat.data.local.PendingReportEntity
 import com.trobat.ui.viewmodel.NotificationsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -80,15 +83,15 @@ fun NotificationsScreen(
             }
         }
 
-        if (uiState.reports.isNotEmpty()) {
+        if (uiState.pendingReports.isNotEmpty()) {
             Text(
                 text = "Mis reportes",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
-            uiState.reports.forEach { report ->
-                ReportCard(report = report)
+            uiState.pendingReports.forEach { report ->
+                PendingReportCard(report = report)
             }
         }
     }
@@ -146,7 +149,9 @@ private fun AlertCard(alert: NotificationEntity) {
 }
 
 @Composable
-private fun ReportCard(report: CitizenReport) {
+private fun PendingReportCard(report: PendingReportEntity) {
+    val isSent = report.status == "SENT"
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
@@ -158,13 +163,25 @@ private fun ReportCard(report: CitizenReport) {
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = if (isSent) Icons.Outlined.CheckCircle else Icons.Outlined.CloudOff,
+                    contentDescription = null,
+                    tint = if (isSent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = if (isSent) "Enviado" else "Pendiente de envío",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isSent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Text(
-                text = report.title,
+                text = "Reporte ciudadano",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
@@ -181,10 +198,28 @@ private fun ReportCard(report: CitizenReport) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            if (!isSent) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CloudUpload,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = "Se enviará automáticamente al recuperar conexión",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
             Text(
                 text = "${report.address} • ${report.createdAt}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

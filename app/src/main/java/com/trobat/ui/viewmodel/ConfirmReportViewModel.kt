@@ -148,10 +148,14 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                 status = ReportStatus.NEW
             )
 
-            reportRepository.sendReport(newReport)
+            val sent = reportRepository.sendReport(newReport)
             CapturedEvidenceHolder.clear()
             _uiState.value = _uiState.value.copy(isSending = false)
-            _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
+            if (sent) {
+                _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
+            } else {
+                _effect.emit(ConfirmReportEffect.ReportSavedLocally)
+            }
         }
     }
 

@@ -41,7 +41,7 @@ object RepositoryProvider {
 
         authRepository = RemoteAuthRepository(api, sessionManager)
         caseRepository = RemoteCaseRepository(api, appScope, db)
-        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext)
+        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao())
         notificationRepository = NotificationRepository(db.notificationDao())
     }
 }
