@@ -19,4 +19,13 @@ interface NotificationDao {
 
     @Query("SELECT COUNT(*) FROM notifications WHERE isRead = 0")
     fun observeUnreadCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM notifications")
+    suspend fun count(): Int
+
+    @Query("DELETE FROM notifications WHERE id = (SELECT id FROM notifications ORDER BY receivedAt ASC LIMIT 1)")
+    suspend fun deleteOldest()
+
+    @Query("DELETE FROM notifications WHERE receivedAt < :cutoff")
+    suspend fun deleteOlderThan(cutoff: Long)
 }

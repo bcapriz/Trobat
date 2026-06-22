@@ -11,6 +11,11 @@ class NotificationRepository(private val dao: NotificationDao) {
     fun observeUnreadCount(): Flow<Int> = dao.observeUnreadCount()
 
     suspend fun save(title: String, body: String, id: Int) {
+        val oneWeekAgo = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000
+        dao.deleteOlderThan(oneWeekAgo)
+
+        if (dao.count() >= 10) dao.deleteOldest()
+
         dao.insert(
             NotificationEntity(
                 id = id,
