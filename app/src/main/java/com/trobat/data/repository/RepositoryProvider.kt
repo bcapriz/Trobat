@@ -8,6 +8,7 @@ import com.trobat.data.local.LastLocationPrefs
 import com.trobat.data.local.SessionManager
 import com.trobat.data.local.TrobatDatabase
 import com.trobat.data.remote.NetworkProvider
+import java.io.File
 
 object RepositoryProvider {
 
@@ -26,17 +27,34 @@ object RepositoryProvider {
     lateinit var lastLocationPrefs: LastLocationPrefs
         private set
 
-    fun init(context: Context) {
+    private fun createEncryptedPrefs(context: Context): android.content.SharedPreferences {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
-        val prefs = EncryptedSharedPreferences.create(
-            context,
-            "trobat_secure_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        return try {
+            EncryptedSharedPreferences.create(
+                context,
+                "trobat_secure_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (_: Exception) {
+            // Keystore key mismatch (e.g. reinstall on device with stale prefs file).
+            // Delete the corrupted file and recreate — user will need to log in again.
+            File(context.filesDir.parent, "shared_prefs/trobat_secure_prefs.xml").delete()
+            EncryptedSharedPreferences.create(
+                context,
+                "trobat_secure_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
+    }
+
+    fun init(context: Context) {
+        val prefs = createEncryptedPrefs(context)
         val sessionManager = SessionManager(prefs)
         NetworkProvider.init(sessionManager)
         val api = NetworkProvider.api
@@ -46,7 +64,7 @@ object RepositoryProvider {
         lastLocationPrefs = LastLocationPrefs(context.applicationContext)
         authRepository = RemoteAuthRepository(api, sessionManager)
         caseRepository = RemoteCaseRepository(api, appScope, db)
-        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao())
+        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao(), authRepository)
         notificationRepository = NotificationRepository(db.notificationDao())
     }
 }

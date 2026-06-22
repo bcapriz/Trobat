@@ -11,6 +11,9 @@ data class CitizenReport(
     val latitude: Double,
     val longitude: Double,
     val isAnonymous: Boolean = true,
+    val contactName: String? = null,
+    val contactPhone: String? = null,
+    val contactEmail: String? = null,
     val status: ReportStatus = ReportStatus.NEW
 )
 

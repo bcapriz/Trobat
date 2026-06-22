@@ -30,6 +30,7 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
 
     private val reportRepository: CitizenReportRepository = RepositoryProvider.citizenReportRepository
     private val caseRepository: CaseRepository = RepositoryProvider.caseRepository
+    private val authRepository = RepositoryProvider.authRepository
 
     private val _uiState = MutableStateFlow(ConfirmReportUiState())
     val uiState: StateFlow<ConfirmReportUiState> = _uiState.asStateFlow()
@@ -134,6 +135,7 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             _uiState.value = currentState.copy(isSending = true)
 
+            val identified = currentState.isIdentified
             val newReport = CitizenReport(
                 id = System.currentTimeMillis().toString(),
                 caseId = currentState.selectedCaseId ?: "",
@@ -144,7 +146,10 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                 createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}",
                 latitude = currentState.latitude ?: -34.6037,
                 longitude = currentState.longitude ?: -58.3816,
-                isAnonymous = !currentState.isIdentified,
+                isAnonymous = !identified,
+                contactName = if (identified) authRepository.getUserName() else null,
+                contactPhone = if (identified) authRepository.getPhone() else null,
+                contactEmail = if (identified) authRepository.getEmail() else null,
                 status = ReportStatus.NEW
             )
 

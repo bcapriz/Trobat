@@ -24,7 +24,8 @@ import java.io.File
 class RemoteCitizenReportRepository(
     private val api: TrobatApi,
     private val context: Context,
-    private val pendingReportDao: PendingReportDao
+    private val pendingReportDao: PendingReportDao,
+    private val authRepository: AuthRepository
 ) : CitizenReportRepository {
 
     private val gson = Gson()
@@ -51,6 +52,9 @@ class RemoteCitizenReportRepository(
                 latitude = report.latitude,
                 longitude = report.longitude,
                 isAnonymous = report.isAnonymous,
+                contactName = report.contactName,
+                contactPhone = report.contactPhone,
+                contactEmail = report.contactEmail,
                 localPhotoPath = localPhotoPath
             )
         )
@@ -77,6 +81,9 @@ class RemoteCitizenReportRepository(
                 latitude = entity.latitude,
                 longitude = entity.longitude,
                 isAnonymous = entity.isAnonymous,
+                contactName = entity.contactName,
+                contactPhone = entity.contactPhone,
+                contactEmail = entity.contactEmail,
                 status = ReportStatus.PENDING_SYNC
             )
             if (trySendToApi(report, entity.localPhotoPath)) {
@@ -98,6 +105,16 @@ class RemoteCitizenReportRepository(
     }
 
     private suspend fun trySendToApi(report: CitizenReport, localPhotoPath: String?): Boolean {
+        val contactInfo = if (!report.isAnonymous) {
+            ContactInfoDto(
+                name = report.contactName ?: authRepository.getUserName(),
+                phone = report.contactPhone ?: authRepository.getPhone(),
+                email = report.contactEmail ?: authRepository.getEmail()
+            )
+        } else {
+            ContactInfoDto()
+        }
+
         val datos = CrearReporteRequestDto(
             case_id = report.caseId,
             location = UbicacionDto(
@@ -107,7 +124,7 @@ class RemoteCitizenReportRepository(
             description = report.description,
             police_priority = false,
             security_metadata = SecurityMetadataDto(anonymous = report.isAnonymous),
-            contact_info = ContactInfoDto()
+            contact_info = contactInfo
         )
         val datosPart = gson.toJson(datos).toRequestBody("application/json".toMediaType())
 

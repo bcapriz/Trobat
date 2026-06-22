@@ -15,6 +15,9 @@ data class PendingReportEntity(
     val latitude: Double,
     val longitude: Double,
     val isAnonymous: Boolean,
+    val contactName: String? = null,
+    val contactPhone: String? = null,
+    val contactEmail: String? = null,
     val localPhotoPath: String?,
     val status: String = "PENDING_SYNC"
 )
