@@ -1,5 +1,8 @@
 package com.trobat.data.repository
 
+import com.trobat.data.local.TrobatDatabase
+import com.trobat.data.local.toDomain
+import com.trobat.data.local.toEntity
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.repository.mapper.toDomain
 import com.trobat.data.model.MissingPersonCase
@@ -7,26 +10,40 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class RemoteCaseRepository(
     private val api: TrobatApi,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val db: TrobatDatabase
 ) : CaseRepository {
 
     private val _cases = MutableStateFlow<List<MissingPersonCase>>(emptyList())
     override val cases: StateFlow<List<MissingPersonCase>> = _cases.asStateFlow()
 
-    override suspend fun refresh() = fetchCases()
+    override suspend fun refresh() {
+        try {
+            val response = api.getCasos()
+            if (response.isSuccessful) {
+                val cases = response.body()?.data?.map { it.toDomain() } ?: emptyList()
+                _cases.value = cases
+                if (cases.isNotEmpty()) saveToCache(cases)
+                return
+            }
+        } catch (_: Exception) {}
+        loadFromCache()
+    }
 
     override suspend fun refreshCercanos(lat: Double, lng: Double, radioKm: Double) {
         try {
             val response = api.getCasosCercanos(lat = lat, lng = lng, radioKm = radioKm)
             if (response.isSuccessful) {
-                _cases.value = response.body()?.data?.map { it.caso.toDomain() } ?: emptyList()
+                val cases = response.body()?.data?.map { it.caso.toDomain() } ?: emptyList()
+                _cases.value = cases
+                if (cases.isNotEmpty()) saveToCache(cases)
+                return
             }
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) {}
+        if (_cases.value.isEmpty()) loadFromCache()
     }
 
     override suspend fun refreshCercanosConFallback(lat: Double, lng: Double, initialRadioKm: Double) {
@@ -44,13 +61,13 @@ class RemoteCaseRepository(
         return (0..4).map { (initialKm + it * step).coerceAtMost(100.0) }
     }
 
-    private suspend fun fetchCases() {
-        try {
-            val response = api.getCasos()
-            if (response.isSuccessful) {
-                _cases.value = response.body()?.data?.map { it.toDomain() } ?: emptyList()
-            }
-        } catch (_: Exception) {
-        }
+    private suspend fun saveToCache(cases: List<MissingPersonCase>) {
+        db.caseDao().deleteAll()
+        db.caseDao().insertAll(cases.map { it.toEntity() })
+    }
+
+    private suspend fun loadFromCache() {
+        val cached = db.caseDao().getAll().map { it.toDomain() }
+        if (cached.isNotEmpty()) _cases.value = cached
     }
 }

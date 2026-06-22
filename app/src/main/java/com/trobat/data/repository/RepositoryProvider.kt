@@ -5,6 +5,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.trobat.TrobatApplication
 import com.trobat.data.local.SessionManager
+import com.trobat.data.local.TrobatDatabase
 import com.trobat.data.remote.NetworkProvider
 
 object RepositoryProvider {
@@ -33,9 +34,10 @@ object RepositoryProvider {
         NetworkProvider.init(sessionManager)
         val api = NetworkProvider.api
         val appScope = (context.applicationContext as TrobatApplication).applicationScope
+        val db = TrobatDatabase.build(context.applicationContext)
 
         authRepository = RemoteAuthRepository(api, sessionManager)
-        caseRepository = RemoteCaseRepository(api, appScope)
+        caseRepository = RemoteCaseRepository(api, appScope, db)
         citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext)
     }
 }
