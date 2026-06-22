@@ -37,13 +37,9 @@ class RemoteCaseRepository(
         try {
             val response = api.getCasosCercanos(lat = lat, lng = lng, radioKm = radioKm)
             if (response.isSuccessful) {
-                val cases = response.body()?.data?.map { it.caso.toDomain() } ?: emptyList()
-                _cases.value = cases
-                if (cases.isNotEmpty()) saveToCache(cases)
-                return
+                _cases.value = response.body()?.data?.map { it.caso.toDomain() } ?: emptyList()
             }
         } catch (_: Exception) {}
-        if (_cases.value.isEmpty()) loadFromCache()
     }
 
     override suspend fun refreshCercanosConFallback(lat: Double, lng: Double, initialRadioKm: Double) {
