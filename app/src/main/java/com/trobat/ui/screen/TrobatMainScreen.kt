@@ -18,7 +18,7 @@ import com.trobat.ui.navigation.MainRoutes
 
 
 @Composable
-fun TrobatMainScreen() {
+fun TrobatMainScreen(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -100,7 +100,7 @@ fun TrobatMainScreen() {
             }
 
             composable(BottomRoutes.PROFILE) {
-                ProfileScreen()
+                ProfileScreen(onLogout = onLogout)
             }
         }
     }

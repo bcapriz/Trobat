@@ -1,0 +1,47 @@
+package com.trobat.ui.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.trobat.data.repository.RepositoryProvider
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+class ProfileViewModel : ViewModel() {
+
+    private val authRepository = RepositoryProvider.authRepository
+
+    private val _uiState = MutableStateFlow(
+        ProfileUiState(
+            name = authRepository.getUserName() ?: "",
+            email = authRepository.getEmail() ?: "",
+            nationalId = authRepository.getNationalId() ?: "",
+            phone = authRepository.getPhone() ?: ""
+        )
+    )
+    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+
+    private val _effect = MutableSharedFlow<ProfileEffect>()
+    val effect: SharedFlow<ProfileEffect> = _effect.asSharedFlow()
+
+    fun onEvent(event: ProfileEvent) {
+        when (event) {
+            ProfileEvent.LogoutClicked -> logout()
+            is ProfileEvent.NotificationsToggled ->
+                _uiState.value = _uiState.value.copy(notificationsEnabled = event.enabled)
+            is ProfileEvent.NearbyAlertsToggled ->
+                _uiState.value = _uiState.value.copy(nearbyAlertsEnabled = event.enabled)
+        }
+    }
+
+    private fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+            _effect.emit(ProfileEffect.NavigateToLogin)
+        }
+    }
+}
