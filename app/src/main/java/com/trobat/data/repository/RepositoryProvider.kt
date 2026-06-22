@@ -19,6 +19,9 @@ object RepositoryProvider {
     lateinit var citizenReportRepository: CitizenReportRepository
         private set
 
+    lateinit var notificationRepository: NotificationRepository
+        private set
+
     fun init(context: Context) {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -39,5 +42,6 @@ object RepositoryProvider {
         authRepository = RemoteAuthRepository(api, sessionManager)
         caseRepository = RemoteCaseRepository(api, appScope, db)
         citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext)
+        notificationRepository = NotificationRepository(db.notificationDao())
     }
 }

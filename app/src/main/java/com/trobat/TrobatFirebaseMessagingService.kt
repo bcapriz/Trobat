@@ -9,6 +9,10 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.trobat.data.repository.RepositoryProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TrobatFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -16,7 +20,13 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         val title = message.notification?.title ?: message.data["titulo"] ?: return
         val body = message.notification?.body ?: message.data["descripcion"] ?: ""
-        showNotification(title, body, notificationId = message.messageId?.hashCode() ?: title.hashCode())
+        val notificationId = message.messageId?.hashCode() ?: title.hashCode()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            RepositoryProvider.notificationRepository.save(title, body, notificationId)
+        }
+
+        showNotification(title, body, notificationId)
     }
 
     // FCM rota el token periódicamente; re-subscribimos para no perder el topic
