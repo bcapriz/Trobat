@@ -39,7 +39,7 @@ class RemoteCitizenReportRepository(
             ),
             description = report.description,
             police_priority = false,
-            security_metadata = SecurityMetadataDto(anonymous = report.optionalDetails == null),
+            security_metadata = SecurityMetadataDto(anonymous = report.isAnonymous),
             contact_info = ContactInfoDto()
         )
 
