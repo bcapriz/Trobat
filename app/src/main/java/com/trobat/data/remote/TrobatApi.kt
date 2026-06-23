@@ -8,6 +8,7 @@ import com.trobat.data.remote.dto.CrearResponseDto
 import com.trobat.data.remote.dto.LoginRequestDto
 import com.trobat.data.remote.dto.LogoutRequestDto
 import com.trobat.data.remote.dto.MensajeResponseDto
+import com.trobat.data.remote.dto.PerfilResponseDto
 import com.trobat.data.remote.dto.RegistroRequestDto
 import com.trobat.data.remote.dto.ReporteDto
 import com.trobat.data.remote.dto.ReportesPaginadosDto
@@ -31,6 +32,9 @@ interface TrobatApi {
 
     @POST("usuarios-reportantes/login")
     suspend fun login(@Body body: LoginRequestDto): Response<TokenResponseDto>
+
+    @GET("usuarios-reportantes/perfil")
+    suspend fun getPerfil(): Response<PerfilResponseDto>
 
     @POST("auth/logout")
     suspend fun logout(@Body body: LogoutRequestDto): Response<MensajeResponseDto>

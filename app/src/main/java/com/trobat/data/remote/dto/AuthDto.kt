@@ -28,6 +28,18 @@ data class TokenResponseDto(
     val nombre: String
 )
 
+data class PersonalInfoResponseDto(
+    val national_id: String = "",
+    val full_name: String = "",
+    val phone: String = ""
+)
+
+data class PerfilResponseDto(
+    val id: String,
+    val email: String,
+    val personal_info: PersonalInfoResponseDto
+)
+
 data class MensajeResponseDto(
     val message: String
 )

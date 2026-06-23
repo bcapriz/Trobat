@@ -19,7 +19,9 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SplashRoute(
-    onNavigateToHome: () -> Unit,
+    onNavigateToMain: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    isLoggedIn: () -> Boolean,
     viewModel: SplashViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -28,7 +30,7 @@ fun SplashRoute(
         delay(1800)
         viewModel.showLoadingScreen()
         delay(1800)
-        onNavigateToHome()
+        if (isLoggedIn()) onNavigateToMain() else onNavigateToLogin()
     }
 
     AnimatedContent(
