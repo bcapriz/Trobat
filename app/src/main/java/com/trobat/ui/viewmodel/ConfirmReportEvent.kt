@@ -7,4 +7,5 @@ sealed interface ConfirmReportEvent {
     data object SendReportClicked : ConfirmReportEvent
     data object RetakePhotoClicked : ConfirmReportEvent
     data class IdentificationToggled(val isIdentified: Boolean) : ConfirmReportEvent
+    data object CancelClicked : ConfirmReportEvent
 }

@@ -156,6 +156,7 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             is ConfirmReportEvent.OptionalDetailsChanged -> onOptionalDetailsChanged(event.value)
             ConfirmReportEvent.SendReportClicked -> sendReport()
             ConfirmReportEvent.RetakePhotoClicked -> retakePhoto()
+            ConfirmReportEvent.CancelClicked -> cancelReport()
             is ConfirmReportEvent.IdentificationToggled -> {
                 _uiState.value = _uiState.value.copy(isIdentified = event.isIdentified)
                 saveDraft()
@@ -231,5 +232,11 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
         CapturedEvidenceHolder.clear()
         draftPrefs.clear()
         viewModelScope.launch { _effect.emit(ConfirmReportEffect.NavigateBackToCamera) }
+    }
+
+    private fun cancelReport() {
+        CapturedEvidenceHolder.clear()
+        draftPrefs.clear()
+        viewModelScope.launch { _effect.emit(ConfirmReportEffect.NavigateToCases) }
     }
 }

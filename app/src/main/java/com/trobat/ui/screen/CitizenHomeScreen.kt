@@ -349,8 +349,9 @@ private fun PendingDraftCard(onResumeDraft: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onResumeDraft),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(22.dp)
     ) {
         Row(
@@ -361,19 +362,19 @@ private fun PendingDraftCard(onResumeDraft: () -> Unit) {
             Icon(
                 imageVector = Icons.Outlined.Description,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                tint = MaterialTheme.colorScheme.primary
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Tenés un reporte pendiente",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Tocá para continuar donde lo dejaste.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

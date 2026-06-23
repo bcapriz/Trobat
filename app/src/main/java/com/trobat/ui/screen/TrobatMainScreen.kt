@@ -39,6 +39,17 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                             restoreState = !goingToStart
                         }
                     }
+                },
+                onCameraClick = {
+                    if (!com.trobat.data.repository.RepositoryProvider.reportDraftPrefs.isEmpty()) {
+                        navController.navigate(MainRoutes.CONFIRM_REPORT)
+                    } else {
+                        navController.navigate(BottomRoutes.CAMERA) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 }
             )
         }

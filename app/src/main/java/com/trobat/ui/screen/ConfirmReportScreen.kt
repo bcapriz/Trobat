@@ -80,13 +80,14 @@ fun ConfirmReportScreen(
                     ).show()
                     onSendReport()
                 }
+                ConfirmReportEffect.NavigateToCases -> onCancel()
             }
         }
     }
 
     ConfirmReportContent(
         uiState = uiState,
-        onCancel = onCancel,
+        onCancel = { viewModel.onEvent(ConfirmReportEvent.CancelClicked) },
         onEvent = viewModel::onEvent
     )
 }
