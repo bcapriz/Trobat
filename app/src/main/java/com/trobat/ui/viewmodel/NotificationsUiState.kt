@@ -1,8 +1,10 @@
 package com.trobat.ui.viewmodel
 
-import com.trobat.data.model.CitizenReport
+import com.trobat.data.local.NotificationEntity
+import com.trobat.data.local.PendingReportEntity
 
 data class NotificationsUiState(
-    val reports: List<CitizenReport> = emptyList(),
+    val alerts: List<NotificationEntity> = emptyList(),
+    val pendingReports: List<PendingReportEntity> = emptyList(),
     val unreadCount: Int = 0
 )

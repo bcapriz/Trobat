@@ -18,9 +18,13 @@ object NetworkProvider {
 
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
+            .apply {
+                if (com.trobat.BuildConfig.DEBUG) {
+                    addInterceptor(HttpLoggingInterceptor().apply {
+                        level = HttpLoggingInterceptor.Level.BODY
+                    })
+                }
+            }
             .addInterceptor { chain ->
                 val token = sessionManager.token
                 val request = if (token != null) {

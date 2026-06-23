@@ -1,7 +1,12 @@
 package com.trobat.data.repository
 
 import android.content.Context
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
+import com.trobat.TrobatApplication
+import com.trobat.data.local.LastLocationPrefs
 import com.trobat.data.local.SessionManager
+import com.trobat.data.local.TrobatDatabase
 import com.trobat.data.remote.NetworkProvider
 
 object RepositoryProvider {
@@ -15,14 +20,33 @@ object RepositoryProvider {
     lateinit var citizenReportRepository: CitizenReportRepository
         private set
 
+    lateinit var notificationRepository: NotificationRepository
+        private set
+
+    lateinit var lastLocationPrefs: LastLocationPrefs
+        private set
+
     fun init(context: Context) {
-        val prefs = context.getSharedPreferences("trobat_prefs", Context.MODE_PRIVATE)
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        val prefs = EncryptedSharedPreferences.create(
+            context,
+            "trobat_secure_prefs",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
         val sessionManager = SessionManager(prefs)
         NetworkProvider.init(sessionManager)
         val api = NetworkProvider.api
+        val appScope = (context.applicationContext as TrobatApplication).applicationScope
+        val db = TrobatDatabase.build(context.applicationContext)
 
+        lastLocationPrefs = LastLocationPrefs(context.applicationContext)
         authRepository = RemoteAuthRepository(api, sessionManager)
-        caseRepository = RemoteCaseRepository(api)
-        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext)
+        caseRepository = RemoteCaseRepository(api, appScope, db)
+        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao())
+        notificationRepository = NotificationRepository(db.notificationDao())
     }
 }

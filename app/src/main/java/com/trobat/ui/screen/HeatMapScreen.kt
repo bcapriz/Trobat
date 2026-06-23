@@ -10,7 +10,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -45,6 +44,7 @@ fun HeatMapScreen(
 
     HeatMapContent(
         uiState = uiState,
+        onCaseClicked = viewModel::onCaseClicked,
         onRadiusChanged = viewModel::onRadiusChanged,
         modifier = modifier
     )
@@ -53,13 +53,13 @@ fun HeatMapScreen(
 @Composable
 private fun HeatMapContent(
     uiState: HeatMapUiState,
+    onCaseClicked: (String) -> Unit,
     onRadiusChanged: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
     val maxMapHeightPx = with(density) { (360.dp + 24.dp).toPx() }
     var mapHeightPx by remember { mutableFloatStateOf(maxMapHeightPx) }
-    var expandedCaseId by remember { mutableStateOf<String?>(null) }
 
     // Collapse map on scroll-up; expand after list bounces back on scroll-down
     val nestedScrollConnection = remember {
@@ -204,11 +204,9 @@ private fun HeatMapContent(
                 items(uiState.filteredCases) { caseItem ->
                     ActiveCaseCard(
                         case = caseItem,
-                        isExpanded = expandedCaseId == caseItem.id,
+                        isExpanded = uiState.expandedCaseId == caseItem.id,
                         distanceKm = uiState.distanceTo(caseItem),
-                        onClick = {
-                            expandedCaseId = if (expandedCaseId == caseItem.id) null else caseItem.id
-                        }
+                        onClick = { onCaseClicked(caseItem.id) }
                     )
                 }
             }

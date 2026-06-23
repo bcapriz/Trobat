@@ -25,9 +25,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import android.widget.Toast
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,16 +65,20 @@ fun ConfirmReportScreen(
     viewModel: ConfirmReportViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                ConfirmReportEffect.NavigateToHeatMap -> {
+                ConfirmReportEffect.NavigateToHeatMap -> onSendReport()
+                ConfirmReportEffect.NavigateBackToCamera -> onRetakePhoto()
+                ConfirmReportEffect.ReportSavedLocally -> {
+                    Toast.makeText(
+                        context,
+                        "Sin conexión. El reporte se enviará automáticamente cuando vuelvas a tener internet.",
+                        Toast.LENGTH_LONG
+                    ).show()
                     onSendReport()
-                }
-
-                ConfirmReportEffect.NavigateBackToCamera -> {
-                    onRetakePhoto()
                 }
             }
         }

@@ -1,6 +1,8 @@
 package com.trobat.data.remote
 
+import com.trobat.data.remote.dto.CasoCercanoDto
 import com.trobat.data.remote.dto.CasoDto
+import com.trobat.data.remote.dto.CasosCercanosPaginadosDto
 import com.trobat.data.remote.dto.CasosPaginadosDto
 import com.trobat.data.remote.dto.CrearResponseDto
 import com.trobat.data.remote.dto.LoginRequestDto
@@ -30,7 +32,7 @@ interface TrobatApi {
     @POST("usuarios-reportantes/login")
     suspend fun login(@Body body: LoginRequestDto): Response<TokenResponseDto>
 
-    @POST("usuarios-reportantes/logout")
+    @POST("auth/logout")
     suspend fun logout(@Body body: LogoutRequestDto): Response<MensajeResponseDto>
 
     @GET("casos")
@@ -38,6 +40,15 @@ interface TrobatApi {
         @Query("page") page: Int = 0,
         @Query("limit") limit: Int = 50
     ): Response<CasosPaginadosDto>
+
+    @GET("casos/cercanos")
+    suspend fun getCasosCercanos(
+        @Query("lat") lat: Double,
+        @Query("lng") lng: Double,
+        @Query("radio") radioKm: Double = 50.0,
+        @Query("page") page: Int = 0,
+        @Query("limit") limit: Int = 50
+    ): Response<CasosCercanosPaginadosDto>
 
     @GET("casos/{id}")
     suspend fun getCaso(@Path("id") id: String): Response<CasoDto>

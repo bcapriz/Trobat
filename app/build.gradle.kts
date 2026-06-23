@@ -3,6 +3,8 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.ksp)
 }
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
@@ -43,6 +45,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -55,9 +58,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    // Permisos en Compose
-    implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 
     // ViewModel para Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
@@ -79,6 +79,9 @@ dependencies {
     // Corrutinas
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
+    // Almacenamiento cifrado (tokens de sesión)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
     // Iconos
     implementation("androidx.compose.material:material-icons-extended")
 
@@ -91,6 +94,16 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.play.services.location)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
