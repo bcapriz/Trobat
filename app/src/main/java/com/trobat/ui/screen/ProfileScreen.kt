@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AssignmentInd
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -135,6 +136,13 @@ fun ProfileScreen(
 
         SectionLabel("Configuración")
         SettingsCard {
+            SettingsToggleRow(
+                icon = Icons.Outlined.DarkMode,
+                label = "Modo oscuro",
+                checked = uiState.darkModeEnabled,
+                onToggle = { viewModel.onEvent(ProfileEvent.DarkModeToggled(it)) }
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             SettingsInfoRow(
                 icon = Icons.Outlined.Info,
                 label = "Versión de la app",

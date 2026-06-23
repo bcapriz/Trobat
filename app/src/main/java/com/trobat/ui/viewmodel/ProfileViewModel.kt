@@ -3,6 +3,7 @@ package com.trobat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.repository.RepositoryProvider
+import com.trobat.ui.theme.ThemeManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,7 +22,8 @@ class ProfileViewModel : ViewModel() {
             email = authRepository.getEmail() ?: "",
             nationalId = authRepository.getNationalId() ?: "",
             phone = authRepository.getPhone() ?: "",
-            notificationsEnabled = authRepository.getNotificationsEnabled()
+            notificationsEnabled = authRepository.getNotificationsEnabled(),
+            darkModeEnabled = authRepository.getDarkModeEnabled()
         )
     )
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -35,6 +37,11 @@ class ProfileViewModel : ViewModel() {
             is ProfileEvent.NotificationsToggled -> {
                 authRepository.setNotificationsEnabled(event.enabled)
                 _uiState.value = _uiState.value.copy(notificationsEnabled = event.enabled)
+            }
+            is ProfileEvent.DarkModeToggled -> {
+                authRepository.setDarkModeEnabled(event.enabled)
+                ThemeManager.setDarkMode(event.enabled)
+                _uiState.value = _uiState.value.copy(darkModeEnabled = event.enabled)
             }
         }
     }

@@ -93,4 +93,10 @@ class RemoteAuthRepository(
     override fun setNotificationsEnabled(enabled: Boolean) {
         sessionManager.notificationsEnabled = enabled
     }
+
+    override fun getDarkModeEnabled(): Boolean = sessionManager.darkModeEnabled
+
+    override fun setDarkModeEnabled(enabled: Boolean) {
+        sessionManager.darkModeEnabled = enabled
+    }
 }
