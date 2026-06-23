@@ -77,9 +77,7 @@ fun ActiveCaseCard(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                if (case.status.isNotBlank()) {
-                    CaseStatusBadge(status = case.status)
-                }
+
                 Icon(
                     imageVector = if (isExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
                     contentDescription = if (isExpanded) "Colapsar" else "Expandir",
@@ -178,24 +176,3 @@ fun ActiveCaseCard(
     }
 }
 
-@Composable
-private fun CaseStatusBadge(status: String) {
-    val (label, color) = when (status.lowercase()) {
-        "active_investigation" -> "Investigación activa" to Color(0xFF2E7D32)
-        "open"                 -> "Abierto"              to Color(0xFF1565C0)
-        "resolved"             -> "Resuelto"             to Color(0xFF546E7A)
-        "suspended"            -> "Suspendido"           to Color(0xFFE65100)
-        "closed"               -> "Cerrado"              to Color(0xFF424242)
-        else -> status.replace("_", " ")
-            .replaceFirstChar { it.uppercase() } to Color(0xFF6A1B9A)
-    }
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelSmall,
-        color = Color.White,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier
-            .background(color = color, shape = CircleShape)
-            .padding(horizontal = 8.dp, vertical = 3.dp)
-    )
-}
