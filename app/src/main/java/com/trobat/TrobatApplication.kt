@@ -58,6 +58,7 @@ class TrobatApplication : Application() {
     }
 
     private fun subscribeToAlertsTopic() {
+        if (!RepositoryProvider.authRepository.isLoggedIn()) return
         FirebaseMessaging.getInstance()
             .subscribeToTopic(ALERTS_TOPIC)
             .addOnFailureListener { /* se reintentará en el próximo arranque */ }

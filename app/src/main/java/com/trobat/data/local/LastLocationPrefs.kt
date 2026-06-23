@@ -19,4 +19,6 @@ class LastLocationPrefs(context: Context) {
         val lng = java.lang.Double.longBitsToDouble(prefs.getLong("lng", 0L))
         return Pair(lat, lng)
     }
+
+    fun clear() = prefs.edit().clear().apply()
 }
