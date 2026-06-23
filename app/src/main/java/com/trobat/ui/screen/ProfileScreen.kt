@@ -25,7 +25,6 @@ import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
@@ -147,16 +146,9 @@ fun ProfileScreen(
         SettingsCard {
             SettingsToggleRow(
                 icon = Icons.Outlined.Notifications,
-                label = "Alertas push",
+                label = "Alertas",
                 checked = uiState.notificationsEnabled,
                 onToggle = { viewModel.onEvent(ProfileEvent.NotificationsToggled(it)) }
-            )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            SettingsToggleRow(
-                icon = Icons.Outlined.LocationOn,
-                label = "Alertas de reportes cercanos",
-                checked = uiState.nearbyAlertsEnabled,
-                onToggle = { viewModel.onEvent(ProfileEvent.NearbyAlertsToggled(it)) }
             )
         }
 

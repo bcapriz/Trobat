@@ -19,6 +19,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
     // handleIntent se llama para TODOS los mensajes FCM sin importar el estado de la app.
     // onMessageReceived solo se llama en foreground para mensajes con notification payload.
     override fun handleIntent(intent: Intent) {
+        if (!RepositoryProvider.authRepository.getNotificationsEnabled()) return
         val title = intent.getStringExtra("gcm.notification.title")
             ?: intent.getStringExtra("titulo")
         if (title != null) {
@@ -35,6 +36,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {
+        if (!RepositoryProvider.authRepository.getNotificationsEnabled()) return
         val title = message.notification?.title ?: message.data["titulo"] ?: return
         val body = message.notification?.body ?: message.data["descripcion"] ?: ""
         showNotification(title, body, notificationId = message.messageId?.hashCode() ?: title.hashCode())

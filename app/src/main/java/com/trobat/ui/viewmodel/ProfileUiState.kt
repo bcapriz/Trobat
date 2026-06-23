@@ -5,6 +5,5 @@ data class ProfileUiState(
     val email: String = "",
     val nationalId: String = "",
     val phone: String = "",
-    val notificationsEnabled: Boolean = true,
-    val nearbyAlertsEnabled: Boolean = true
+    val notificationsEnabled: Boolean = true
 )

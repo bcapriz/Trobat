@@ -20,7 +20,8 @@ class ProfileViewModel : ViewModel() {
             name = authRepository.getUserName() ?: "",
             email = authRepository.getEmail() ?: "",
             nationalId = authRepository.getNationalId() ?: "",
-            phone = authRepository.getPhone() ?: ""
+            phone = authRepository.getPhone() ?: "",
+            notificationsEnabled = authRepository.getNotificationsEnabled()
         )
     )
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -31,10 +32,10 @@ class ProfileViewModel : ViewModel() {
     fun onEvent(event: ProfileEvent) {
         when (event) {
             ProfileEvent.LogoutClicked -> logout()
-            is ProfileEvent.NotificationsToggled ->
+            is ProfileEvent.NotificationsToggled -> {
+                authRepository.setNotificationsEnabled(event.enabled)
                 _uiState.value = _uiState.value.copy(notificationsEnabled = event.enabled)
-            is ProfileEvent.NearbyAlertsToggled ->
-                _uiState.value = _uiState.value.copy(nearbyAlertsEnabled = event.enabled)
+            }
         }
     }
 
