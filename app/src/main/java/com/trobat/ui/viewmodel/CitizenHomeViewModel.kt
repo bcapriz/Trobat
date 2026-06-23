@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
@@ -30,10 +31,13 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
     private val _isLoading = MutableStateFlow(true)
+    private val _searchResults = MutableStateFlow<List<com.trobat.data.model.MissingPersonCase>?>(null)
+    private val _isSearching = MutableStateFlow(false)
 
     init {
         fetchUserLocation()
         observeData()
+        observeSearch()
     }
 
     private fun fetchUserLocation() {
@@ -62,7 +66,13 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                 fetchUserLocation()
             }
             CitizenHomeEvent.DismissCaseModal -> _selectedCase.value = null
-            is CitizenHomeEvent.SearchQueryChanged -> _searchQuery.value = event.query
+            is CitizenHomeEvent.SearchQueryChanged -> {
+                _searchQuery.value = event.query
+                if (event.query.isBlank()) {
+                    _searchResults.value = null
+                    _isSearching.value = false
+                }
+            }
             is CitizenHomeEvent.CaseCardClicked -> _selectedCase.value = event.case
             is CitizenHomeEvent.RadiusChanged -> _radiusKm.value = event.km
         }
@@ -87,9 +97,33 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                 )
             }.combine(_isLoading) { state, loading ->
                 state.copy(isLoading = loading)
+            }.combine(_searchResults) { state, searchResults ->
+                state.copy(searchResults = searchResults)
+            }.combine(_isSearching) { state, isSearching ->
+                state.copy(isSearching = isSearching)
             }.collect { state ->
                 _uiState.value = state
             }
+        }
+    }
+
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    private fun observeSearch() {
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300)
+                .collect { query ->
+                    if (query.length >= 2) {
+                        _isSearching.value = true
+                        try {
+                            _searchResults.value = caseRepository.searchByName(query)
+                        } catch (_: Exception) {
+                            _searchResults.value = emptyList()
+                        } finally {
+                            _isSearching.value = false
+                        }
+                    }
+                }
         }
     }
 

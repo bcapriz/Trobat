@@ -7,6 +7,8 @@ data class CitizenHomeUiState(
     val title: String = "¿Cómo querés colaborar?",
     val activeCases: List<MissingPersonCase> = emptyList(),
     val searchQuery: String = "",
+    val searchResults: List<MissingPersonCase>? = null,
+    val isSearching: Boolean = false,
     val selectedCase: MissingPersonCase? = null,
     val userLat: Double? = null,
     val userLng: Double? = null,
@@ -14,6 +16,7 @@ data class CitizenHomeUiState(
     val isLoading: Boolean = true
 ) {
     val filteredCases: List<MissingPersonCase> get() {
+        if (searchResults != null) return searchResults
         val bySearch = if (searchQuery.isBlank()) activeCases
         else activeCases.filter { case ->
             case.fullName.contains(searchQuery, ignoreCase = true)

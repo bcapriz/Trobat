@@ -8,4 +8,5 @@ interface CaseRepository {
     suspend fun refresh() {}
     suspend fun refreshCercanos(lat: Double, lng: Double, radioKm: Double = 50.0) {}
     suspend fun refreshCercanosConFallback(lat: Double, lng: Double, initialRadioKm: Double = 50.0) {}
+    suspend fun searchByName(query: String): List<MissingPersonCase> = emptyList()
 }

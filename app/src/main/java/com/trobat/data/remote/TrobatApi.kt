@@ -54,6 +54,13 @@ interface TrobatApi {
         @Query("limit") limit: Int = 50
     ): Response<CasosCercanosPaginadosDto>
 
+    @GET("casos/buscar")
+    suspend fun buscarCasos(
+        @Query("q") q: String,
+        @Query("page") page: Int = 0,
+        @Query("limit") limit: Int = 20
+    ): Response<CasosPaginadosDto>
+
     @GET("casos/{id}")
     suspend fun getCaso(@Path("id") id: String): Response<CasoDto>
 

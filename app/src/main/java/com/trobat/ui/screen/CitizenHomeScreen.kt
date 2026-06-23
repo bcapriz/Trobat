@@ -245,6 +245,12 @@ private fun CitizenHomeContent(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        } else if (uiState.isSearching) {
+            Text(
+                text = "Buscando...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         } else if (uiState.filteredCases.isEmpty()) {
             Text(
                 text = when {

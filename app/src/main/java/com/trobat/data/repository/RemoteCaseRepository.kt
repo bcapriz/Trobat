@@ -55,6 +55,17 @@ class RemoteCaseRepository(
         refresh()
     }
 
+    override suspend fun searchByName(query: String): List<MissingPersonCase> {
+        return try {
+            val response = api.buscarCasos(q = query)
+            if (response.isSuccessful) {
+                response.body()?.data?.map { it.toDomain() } ?: emptyList()
+            } else emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
     private fun buildRadiusSteps(initialKm: Double): List<Double> {
         if (initialKm >= 100.0) return listOf(100.0)
         val step = (100.0 - initialKm) / 4.0
