@@ -23,11 +23,14 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,6 +47,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
+import com.trobat.ui.components.CaseDetailSheet
 import com.trobat.ui.viewmodel.CitizenHomeEffect
 import com.trobat.ui.viewmodel.CitizenHomeEvent
 import com.trobat.ui.viewmodel.CitizenHomeUiState
@@ -103,6 +107,7 @@ fun CitizenHomeScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CitizenHomeContent(
     uiState: CitizenHomeUiState,
@@ -244,13 +249,20 @@ private fun CitizenHomeContent(
             uiState.filteredCases.forEach { case ->
                 ActiveCaseCard(
                     case = case,
-                    isExpanded = uiState.expandedCaseId == case.id,
                     distanceKm = uiState.distanceTo(case),
-                    onClick = { onEvent(CitizenHomeEvent.CaseCardClicked(case.id)) }
+                    onClick = { onEvent(CitizenHomeEvent.CaseCardClicked(case)) }
                 )
             }
         }
+    }
 
+    if (uiState.selectedCase != null) {
+        ModalBottomSheet(
+            onDismissRequest = { onEvent(CitizenHomeEvent.DismissCaseModal) },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            CaseDetailSheet(case = uiState.selectedCase)
+        }
     }
 }
 @Composable

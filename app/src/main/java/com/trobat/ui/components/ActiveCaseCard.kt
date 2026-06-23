@@ -1,6 +1,5 @@
 package com.trobat.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,21 +11,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessTime
-import androidx.compose.material.icons.outlined.ExpandLess
-import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.NearMe
 import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.Place
-import androidx.compose.ui.graphics.Color
 import coil.compose.SubcomposeAsyncImage
 import com.trobat.utils.GeoUtils
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,7 +36,6 @@ import com.trobat.utils.formatLastSeenDate
 @Composable
 fun ActiveCaseCard(
     case: MissingPersonCase,
-    isExpanded: Boolean = false,
     distanceKm: Double? = null,
     onClick: () -> Unit = {}
 ) {
@@ -78,12 +70,6 @@ fun ActiveCaseCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                Icon(
-                    imageVector = if (isExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                    contentDescription = if (isExpanded) "Colapsar" else "Expandir",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
-                )
             }
 
             Row(
@@ -127,51 +113,6 @@ fun ActiveCaseCard(
                 }
             }
 
-            AnimatedVisibility(visible = isExpanded) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 2.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                    if (case.imageUrl != null) {
-                        SubcomposeAsyncImage(
-                            model = case.imageUrl,
-                            contentDescription = case.fullName,
-                            contentScale = ContentScale.FillWidth,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                        )
-                    }
-                    Text(
-                        text = case.physicalDescription,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Outlined.AccessTime,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = formatLastSeenDate(case.lastSeenDate),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (case.area.isNotBlank()) {
-                        Text(
-                            text = case.area,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 18.dp)
-                        )
-                    }
-                }
-            }
         }
     }
 }

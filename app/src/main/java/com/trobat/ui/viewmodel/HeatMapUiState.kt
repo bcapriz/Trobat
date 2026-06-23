@@ -9,7 +9,7 @@ data class HeatMapUiState(
     val mostActiveArea: String = "-",
     val mostActiveCount: Int = 0,
     val isLoading: Boolean = true,
-    val expandedCaseId: String? = null,
+    val selectedCase: MissingPersonCase? = null,
     val userLat: Double? = null,
     val userLng: Double? = null,
     val radiusKm: Float = 50f

@@ -32,6 +32,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
+import com.trobat.ui.components.CaseDetailSheet
 import com.trobat.ui.viewmodel.HeatMapUiState
 import com.trobat.ui.viewmodel.HeatMapViewModel
 
@@ -45,15 +46,18 @@ fun HeatMapScreen(
     HeatMapContent(
         uiState = uiState,
         onCaseClicked = viewModel::onCaseClicked,
+        onDismissCaseModal = viewModel::onDismissCaseModal,
         onRadiusChanged = viewModel::onRadiusChanged,
         modifier = modifier
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HeatMapContent(
     uiState: HeatMapUiState,
-    onCaseClicked: (String) -> Unit,
+    onCaseClicked: (MissingPersonCase) -> Unit,
+    onDismissCaseModal: () -> Unit,
     onRadiusChanged: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -204,12 +208,20 @@ private fun HeatMapContent(
                 items(uiState.filteredCases) { caseItem ->
                     ActiveCaseCard(
                         case = caseItem,
-                        isExpanded = uiState.expandedCaseId == caseItem.id,
                         distanceKm = uiState.distanceTo(caseItem),
-                        onClick = { onCaseClicked(caseItem.id) }
+                        onClick = { onCaseClicked(caseItem) }
                     )
                 }
             }
+        }
+    }
+
+    if (uiState.selectedCase != null) {
+        ModalBottomSheet(
+            onDismissRequest = onDismissCaseModal,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            CaseDetailSheet(case = uiState.selectedCase)
         }
     }
 }

@@ -7,7 +7,7 @@ data class CitizenHomeUiState(
     val title: String = "¿Cómo querés colaborar?",
     val activeCases: List<MissingPersonCase> = emptyList(),
     val searchQuery: String = "",
-    val expandedCaseId: String? = null,
+    val selectedCase: MissingPersonCase? = null,
     val userLat: Double? = null,
     val userLng: Double? = null,
     val radiusKm: Float = 50f,

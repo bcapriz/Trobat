@@ -26,7 +26,7 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     val effect: SharedFlow<CitizenHomeEffect> = _effect.asSharedFlow()
 
     private val _searchQuery = MutableStateFlow("")
-    private val _expandedCaseId = MutableStateFlow<String?>(null)
+    private val _selectedCase = MutableStateFlow<com.trobat.data.model.MissingPersonCase?>(null)
     private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
     private val _isLoading = MutableStateFlow(true)
@@ -58,14 +58,12 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
             CitizenHomeEvent.CaptureEvidenceClicked -> navigateToCamera()
             CitizenHomeEvent.RefreshClicked -> {
                 _searchQuery.value = ""
-                _expandedCaseId.value = null
+                _selectedCase.value = null
                 fetchUserLocation()
             }
+            CitizenHomeEvent.DismissCaseModal -> _selectedCase.value = null
             is CitizenHomeEvent.SearchQueryChanged -> _searchQuery.value = event.query
-            is CitizenHomeEvent.CaseCardClicked -> {
-                _expandedCaseId.value =
-                    if (_expandedCaseId.value == event.caseId) null else event.caseId
-            }
+            is CitizenHomeEvent.CaseCardClicked -> _selectedCase.value = event.case
             is CitizenHomeEvent.RadiusChanged -> _radiusKm.value = event.km
         }
     }
@@ -75,14 +73,14 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
             combine(
                 caseRepository.cases,
                 _searchQuery,
-                _expandedCaseId,
+                _selectedCase,
                 _radiusKm,
                 _userLocation
-            ) { cases, query, expandedId, radius, location ->
+            ) { cases, query, selectedCase, radius, location ->
                 CitizenHomeUiState(
                     activeCases = cases,
                     searchQuery = query,
-                    expandedCaseId = expandedId,
+                    selectedCase = selectedCase,
                     userLat = location?.first,
                     userLng = location?.second,
                     radiusKm = radius
