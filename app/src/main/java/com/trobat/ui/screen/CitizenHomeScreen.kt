@@ -239,13 +239,18 @@ private fun CitizenHomeContent(
             }
         }
 
-        if (uiState.filteredCases.isEmpty()) {
+        if (uiState.isLoading) {
+            Text(
+                text = "Cargando casos...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else if (uiState.filteredCases.isEmpty()) {
             Text(
                 text = when {
-                    uiState.isLoading -> "Cargando casos..."
                     uiState.searchQuery.isNotBlank() -> "Sin resultados para \"${uiState.searchQuery}\""
                     uiState.userLat != null -> "No se encontraron casos cercanos en un radio de ${uiState.radiusKm.roundToInt()} km."
-                    else -> "Cargando casos..."
+                    else -> "No hay casos para mostrar."
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

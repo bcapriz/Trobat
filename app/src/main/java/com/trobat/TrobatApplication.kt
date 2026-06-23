@@ -20,7 +20,10 @@ class TrobatApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         RepositoryProvider.init(this)
-        applicationScope.launch { RepositoryProvider.citizenReportRepository.retrySyncPending() }
+        applicationScope.launch {
+            RepositoryProvider.citizenReportRepository.resetStuckSending()
+            RepositoryProvider.citizenReportRepository.retrySyncPending()
+        }
         registerConnectivityCallback()
         createAlertsChannel()
         subscribeToAlertsTopic()

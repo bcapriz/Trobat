@@ -26,6 +26,12 @@ interface PendingReportDao {
     @Query("DELETE FROM pending_reports WHERE status = 'SENT' AND createdAtMillis < :cutoff")
     suspend fun deleteSentOlderThan(cutoff: Long)
 
+    @Query("UPDATE pending_reports SET status = :status WHERE id = :id")
+    suspend fun updateStatus(id: String, status: String)
+
+    @Query("UPDATE pending_reports SET status = 'PENDING_SYNC' WHERE status = 'SENDING'")
+    suspend fun resetSendingToPending()
+
     @Query("DELETE FROM pending_reports")
     suspend fun deleteAll()
 }
