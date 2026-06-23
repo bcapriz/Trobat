@@ -41,7 +41,7 @@ private fun capturePhotoWithExif(
     onResult: (Uri, Double, Double) -> Unit,
     onError: (String?) -> Unit
 ) {
-    val photoFile = File(context.cacheDir, "evidence_${System.currentTimeMillis()}.jpg")
+    val photoFile = File(context.filesDir, "evidence_${System.currentTimeMillis()}.jpg")
     val metadata = ImageCapture.Metadata().apply {
         location = AndroidLocation("gps").apply {
             latitude = lat

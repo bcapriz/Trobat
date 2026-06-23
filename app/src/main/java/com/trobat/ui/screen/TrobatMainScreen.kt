@@ -58,6 +58,9 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                     },
                     onCaptureEvidence = {
                         navController.navigate(BottomRoutes.CAMERA)
+                    },
+                    onResumeDraft = {
+                        navController.navigate(MainRoutes.CONFIRM_REPORT)
                     }
                 )
             }

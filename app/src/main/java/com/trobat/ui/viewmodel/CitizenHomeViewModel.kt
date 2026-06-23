@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
 
     private val caseRepository: CaseRepository = RepositoryProvider.caseRepository
+    private val draftPrefs = RepositoryProvider.reportDraftPrefs
 
     private val _uiState = MutableStateFlow(CitizenHomeUiState())
     val uiState: StateFlow<CitizenHomeUiState> = _uiState.asStateFlow()
@@ -33,11 +34,17 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     private val _isLoading = MutableStateFlow(true)
     private val _searchResults = MutableStateFlow<List<com.trobat.data.model.MissingPersonCase>?>(null)
     private val _isSearching = MutableStateFlow(false)
+    private val _hasPendingDraft = MutableStateFlow(false)
 
     init {
         fetchUserLocation()
         observeData()
         observeSearch()
+        checkPendingDraft()
+    }
+
+    private fun checkPendingDraft() {
+        _hasPendingDraft.value = !draftPrefs.isEmpty()
     }
 
     private fun fetchUserLocation() {
@@ -75,6 +82,7 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
             }
             is CitizenHomeEvent.CaseCardClicked -> _selectedCase.value = event.case
             is CitizenHomeEvent.RadiusChanged -> _radiusKm.value = event.km
+            CitizenHomeEvent.ResumeDraftClicked -> navigateToConfirmReport()
         }
     }
 
@@ -101,6 +109,8 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                 state.copy(searchResults = searchResults)
             }.combine(_isSearching) { state, isSearching ->
                 state.copy(isSearching = isSearching)
+            }.combine(_hasPendingDraft) { state, hasPendingDraft ->
+                state.copy(hasPendingDraft = hasPendingDraft)
             }.collect { state ->
                 _uiState.value = state
             }
@@ -133,5 +143,9 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun navigateToCamera() {
         viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToCamera) }
+    }
+
+    private fun navigateToConfirmReport() {
+        viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToConfirmReport) }
     }
 }

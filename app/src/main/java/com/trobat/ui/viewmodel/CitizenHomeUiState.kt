@@ -13,7 +13,8 @@ data class CitizenHomeUiState(
     val userLat: Double? = null,
     val userLng: Double? = null,
     val radiusKm: Float = 50f,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val hasPendingDraft: Boolean = false
 ) {
     val filteredCases: List<MissingPersonCase> get() {
         if (searchResults != null) return searchResults

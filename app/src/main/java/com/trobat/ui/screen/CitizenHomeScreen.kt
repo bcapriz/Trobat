@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.Search
@@ -58,6 +59,7 @@ import kotlin.math.roundToInt
 fun CitizenHomeScreen(
     onOpenMap: () -> Unit = {},
     onCaptureEvidence: () -> Unit = {},
+    onResumeDraft: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: CitizenHomeViewModel = viewModel()
 ) {
@@ -90,6 +92,7 @@ fun CitizenHomeScreen(
             when (effect) {
                 CitizenHomeEffect.NavigateToMap -> onOpenMap()
                 CitizenHomeEffect.NavigateToCamera -> onCaptureEvidence()
+                CitizenHomeEffect.NavigateToConfirmReport -> onResumeDraft()
             }
         }
     }
@@ -107,7 +110,8 @@ fun CitizenHomeScreen(
             com.trobat.data.model.CapturedEvidenceHolder.preselectedCaseId = caseId
             onCaptureEvidence()
         },
-        modifier = modifier
+        modifier = modifier,
+        onResumeDraft = onResumeDraft
     )
 }
 
@@ -119,6 +123,7 @@ private fun CitizenHomeContent(
     onRequestLocationPermission: () -> Unit,
     onEvent: (CitizenHomeEvent) -> Unit,
     onCargarReporte: (caseId: String) -> Unit,
+    onResumeDraft: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -151,6 +156,10 @@ private fun CitizenHomeContent(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        if (uiState.hasPendingDraft) {
+            PendingDraftCard(onResumeDraft = { onEvent(CitizenHomeEvent.ResumeDraftClicked) })
+        }
 
         CollaborationOptionCard(
             title = "Mapa de reportes",
@@ -329,6 +338,44 @@ private fun CollaborationOptionCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun PendingDraftCard(onResumeDraft: () -> Unit) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onResumeDraft),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Description,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Tenés un reporte pendiente",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Tocá para continuar donde lo dejaste.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
         }
     }
 }
