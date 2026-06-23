@@ -11,4 +11,5 @@ sealed interface CitizenHomeEvent {
     data class CaseCardClicked(val case: MissingPersonCase) : CitizenHomeEvent
     data class RadiusChanged(val km: Float) : CitizenHomeEvent
     data object ResumeDraftClicked : CitizenHomeEvent
+    data object ScreenResumed : CitizenHomeEvent
 }

@@ -66,7 +66,9 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     fun onEvent(event: CitizenHomeEvent) {
         when (event) {
             CitizenHomeEvent.OpenMapClicked -> navigateToMap()
-            CitizenHomeEvent.CaptureEvidenceClicked -> navigateToCamera()
+            CitizenHomeEvent.CaptureEvidenceClicked -> {
+                if (!draftPrefs.isEmpty()) navigateToConfirmReport() else navigateToCamera()
+            }
             CitizenHomeEvent.RefreshClicked -> {
                 _searchQuery.value = ""
                 _selectedCase.value = null
@@ -83,6 +85,7 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
             is CitizenHomeEvent.CaseCardClicked -> _selectedCase.value = event.case
             is CitizenHomeEvent.RadiusChanged -> _radiusKm.value = event.km
             CitizenHomeEvent.ResumeDraftClicked -> navigateToConfirmReport()
+            CitizenHomeEvent.ScreenResumed -> checkPendingDraft()
         }
     }
 
