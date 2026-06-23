@@ -54,11 +54,14 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
     private fun loadCapturedEvidence() {
         val lat = CapturedEvidenceHolder.latitude
         val lng = CapturedEvidenceHolder.longitude
+        val preselectedCaseId = CapturedEvidenceHolder.preselectedCaseId
+        CapturedEvidenceHolder.preselectedCaseId = null
         _uiState.value = _uiState.value.copy(
             photoUri = CapturedEvidenceHolder.photoUri,
             latitude = lat,
             longitude = lng,
-            locationLabel = if (lat != null && lng != null) "Obteniendo dirección..." else "Ubicación no disponible"
+            locationLabel = if (lat != null && lng != null) "Obteniendo dirección..." else "Ubicación no disponible",
+            selectedCaseId = preselectedCaseId
         )
         if (lat != null && lng != null) {
             viewModelScope.launch {

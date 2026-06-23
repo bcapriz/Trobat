@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +32,10 @@ import com.trobat.data.model.MissingPersonCase
 import com.trobat.utils.formatLastSeenDate
 
 @Composable
-fun CaseDetailSheet(case: MissingPersonCase) {
+fun CaseDetailSheet(
+    case: MissingPersonCase,
+    onCargarReporte: (() -> Unit)? = null
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,6 +118,15 @@ fun CaseDetailSheet(case: MissingPersonCase) {
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium
             )
+        }
+
+        if (onCargarReporte != null) {
+            Button(
+                onClick = onCargarReporte,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Cargar Reporte")
+            }
         }
     }
 }

@@ -103,6 +103,10 @@ fun CitizenHomeScreen(
             )
         },
         onEvent = viewModel::onEvent,
+        onCargarReporte = { caseId ->
+            com.trobat.data.model.CapturedEvidenceHolder.preselectedCaseId = caseId
+            onCaptureEvidence()
+        },
         modifier = modifier
     )
 }
@@ -114,6 +118,7 @@ private fun CitizenHomeContent(
     hasLocationPermission: Boolean,
     onRequestLocationPermission: () -> Unit,
     onEvent: (CitizenHomeEvent) -> Unit,
+    onCargarReporte: (caseId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -261,7 +266,10 @@ private fun CitizenHomeContent(
             onDismissRequest = { onEvent(CitizenHomeEvent.DismissCaseModal) },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
-            CaseDetailSheet(case = uiState.selectedCase)
+            CaseDetailSheet(
+                case = uiState.selectedCase,
+                onCargarReporte = { onCargarReporte(uiState.selectedCase.id) }
+            )
         }
     }
 }

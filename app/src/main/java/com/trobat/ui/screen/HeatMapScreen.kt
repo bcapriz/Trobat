@@ -38,6 +38,7 @@ import com.trobat.ui.viewmodel.HeatMapViewModel
 
 @Composable
 fun HeatMapScreen(
+    onNavigateToCamera: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: HeatMapViewModel = viewModel()
 ) {
@@ -48,6 +49,7 @@ fun HeatMapScreen(
         onCaseClicked = viewModel::onCaseClicked,
         onDismissCaseModal = viewModel::onDismissCaseModal,
         onRadiusChanged = viewModel::onRadiusChanged,
+        onNavigateToCamera = onNavigateToCamera,
         modifier = modifier
     )
 }
@@ -59,6 +61,7 @@ private fun HeatMapContent(
     onCaseClicked: (MissingPersonCase) -> Unit,
     onDismissCaseModal: () -> Unit,
     onRadiusChanged: (Float) -> Unit,
+    onNavigateToCamera: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -221,7 +224,13 @@ private fun HeatMapContent(
             onDismissRequest = onDismissCaseModal,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
-            CaseDetailSheet(case = uiState.selectedCase)
+            CaseDetailSheet(
+                case = uiState.selectedCase,
+                onCargarReporte = {
+                    com.trobat.data.model.CapturedEvidenceHolder.preselectedCaseId = uiState.selectedCase.id
+                    onNavigateToCamera()
+                }
+            )
         }
     }
 }

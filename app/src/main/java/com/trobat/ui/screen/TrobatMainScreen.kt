@@ -63,7 +63,9 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
             }
 
             composable(BottomRoutes.HEATMAP) {
-                HeatMapScreen()
+                HeatMapScreen(
+                    onNavigateToCamera = { navController.navigate(BottomRoutes.CAMERA) }
+                )
             }
 
             composable(BottomRoutes.CAMERA) {
