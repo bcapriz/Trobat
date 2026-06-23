@@ -16,10 +16,7 @@ data class CitizenHomeUiState(
     val filteredCases: List<MissingPersonCase> get() {
         val bySearch = if (searchQuery.isBlank()) activeCases
         else activeCases.filter { case ->
-            case.fullName.contains(searchQuery, ignoreCase = true) ||
-            case.lastSeenLocation.contains(searchQuery, ignoreCase = true) ||
-            case.area.contains(searchQuery, ignoreCase = true) ||
-            case.status.contains(searchQuery, ignoreCase = true)
+            case.fullName.contains(searchQuery, ignoreCase = true)
         }
         val lat = userLat ?: return bySearch
         val lng = userLng ?: return bySearch

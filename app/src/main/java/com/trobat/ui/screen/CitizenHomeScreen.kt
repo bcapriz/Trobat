@@ -183,7 +183,7 @@ private fun CitizenHomeContent(
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
-                    text = "Buscar por nombre, zona o ubicación...",
+                    text = "Buscar por nombre...",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
