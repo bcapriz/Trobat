@@ -8,6 +8,7 @@ import com.trobat.data.local.LastLocationPrefs
 import com.trobat.data.local.SessionManager
 import com.trobat.data.local.TrobatDatabase
 import com.trobat.data.remote.NetworkProvider
+import com.trobat.ui.theme.ThemeManager
 import java.io.File
 
 object RepositoryProvider {
@@ -63,6 +64,7 @@ object RepositoryProvider {
 
         lastLocationPrefs = LastLocationPrefs(context.applicationContext)
         authRepository = RemoteAuthRepository(api, sessionManager)
+        ThemeManager.init(sessionManager.darkModeEnabled)
         caseRepository = RemoteCaseRepository(api, appScope, db)
         citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao(), authRepository)
         notificationRepository = NotificationRepository(db.notificationDao())

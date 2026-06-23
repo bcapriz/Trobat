@@ -87,4 +87,16 @@ class RemoteAuthRepository(
     override fun getPhone(): String? = sessionManager.phone
 
     override fun getEmail(): String? = sessionManager.email
+
+    override fun getNotificationsEnabled(): Boolean = sessionManager.notificationsEnabled
+
+    override fun setNotificationsEnabled(enabled: Boolean) {
+        sessionManager.notificationsEnabled = enabled
+    }
+
+    override fun getDarkModeEnabled(): Boolean = sessionManager.darkModeEnabled
+
+    override fun setDarkModeEnabled(enabled: Boolean) {
+        sessionManager.darkModeEnabled = enabled
+    }
 }

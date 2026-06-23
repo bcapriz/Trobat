@@ -9,8 +9,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.trobat.data.repository.RepositoryProvider
 import com.trobat.ui.navigation.AppNavigation
+import com.trobat.ui.theme.ThemeManager
 import com.trobat.ui.theme.TrobatTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,7 +31,8 @@ class MainActivity : ComponentActivity() {
         }
         persistFcmNotificationIfNeeded(intent)
         setContent {
-            TrobatTheme {
+            val darkMode by ThemeManager.darkMode.collectAsState()
+            TrobatTheme(darkTheme = darkMode) {
                 AppNavigation()
             }
         }

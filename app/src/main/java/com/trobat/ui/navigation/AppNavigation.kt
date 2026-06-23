@@ -64,7 +64,13 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.MAIN) {
-            TrobatMainScreen()
+            TrobatMainScreen(
+                onLogout = {
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(AppRoutes.MAIN) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
