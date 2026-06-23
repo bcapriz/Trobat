@@ -40,3 +40,17 @@ data class CasosPaginadosDto(
     val limit: Int,
     val hasMore: Boolean
 )
+
+data class CasoCercanoDto(
+    val caso: CasoDto,
+    val distance_km: Double = 0.0
+)
+
+data class CasosCercanosPaginadosDto(
+    val data: List<CasoCercanoDto>,
+    val total: Long,
+    val page: Int,
+    val limit: Int,
+    val radius_km: Double,
+    val hasMore: Boolean
+)

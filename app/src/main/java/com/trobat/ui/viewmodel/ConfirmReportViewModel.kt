@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.CapturedEvidenceHolder
 import com.trobat.data.model.ReportStatus
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.RepositoryProvider
@@ -139,17 +141,21 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                 description = currentState.requiredDescription,
                 optionalDetails = currentState.optionalDetails.ifBlank { null },
                 address = currentState.locationLabel,
-                createdAt = "Ahora",
+                createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}",
                 latitude = currentState.latitude ?: -34.6037,
                 longitude = currentState.longitude ?: -58.3816,
                 isAnonymous = !currentState.isIdentified,
                 status = ReportStatus.NEW
             )
 
-            reportRepository.sendReport(newReport)
+            val sent = reportRepository.sendReport(newReport)
             CapturedEvidenceHolder.clear()
             _uiState.value = _uiState.value.copy(isSending = false)
-            _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
+            if (sent) {
+                _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
+            } else {
+                _effect.emit(ConfirmReportEffect.ReportSavedLocally)
+            }
         }
     }
 

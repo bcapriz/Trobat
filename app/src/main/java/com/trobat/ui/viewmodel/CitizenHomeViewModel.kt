@@ -1,16 +1,11 @@
 package com.trobat.ui.viewmodel
 
-import android.Manifest
 import android.app.Application
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.RepositoryProvider
+import com.trobat.utils.fetchCurrentLocation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,6 +29,7 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     private val _expandedCaseId = MutableStateFlow<String?>(null)
     private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    private val _isLoading = MutableStateFlow(true)
 
     init {
         fetchUserLocation()
@@ -41,21 +37,19 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun fetchUserLocation() {
-        val app = getApplication<Application>()
-        val granted = ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED
-        if (!granted) return
-
-        val client = LocationServices.getFusedLocationProviderClient(app)
-        val tokenSource = CancellationTokenSource()
-        client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
-            .addOnSuccessListener { location ->
+        fetchCurrentLocation { location ->
+            _userLocation.value = location
+            if (location != null) RepositoryProvider.lastLocationPrefs.save(location.first, location.second)
+            viewModelScope.launch {
+                _isLoading.value = true
                 if (location != null) {
-                    _userLocation.value = Pair(location.latitude, location.longitude)
+                    caseRepository.refreshCercanosConFallback(location.first, location.second, _radiusKm.value.toDouble())
+                } else {
+                    caseRepository.refresh()
                 }
+                _isLoading.value = false
             }
+        }
     }
 
     fun onEvent(event: CitizenHomeEvent) {
@@ -93,6 +87,8 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                     userLng = location?.second,
                     radiusKm = radius
                 )
+            }.combine(_isLoading) { state, loading ->
+                state.copy(isLoading = loading)
             }.collect { state ->
                 _uiState.value = state
             }

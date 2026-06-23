@@ -1,57 +1,73 @@
 package com.trobat.data.repository
 
-import com.trobat.data.model.MissingPersonCase
+import com.trobat.data.local.TrobatDatabase
+import com.trobat.data.local.toDomain
+import com.trobat.data.local.toEntity
 import com.trobat.data.remote.TrobatApi
-import com.trobat.data.remote.dto.CasoDto
+import com.trobat.data.repository.mapper.toDomain
+import com.trobat.data.model.MissingPersonCase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
-class RemoteCaseRepository(private val api: TrobatApi) : CaseRepository {
+class RemoteCaseRepository(
+    private val api: TrobatApi,
+    private val scope: CoroutineScope,
+    private val db: TrobatDatabase
+) : CaseRepository {
 
     private val _cases = MutableStateFlow<List<MissingPersonCase>>(emptyList())
     override val cases: StateFlow<List<MissingPersonCase>> = _cases.asStateFlow()
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    init {
-        scope.launch { fetchCases() }
-    }
-
-    suspend fun refresh() = fetchCases()
-
-    private suspend fun fetchCases() {
+    override suspend fun refresh() {
         try {
             val response = api.getCasos()
             if (response.isSuccessful) {
-                _cases.value = response.body()?.data?.map { it.toDomain() } ?: emptyList()
+                val cases = response.body()?.data?.map { it.toDomain() } ?: emptyList()
+                _cases.value = cases
+                if (cases.isNotEmpty()) saveToCache(cases)
+                return
             }
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) {}
+        loadFromCache()
     }
-}
 
-private fun CasoDto.toDomain(): MissingPersonCase {
-    val coords = missing_person.last_known_location?.coordinates
-    val lat = coords?.getOrNull(1) ?: 0.0
-    val lng = coords?.getOrNull(0) ?: 0.0
-    val location = (missing_person.location_label ?: missing_person.location_description).ifBlank {
-        if (lat != 0.0) "Lat: ${"%.5f".format(lat)}, Lng: ${"%.5f".format(lng)}" else ""
+    override suspend fun refreshCercanos(lat: Double, lng: Double, radioKm: Double) {
+        try {
+            val response = api.getCasosCercanos(lat = lat, lng = lng, radioKm = radioKm)
+            if (response.isSuccessful) {
+                val cases = response.body()?.data?.map { it.caso.toDomain() } ?: emptyList()
+                _cases.value = cases
+                if (cases.isNotEmpty()) saveToCache(cases)
+                return
+            }
+        } catch (_: Exception) {}
+        if (_cases.value.isEmpty()) loadFromCache()
     }
-    return MissingPersonCase(
-        id = id,
-        fullName = missing_person.name,
-        age = missing_person.age,
-        physicalDescription = missing_person.description,
-        lastSeenLocation = location,
-        lastSeenDate = missing_person.last_seen_date.ifBlank { created_at },
-        area = missing_person.location_description.ifBlank { location },
-        status = status,
-        latitude = lat,
-        longitude = lng
-    )
+
+    override suspend fun refreshCercanosConFallback(lat: Double, lng: Double, initialRadioKm: Double) {
+        val pasos = buildRadiusSteps(initialRadioKm)
+        for (radio in pasos) {
+            refreshCercanos(lat, lng, radio)
+            if (_cases.value.isNotEmpty()) return
+        }
+        refresh()
+    }
+
+    private fun buildRadiusSteps(initialKm: Double): List<Double> {
+        if (initialKm >= 100.0) return listOf(100.0)
+        val step = (100.0 - initialKm) / 4.0
+        return (0..4).map { (initialKm + it * step).coerceAtMost(100.0) }
+    }
+
+    private suspend fun saveToCache(cases: List<MissingPersonCase>) {
+        db.caseDao().deleteAll()
+        db.caseDao().insertAll(cases.map { it.toEntity() })
+    }
+
+    private suspend fun loadFromCache() {
+        val cached = db.caseDao().getAll().map { it.toDomain() }
+        if (cached.isNotEmpty()) _cases.value = cached
+    }
 }

@@ -9,8 +9,29 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.trobat.data.repository.RepositoryProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TrobatFirebaseMessagingService : FirebaseMessagingService() {
+
+    // handleIntent se llama para TODOS los mensajes FCM sin importar el estado de la app.
+    // onMessageReceived solo se llama en foreground para mensajes con notification payload.
+    override fun handleIntent(intent: Intent) {
+        val title = intent.getStringExtra("gcm.notification.title")
+            ?: intent.getStringExtra("titulo")
+        if (title != null) {
+            val body = intent.getStringExtra("gcm.notification.body")
+                ?: intent.getStringExtra("descripcion") ?: ""
+            val id = intent.getStringExtra("google.message_id")?.hashCode()
+                ?: (title + body).hashCode()
+            CoroutineScope(Dispatchers.IO).launch {
+                RepositoryProvider.notificationRepository.save(title, body, id)
+            }
+        }
+        super.handleIntent(intent)
+    }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {

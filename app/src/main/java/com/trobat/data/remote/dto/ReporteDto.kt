@@ -30,7 +30,8 @@ data class ReporteDto(
     val security_metadata: SecurityMetadataDto = SecurityMetadataDto(),
     val contact_info: ContactInfoDto = ContactInfoDto(),
     val validated: Boolean = false,
-    val priority: String? = null
+    val priority: String? = null,
+    val suspicious: Boolean? = null
 )
 
 data class ReportesPaginadosDto(

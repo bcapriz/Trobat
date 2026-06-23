@@ -1,10 +1,13 @@
 package com.trobat.data.repository
 
+import com.trobat.data.local.PendingReportEntity
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.ReportStatus
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 
 class FakeCitizenReportRepository : CitizenReportRepository {
 
@@ -37,8 +40,8 @@ class FakeCitizenReportRepository : CitizenReportRepository {
 
     private val _reports = MutableStateFlow(initialReports)
 
-    override val reports: StateFlow<List<CitizenReport>> =
-        _reports.asStateFlow()
+    override val reports: StateFlow<List<CitizenReport>> = _reports.asStateFlow()
+    override val pendingReports: Flow<List<PendingReportEntity>> = flowOf(emptyList())
 
     override fun getNearbyReports(): List<CitizenReport> {
         return _reports.value
@@ -50,7 +53,12 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         }
     }
 
-    override suspend fun sendReport(report: CitizenReport) {
+    override suspend fun sendReport(report: CitizenReport): Boolean {
         _reports.value = _reports.value + report
+        return true
     }
+
+    override suspend fun retrySyncPending() {}
+
+    override suspend fun cleanupSentReports() {}
 }
