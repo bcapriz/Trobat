@@ -161,6 +161,7 @@
     <string name="profile_version_label">Versión de la app</string>
     <string name="profile_version_value">1.0.0</string>
     <string name="profile_alerts">Alertas</string>
+    <string name="profile_notifications_blocked_hint">Bloqueaste el permiso de notificaciones. Habilitalo desde Configuración → Permisos.</string>
     <string name="profile_terms">Términos y condiciones</string>
     <string name="profile_privacy">Política de privacidad</string>
     <string name="profile_help">Ayuda y soporte</string>
