@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.data.local.NotificationEntity
-import com.trobat.data.local.PendingReportEntity
 import com.trobat.ui.notifications.NotificationsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -90,8 +89,8 @@ fun NotificationsScreen(
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
-            uiState.pendingReports.forEach { report ->
-                PendingReportCard(report = report)
+            uiState.pendingReports.forEach { item ->
+                PendingReportCard(item = item)
             }
         }
     }
@@ -149,8 +148,11 @@ private fun AlertCard(alert: NotificationEntity) {
 }
 
 @Composable
-private fun PendingReportCard(report: PendingReportEntity) {
+private fun PendingReportCard(item: PendingReportItem) {
+    val report = item.entity
     val isSent = report.status == "SENT"
+    val dateFormat = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.forLanguageTag("es-AR"))
+    val formattedDate = dateFormat.format(Date(report.createdAtMillis))
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -181,7 +183,7 @@ private fun PendingReportCard(report: PendingReportEntity) {
                 )
             }
             Text(
-                text = "Reporte ciudadano",
+                text = item.caseName ?: "Reporte ciudadano",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
@@ -220,7 +222,7 @@ private fun PendingReportCard(report: PendingReportEntity) {
                 it.startsWith("Obteniendo") || it == "Ubicación no disponible"
             }
             Text(
-                text = if (addressDisplay != null) "$addressDisplay • ${report.createdAt}" else report.createdAt,
+                text = if (addressDisplay != null) "$addressDisplay • $formattedDate" else formattedDate,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -2,9 +2,10 @@ package com.trobat.ui.notifications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trobat.data.repository.AppContainer
+import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.NotificationRepository
-import com.trobat.data.repository.AppContainer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +18,8 @@ class NotificationsViewModel : ViewModel() {
         AppContainer.citizenReportRepository
     private val notificationRepository: NotificationRepository =
         AppContainer.notificationRepository
+    private val caseRepository: CaseRepository =
+        AppContainer.caseRepository
 
     private val _uiState = MutableStateFlow(NotificationsUiState())
     val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
@@ -31,11 +34,17 @@ class NotificationsViewModel : ViewModel() {
             combine(
                 notificationRepository.observeAll(),
                 notificationRepository.observeUnreadCount(),
-                reportRepository.pendingReports
-            ) { alerts, unread, pending ->
+                reportRepository.pendingReports,
+                caseRepository.cases
+            ) { alerts, unread, pending, cases ->
                 NotificationsUiState(
                     alerts = alerts,
-                    pendingReports = pending,
+                    pendingReports = pending.map { entity ->
+                        PendingReportItem(
+                            entity = entity,
+                            caseName = cases.firstOrNull { it.id == entity.caseId }?.fullName
+                        )
+                    },
                     unreadCount = unread
                 )
             }.collect { _uiState.value = it }
