@@ -28,6 +28,9 @@ object RepositoryProvider {
     lateinit var lastLocationPrefs: LastLocationPrefs
         private set
 
+    lateinit var reportDraftPrefs: com.trobat.data.local.ReportDraftPrefs
+        private set
+
     private fun createEncryptedPrefs(context: Context): android.content.SharedPreferences {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -63,7 +66,8 @@ object RepositoryProvider {
         val db = TrobatDatabase.build(context.applicationContext)
 
         lastLocationPrefs = LastLocationPrefs(context.applicationContext)
-        authRepository = RemoteAuthRepository(api, sessionManager)
+        reportDraftPrefs = com.trobat.data.local.ReportDraftPrefs(context.applicationContext)
+        authRepository = RemoteAuthRepository(api, sessionManager, db, lastLocationPrefs, context.applicationContext)
         ThemeManager.init(sessionManager.darkModeEnabled)
         caseRepository = RemoteCaseRepository(api, appScope, db)
         citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao(), authRepository)

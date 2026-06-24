@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -29,6 +31,7 @@ class RemoteCitizenReportRepository(
 ) : CitizenReportRepository {
 
     private val gson = Gson()
+    private val syncMutex = Mutex()
     private val _reports = MutableStateFlow<List<CitizenReport>>(emptyList())
     override val reports: StateFlow<List<CitizenReport>> = _reports.asStateFlow()
     override val pendingReports: Flow<List<PendingReportEntity>> = pendingReportDao.observeAll()
@@ -68,29 +71,41 @@ class RemoteCitizenReportRepository(
     }
 
     override suspend fun retrySyncPending() {
-        val pending = pendingReportDao.getAll().filter { it.status == "PENDING_SYNC" }
-        for (entity in pending) {
-            val report = CitizenReport(
-                id = entity.id,
-                caseId = entity.caseId,
-                title = "Reporte ciudadano",
-                description = entity.description,
-                optionalDetails = entity.optionalDetails,
-                address = entity.address,
-                createdAt = entity.createdAt,
-                latitude = entity.latitude,
-                longitude = entity.longitude,
-                isAnonymous = entity.isAnonymous,
-                contactName = entity.contactName,
-                contactPhone = entity.contactPhone,
-                contactEmail = entity.contactEmail,
-                status = ReportStatus.PENDING_SYNC
-            )
-            if (trySendToApi(report, entity.localPhotoPath)) {
-                markSent(entity.id)
-                entity.localPhotoPath?.let { File(it).delete() }
+        if (!syncMutex.tryLock()) return
+        try {
+            val pending = pendingReportDao.getAll().filter { it.status == "PENDING_SYNC" }
+            for (entity in pending) {
+                pendingReportDao.updateStatus(entity.id, "SENDING")
+                val report = CitizenReport(
+                    id = entity.id,
+                    caseId = entity.caseId,
+                    title = "Reporte ciudadano",
+                    description = entity.description,
+                    optionalDetails = entity.optionalDetails,
+                    address = entity.address,
+                    createdAt = entity.createdAt,
+                    latitude = entity.latitude,
+                    longitude = entity.longitude,
+                    isAnonymous = entity.isAnonymous,
+                    contactName = entity.contactName,
+                    contactPhone = entity.contactPhone,
+                    contactEmail = entity.contactEmail,
+                    status = ReportStatus.PENDING_SYNC
+                )
+                if (trySendToApi(report, entity.localPhotoPath)) {
+                    markSent(entity.id)
+                    entity.localPhotoPath?.let { File(it).delete() }
+                } else {
+                    pendingReportDao.updateStatus(entity.id, "PENDING_SYNC")
+                }
             }
+        } finally {
+            syncMutex.unlock()
         }
+    }
+
+    override suspend fun resetStuckSending() {
+        pendingReportDao.resetSendingToPending()
     }
 
     override suspend fun cleanupSentReports() {

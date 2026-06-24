@@ -28,4 +28,7 @@ interface NotificationDao {
 
     @Query("DELETE FROM notifications WHERE receivedAt < :cutoff")
     suspend fun deleteOlderThan(cutoff: Long)
+
+    @Query("DELETE FROM notifications")
+    suspend fun deleteAll()
 }

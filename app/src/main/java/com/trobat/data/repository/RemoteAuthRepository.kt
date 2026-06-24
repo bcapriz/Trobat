@@ -1,6 +1,12 @@
 package com.trobat.data.repository
 
+import android.content.Context
+import androidx.core.app.NotificationManagerCompat
+import com.google.firebase.messaging.FirebaseMessaging
+import com.trobat.TrobatApplication
+import com.trobat.data.local.LastLocationPrefs
 import com.trobat.data.local.SessionManager
+import com.trobat.data.local.TrobatDatabase
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.remote.dto.LoginRequestDto
 import com.trobat.data.remote.dto.LogoutRequestDto
@@ -10,7 +16,10 @@ import com.trobat.data.remote.dto.RegistroRequestDto
 
 class RemoteAuthRepository(
     private val api: TrobatApi,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val db: TrobatDatabase,
+    private val lastLocationPrefs: LastLocationPrefs,
+    private val context: Context
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Result<Unit> {
@@ -22,6 +31,7 @@ class RemoteAuthRepository(
                 sessionManager.userId = body.id
                 sessionManager.userName = body.nombre
                 fetchAndSavePerfil()
+                FirebaseMessaging.getInstance().subscribeToTopic(TrobatApplication.ALERTS_TOPIC)
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("Credenciales inválidas"))
@@ -73,7 +83,13 @@ class RemoteAuthRepository(
             api.logout(LogoutRequestDto())
         } catch (_: Exception) {
         }
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(TrobatApplication.ALERTS_TOPIC)
         sessionManager.clear()
+        lastLocationPrefs.clear()
+        db.caseDao().deleteAll()
+        db.notificationDao().deleteAll()
+        db.pendingReportDao().deleteAll()
+        NotificationManagerCompat.from(context).cancelAll()
     }
 
     override fun isLoggedIn(): Boolean = sessionManager.isLoggedIn()

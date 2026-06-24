@@ -50,10 +50,12 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun onCaseClicked(caseId: String) {
-        _uiState.update { state ->
-            state.copy(expandedCaseId = if (state.expandedCaseId == caseId) null else caseId)
-        }
+    fun onCaseClicked(case: com.trobat.data.model.MissingPersonCase) {
+        _uiState.update { state -> state.copy(selectedCase = case) }
+    }
+
+    fun onDismissCaseModal() {
+        _uiState.update { state -> state.copy(selectedCase = null) }
     }
 
     fun onRadiusChanged(km: Float) {
@@ -73,7 +75,7 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
                     totalCases = cases.size,
                     mostActiveArea = concentration?.label ?: "-",
                     mostActiveCount = concentration?.count ?: 0,
-                    expandedCaseId = _uiState.value.expandedCaseId,
+                    selectedCase = _uiState.value.selectedCase,
                     userLat = location?.first,
                     userLng = location?.second,
                     radiusKm = radius

@@ -19,5 +19,7 @@ interface CitizenReportRepository {
 
     suspend fun retrySyncPending()
 
+    suspend fun resetStuckSending()
+
     suspend fun cleanupSentReports()
 }

@@ -39,6 +39,17 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                             restoreState = !goingToStart
                         }
                     }
+                },
+                onCameraClick = {
+                    if (!com.trobat.data.repository.RepositoryProvider.reportDraftPrefs.isEmpty()) {
+                        navController.navigate(MainRoutes.CONFIRM_REPORT)
+                    } else {
+                        navController.navigate(BottomRoutes.CAMERA) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 }
             )
         }
@@ -58,12 +69,17 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                     },
                     onCaptureEvidence = {
                         navController.navigate(BottomRoutes.CAMERA)
+                    },
+                    onResumeDraft = {
+                        navController.navigate(MainRoutes.CONFIRM_REPORT)
                     }
                 )
             }
 
             composable(BottomRoutes.HEATMAP) {
-                HeatMapScreen()
+                HeatMapScreen(
+                    onNavigateToCamera = { navController.navigate(BottomRoutes.CAMERA) }
+                )
             }
 
             composable(BottomRoutes.CAMERA) {

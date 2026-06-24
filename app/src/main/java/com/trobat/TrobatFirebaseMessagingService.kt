@@ -19,6 +19,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
     // handleIntent se llama para TODOS los mensajes FCM sin importar el estado de la app.
     // onMessageReceived solo se llama en foreground para mensajes con notification payload.
     override fun handleIntent(intent: Intent) {
+        if (!RepositoryProvider.authRepository.isLoggedIn()) return
         if (!RepositoryProvider.authRepository.getNotificationsEnabled()) return
         val title = intent.getStringExtra("gcm.notification.title")
             ?: intent.getStringExtra("titulo")
@@ -36,6 +37,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {
+        if (!RepositoryProvider.authRepository.isLoggedIn()) return
         if (!RepositoryProvider.authRepository.getNotificationsEnabled()) return
         val title = message.notification?.title ?: message.data["titulo"] ?: return
         val body = message.notification?.body ?: message.data["descripcion"] ?: ""
@@ -44,6 +46,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
 
     // FCM rota el token periódicamente; re-subscribimos para no perder el topic
     override fun onNewToken(token: String) {
+        if (!RepositoryProvider.authRepository.isLoggedIn()) return
         FirebaseMessaging.getInstance()
             .subscribeToTopic(TrobatApplication.ALERTS_TOPIC)
             .addOnFailureListener { /* el próximo onNewToken lo reintentará */ }

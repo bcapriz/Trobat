@@ -17,18 +17,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,9 +46,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
+import com.trobat.ui.components.CaseDetailSheet
 import com.trobat.ui.viewmodel.CitizenHomeEffect
 import com.trobat.ui.viewmodel.CitizenHomeEvent
 import com.trobat.ui.viewmodel.CitizenHomeUiState
@@ -54,11 +63,23 @@ import kotlin.math.roundToInt
 fun CitizenHomeScreen(
     onOpenMap: () -> Unit = {},
     onCaptureEvidence: () -> Unit = {},
+    onResumeDraft: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: CitizenHomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onEvent(CitizenHomeEvent.ScreenResumed)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     var hasLocationPermission by remember {
         mutableStateOf(
@@ -86,6 +107,7 @@ fun CitizenHomeScreen(
             when (effect) {
                 CitizenHomeEffect.NavigateToMap -> onOpenMap()
                 CitizenHomeEffect.NavigateToCamera -> onCaptureEvidence()
+                CitizenHomeEffect.NavigateToConfirmReport -> onResumeDraft()
             }
         }
     }
@@ -99,16 +121,24 @@ fun CitizenHomeScreen(
             )
         },
         onEvent = viewModel::onEvent,
-        modifier = modifier
+        onCargarReporte = { caseId ->
+            com.trobat.data.model.CapturedEvidenceHolder.preselectedCaseId = caseId
+            onCaptureEvidence()
+        },
+        modifier = modifier,
+        onResumeDraft = onResumeDraft
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CitizenHomeContent(
     uiState: CitizenHomeUiState,
     hasLocationPermission: Boolean,
     onRequestLocationPermission: () -> Unit,
     onEvent: (CitizenHomeEvent) -> Unit,
+    onCargarReporte: (caseId: String) -> Unit,
+    onResumeDraft: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -141,6 +171,10 @@ private fun CitizenHomeContent(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        if (uiState.hasPendingDraft) {
+            PendingDraftCard(onResumeDraft = { onEvent(CitizenHomeEvent.ResumeDraftClicked) })
+        }
 
         CollaborationOptionCard(
             title = "Mapa de reportes",
@@ -183,7 +217,7 @@ private fun CitizenHomeContent(
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
-                    text = "Buscar por nombre, zona o ubicación...",
+                    text = "Buscar por nombre...",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -229,13 +263,24 @@ private fun CitizenHomeContent(
             }
         }
 
-        if (uiState.filteredCases.isEmpty()) {
+        if (uiState.isLoading) {
+            Text(
+                text = "Cargando casos...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else if (uiState.isSearching) {
+            Text(
+                text = "Buscando...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else if (uiState.filteredCases.isEmpty()) {
             Text(
                 text = when {
-                    uiState.isLoading -> "Cargando casos..."
                     uiState.searchQuery.isNotBlank() -> "Sin resultados para \"${uiState.searchQuery}\""
                     uiState.userLat != null -> "No se encontraron casos cercanos en un radio de ${uiState.radiusKm.roundToInt()} km."
-                    else -> "Cargando casos..."
+                    else -> "No hay casos para mostrar."
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -244,13 +289,23 @@ private fun CitizenHomeContent(
             uiState.filteredCases.forEach { case ->
                 ActiveCaseCard(
                     case = case,
-                    isExpanded = uiState.expandedCaseId == case.id,
                     distanceKm = uiState.distanceTo(case),
-                    onClick = { onEvent(CitizenHomeEvent.CaseCardClicked(case.id)) }
+                    onClick = { onEvent(CitizenHomeEvent.CaseCardClicked(case)) }
                 )
             }
         }
+    }
 
+    if (uiState.selectedCase != null) {
+        ModalBottomSheet(
+            onDismissRequest = { onEvent(CitizenHomeEvent.DismissCaseModal) },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            CaseDetailSheet(
+                case = uiState.selectedCase,
+                onCargarReporte = { onCargarReporte(uiState.selectedCase.id) }
+            )
+        }
     }
 }
 @Composable
@@ -298,6 +353,45 @@ private fun CollaborationOptionCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun PendingDraftCard(onResumeDraft: () -> Unit) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onResumeDraft),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Description,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Tenés un reporte pendiente",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Tocá para continuar donde lo dejaste.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

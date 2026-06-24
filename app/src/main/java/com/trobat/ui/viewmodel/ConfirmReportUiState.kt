@@ -6,6 +6,11 @@ import com.trobat.data.model.MissingPersonCase
 data class ConfirmReportUiState(
     val activeCases: List<MissingPersonCase> = emptyList(),
     val selectedCaseId: String? = null,
+    val selectedCase: MissingPersonCase? = null,
+    val selectedCaseName: String? = null,
+    val caseSearchQuery: String = "",
+    val caseSearchResults: List<MissingPersonCase>? = null,
+    val isCaseSearching: Boolean = false,
     val requiredDescription: String = "",
     val optionalDetails: String = "",
     val showCaseError: Boolean = false,
@@ -17,8 +22,11 @@ data class ConfirmReportUiState(
     val locationLabel: String = "Obteniendo dirección...",
     val isIdentified: Boolean = false
 ) {
-    val selectedCase: MissingPersonCase?
-        get() = activeCases.firstOrNull { it.id == selectedCaseId }
+    val selectedCaseLabel: String?
+        get() = selectedCase?.let { "${it.fullName}, ${it.age} años" } ?: selectedCaseName
+
+    val displayedCases: List<MissingPersonCase>
+        get() = caseSearchResults ?: activeCases
 
     val canSendReport: Boolean
         get() = selectedCaseId != null &&

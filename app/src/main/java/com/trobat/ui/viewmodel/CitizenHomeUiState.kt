@@ -7,19 +7,20 @@ data class CitizenHomeUiState(
     val title: String = "¿Cómo querés colaborar?",
     val activeCases: List<MissingPersonCase> = emptyList(),
     val searchQuery: String = "",
-    val expandedCaseId: String? = null,
+    val searchResults: List<MissingPersonCase>? = null,
+    val isSearching: Boolean = false,
+    val selectedCase: MissingPersonCase? = null,
     val userLat: Double? = null,
     val userLng: Double? = null,
     val radiusKm: Float = 50f,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val hasPendingDraft: Boolean = false
 ) {
     val filteredCases: List<MissingPersonCase> get() {
+        if (searchResults != null) return searchResults
         val bySearch = if (searchQuery.isBlank()) activeCases
         else activeCases.filter { case ->
-            case.fullName.contains(searchQuery, ignoreCase = true) ||
-            case.lastSeenLocation.contains(searchQuery, ignoreCase = true) ||
-            case.area.contains(searchQuery, ignoreCase = true) ||
-            case.status.contains(searchQuery, ignoreCase = true)
+            case.fullName.contains(searchQuery, ignoreCase = true)
         }
         val lat = userLat ?: return bySearch
         val lng = userLng ?: return bySearch

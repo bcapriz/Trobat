@@ -20,7 +20,10 @@ class TrobatApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         RepositoryProvider.init(this)
-        applicationScope.launch { RepositoryProvider.citizenReportRepository.retrySyncPending() }
+        applicationScope.launch {
+            RepositoryProvider.citizenReportRepository.resetStuckSending()
+            RepositoryProvider.citizenReportRepository.retrySyncPending()
+        }
         registerConnectivityCallback()
         createAlertsChannel()
         subscribeToAlertsTopic()
@@ -58,6 +61,7 @@ class TrobatApplication : Application() {
     }
 
     private fun subscribeToAlertsTopic() {
+        if (!RepositoryProvider.authRepository.isLoggedIn()) return
         FirebaseMessaging.getInstance()
             .subscribeToTopic(ALERTS_TOPIC)
             .addOnFailureListener { /* se reintentará en el próximo arranque */ }

@@ -50,6 +50,7 @@ import com.trobat.ui.components.FloatingCameraButton
 fun TrobatBottomBar(
     currentRoute: String?,
     onNavigate: (String) -> Unit,
+    onCameraClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val cameraSelected = currentRoute == BottomRoutes.CAMERA
@@ -116,9 +117,7 @@ fun TrobatBottomBar(
 
         FloatingCameraButton(
             selected = cameraSelected,
-            onClick = {
-                onNavigate(BottomRoutes.CAMERA)
-            },
+            onClick = onCameraClick ?: { onNavigate(BottomRoutes.CAMERA) },
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = 14.dp)
