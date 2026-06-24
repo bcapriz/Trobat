@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.trobat.data.repository.RepositoryProvider
-import com.trobat.ui.screen.LoginScreen
-import com.trobat.ui.screen.OnboardingScreen
-import com.trobat.ui.screen.RegisterScreen
-import com.trobat.ui.screen.TrobatMainScreen
+import com.trobat.data.repository.AppContainer
+import com.trobat.ui.login.LoginScreen
+import com.trobat.ui.onboarding.OnboardingScreen
+import com.trobat.ui.register.RegisterScreen
+import com.trobat.ui.main.TrobatMainScreen
 
 object AppRoutes {
     const val SPLASH = "splash"
@@ -43,15 +43,15 @@ fun AppNavigation() {
                         popUpTo(AppRoutes.SPLASH) { inclusive = true }
                     }
                 },
-                isLoggedIn = { RepositoryProvider.authRepository.isLoggedIn() },
-                hasSeenOnboarding = { RepositoryProvider.onboardingPrefs.hasSeenOnboarding }
+                isLoggedIn = { AppContainer.authRepository.isLoggedIn() },
+                hasSeenOnboarding = { AppContainer.onboardingPrefs.hasSeenOnboarding }
             )
         }
 
         composable(AppRoutes.ONBOARDING) {
             OnboardingScreen(
                 onFinish = {
-                    RepositoryProvider.onboardingPrefs.hasSeenOnboarding = true
+                    AppContainer.onboardingPrefs.hasSeenOnboarding = true
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.ONBOARDING) { inclusive = true }
                     }

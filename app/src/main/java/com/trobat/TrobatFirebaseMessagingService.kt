@@ -9,7 +9,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.trobat.data.repository.RepositoryProvider
+import com.trobat.data.repository.AppContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,8 +19,8 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
     // handleIntent se llama para TODOS los mensajes FCM sin importar el estado de la app.
     // onMessageReceived solo se llama en foreground para mensajes con notification payload.
     override fun handleIntent(intent: Intent) {
-        if (!RepositoryProvider.authRepository.isLoggedIn()) return
-        if (!RepositoryProvider.authRepository.getNotificationsEnabled()) return
+        if (!AppContainer.authRepository.isLoggedIn()) return
+        if (!AppContainer.authRepository.getNotificationsEnabled()) return
         val title = intent.getStringExtra("gcm.notification.title")
             ?: intent.getStringExtra("titulo")
         if (title != null) {
@@ -29,7 +29,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
             val id = intent.getStringExtra("google.message_id")?.hashCode()
                 ?: (title + body).hashCode()
             CoroutineScope(Dispatchers.IO).launch {
-                RepositoryProvider.notificationRepository.save(title, body, id)
+                AppContainer.notificationRepository.save(title, body, id)
             }
         }
         super.handleIntent(intent)
@@ -37,8 +37,8 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {
-        if (!RepositoryProvider.authRepository.isLoggedIn()) return
-        if (!RepositoryProvider.authRepository.getNotificationsEnabled()) return
+        if (!AppContainer.authRepository.isLoggedIn()) return
+        if (!AppContainer.authRepository.getNotificationsEnabled()) return
         val title = message.notification?.title ?: message.data["titulo"] ?: return
         val body = message.notification?.body ?: message.data["descripcion"] ?: ""
         showNotification(title, body, notificationId = message.messageId?.hashCode() ?: title.hashCode())
@@ -46,7 +46,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
 
     // FCM rota el token periódicamente; re-subscribimos para no perder el topic
     override fun onNewToken(token: String) {
-        if (!RepositoryProvider.authRepository.isLoggedIn()) return
+        if (!AppContainer.authRepository.isLoggedIn()) return
         FirebaseMessaging.getInstance()
             .subscribeToTopic(TrobatApplication.ALERTS_TOPIC)
             .addOnFailureListener { /* el próximo onNewToken lo reintentará */ }

@@ -11,7 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.trobat.data.repository.RepositoryProvider
+import com.trobat.data.repository.AppContainer
 import com.trobat.ui.navigation.AppNavigation
 import com.trobat.ui.theme.ThemeManager
 import com.trobat.ui.theme.TrobatTheme
@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
         val id = intent.getStringExtra("google.message_id")?.hashCode()
             ?: (title + body).hashCode()
         lifecycleScope.launch(Dispatchers.IO) {
-            RepositoryProvider.notificationRepository.save(title, body, id)
+            AppContainer.notificationRepository.save(title, body, id)
         }
     }
 }

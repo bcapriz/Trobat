@@ -8,7 +8,8 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import com.google.firebase.messaging.FirebaseMessaging
-import com.trobat.data.repository.RepositoryProvider
+import com.trobat.data.repository.AppContainer
+import com.trobat.ui.theme.ThemeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,10 +20,11 @@ class TrobatApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        RepositoryProvider.init(this)
+        AppContainer.init(this)
+        ThemeManager.init(AppContainer.darkModeEnabled)
         applicationScope.launch {
-            RepositoryProvider.citizenReportRepository.resetStuckSending()
-            RepositoryProvider.citizenReportRepository.retrySyncPending()
+            AppContainer.citizenReportRepository.resetStuckSending()
+            AppContainer.citizenReportRepository.retrySyncPending()
         }
         registerConnectivityCallback()
         createAlertsChannel()
@@ -37,12 +39,12 @@ class TrobatApplication : Application() {
         cm.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 applicationScope.launch {
-                    RepositoryProvider.citizenReportRepository.retrySyncPending()
-                    val location = RepositoryProvider.lastLocationPrefs.load()
+                    AppContainer.citizenReportRepository.retrySyncPending()
+                    val location = AppContainer.lastLocationPrefs.load()
                     if (location != null) {
-                        RepositoryProvider.caseRepository.refreshCercanosConFallback(location.first, location.second)
+                        AppContainer.caseRepository.refreshCercanosConFallback(location.first, location.second)
                     } else {
-                        RepositoryProvider.caseRepository.refresh()
+                        AppContainer.caseRepository.refresh()
                     }
                 }
             }
@@ -61,7 +63,7 @@ class TrobatApplication : Application() {
     }
 
     private fun subscribeToAlertsTopic() {
-        if (!RepositoryProvider.authRepository.isLoggedIn()) return
+        if (!AppContainer.authRepository.isLoggedIn()) return
         FirebaseMessaging.getInstance()
             .subscribeToTopic(ALERTS_TOPIC)
             .addOnFailureListener { /* se reintentará en el próximo arranque */ }

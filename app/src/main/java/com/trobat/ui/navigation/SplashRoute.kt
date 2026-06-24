@@ -11,9 +11,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trobat.ui.screen.LoadingScreen
-import com.trobat.ui.screen.SplashScreen
-import com.trobat.ui.viewmodel.SplashViewModel
+import com.trobat.ui.splash.LoadingScreen
+import com.trobat.ui.splash.SplashScreen
+import com.trobat.ui.splash.SplashViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)

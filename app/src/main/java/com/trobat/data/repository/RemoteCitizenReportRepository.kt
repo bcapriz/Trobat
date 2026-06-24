@@ -4,7 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import com.trobat.data.local.PendingReportDao
 import com.trobat.data.local.PendingReportEntity
-import com.trobat.data.model.CapturedEvidenceHolder
+import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.ReportStatus
 import com.trobat.data.remote.TrobatApi
