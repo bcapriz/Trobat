@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.CapturedEvidenceHolder
+import com.trobat.data.model.MissingPersonCase
 import com.trobat.data.model.ReportStatus
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -39,18 +41,60 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
     private val _effect = MutableSharedFlow<ConfirmReportEffect>()
     val effect: SharedFlow<ConfirmReportEffect> = _effect.asSharedFlow()
 
+    private val _caseSearchQuery = MutableStateFlow("")
+
     init {
         observeCases()
+        observeCaseSearch()
         loadCapturedEvidence()
     }
 
     private fun observeCases() {
         viewModelScope.launch {
             caseRepository.cases.collect { cases ->
-                _uiState.value = _uiState.value.copy(activeCases = cases)
+                val current = _uiState.value
+                val matched = if (current.selectedCase == null && current.selectedCaseId != null)
+                    cases.firstOrNull { it.id == current.selectedCaseId }
+                else null
+                _uiState.value = current.copy(
+                    activeCases = cases,
+                    selectedCase = matched ?: current.selectedCase
+                )
             }
         }
     }
+
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    private fun observeCaseSearch() {
+        viewModelScope.launch {
+            _caseSearchQuery
+                .debounce(300)
+                .collect { query ->
+                    if (query.length >= 2) {
+                        _uiState.value = _uiState.value.copy(isCaseSearching = true)
+                        try {
+                            _uiState.value = _uiState.value.copy(
+                                caseSearchResults = caseRepository.searchByName(query),
+                                isCaseSearching = false
+                            )
+                        } catch (_: Exception) {
+                            _uiState.value = _uiState.value.copy(
+                                caseSearchResults = emptyList(),
+                                isCaseSearching = false
+                            )
+                        }
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            caseSearchResults = null,
+                            isCaseSearching = false
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun resolveCase(caseId: String?): MissingPersonCase? =
+        caseId?.let { id -> caseRepository.cases.value.firstOrNull { it.id == id } }
 
     private fun loadCapturedEvidence() {
         val holder = CapturedEvidenceHolder
@@ -61,19 +105,24 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             // Nueva sesión de captura — usar evidencia nueva, restaurar texto del borrador
             val lat = holder.latitude
             val lng = holder.longitude
+            val resolvedCaseId = preselectedCaseId ?: draft.selectedCaseId
+            val resolvedCase = resolveCase(resolvedCaseId)
             draftPrefs.save(draft.copy(
                 photoUriString = holder.photoUri.toString(),
                 latitude = lat,
                 longitude = lng,
                 locationLabel = "",
-                selectedCaseId = preselectedCaseId ?: draft.selectedCaseId
+                selectedCaseId = resolvedCaseId,
+                selectedCaseName = resolvedCase?.let { "${it.fullName}, ${it.age} años" } ?: draft.selectedCaseName
             ))
             _uiState.value = _uiState.value.copy(
                 photoUri = holder.photoUri,
                 latitude = lat,
                 longitude = lng,
                 locationLabel = if (lat != null && lng != null) "Obteniendo dirección..." else "Ubicación no disponible",
-                selectedCaseId = preselectedCaseId ?: draft.selectedCaseId,
+                selectedCaseId = resolvedCaseId,
+                selectedCase = resolvedCase,
+                selectedCaseName = resolvedCase?.let { "${it.fullName}, ${it.age} años" } ?: draft.selectedCaseName,
                 requiredDescription = draft.description,
                 optionalDetails = draft.details,
                 isIdentified = draft.isIdentified
@@ -88,6 +137,8 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
         } else if (!draftPrefs.isEmpty()) {
             // Sin nueva captura — restaurar borrador completo del disco
             val restoredUri = draft.photoUri
+            val resolvedCaseId = preselectedCaseId ?: draft.selectedCaseId
+            val resolvedCase = resolveCase(resolvedCaseId)
             _uiState.value = _uiState.value.copy(
                 photoUri = restoredUri,
                 latitude = draft.latitude,
@@ -96,7 +147,9 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                     if (draft.latitude != null && draft.longitude != null) "Obteniendo dirección..."
                     else "Ubicación no disponible"
                 },
-                selectedCaseId = preselectedCaseId ?: draft.selectedCaseId,
+                selectedCaseId = resolvedCaseId,
+                selectedCase = resolvedCase,
+                selectedCaseName = resolvedCase?.let { "${it.fullName}, ${it.age} años" } ?: draft.selectedCaseName,
                 requiredDescription = draft.description,
                 optionalDetails = draft.details,
                 isIdentified = draft.isIdentified
@@ -119,6 +172,7 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             longitude = s.longitude,
             locationLabel = s.locationLabel,
             selectedCaseId = s.selectedCaseId,
+            selectedCaseName = s.selectedCaseName,
             description = s.requiredDescription,
             details = s.optionalDetails,
             isIdentified = s.isIdentified
@@ -152,6 +206,13 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
     fun onEvent(event: ConfirmReportEvent) {
         when (event) {
             is ConfirmReportEvent.CaseSelected -> onCaseSelected(event.caseId)
+            is ConfirmReportEvent.CaseSearchQueryChanged -> {
+                _caseSearchQuery.value = event.query
+                _uiState.value = _uiState.value.copy(caseSearchQuery = event.query)
+                if (event.query.isBlank()) {
+                    _uiState.value = _uiState.value.copy(caseSearchResults = null, isCaseSearching = false)
+                }
+            }
             is ConfirmReportEvent.RequiredDescriptionChanged -> onRequiredDescriptionChanged(event.value)
             is ConfirmReportEvent.OptionalDetailsChanged -> onOptionalDetailsChanged(event.value)
             ConfirmReportEvent.SendReportClicked -> sendReport()
@@ -165,7 +226,13 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun onCaseSelected(caseId: String) {
-        _uiState.value = _uiState.value.copy(selectedCaseId = caseId, showCaseError = false)
+        val case = _uiState.value.displayedCases.firstOrNull { it.id == caseId }
+        _uiState.value = _uiState.value.copy(
+            selectedCaseId = caseId,
+            selectedCase = case,
+            selectedCaseName = case?.let { "${it.fullName}, ${it.age} años" },
+            showCaseError = false
+        )
         saveDraft()
     }
 

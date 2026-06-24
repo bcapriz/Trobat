@@ -72,6 +72,13 @@ class RemoteCaseRepository(
         return (0..4).map { (initialKm + it * step).coerceAtMost(100.0) }
     }
 
+    override suspend fun cacheCase(case: MissingPersonCase) {
+        db.caseDao().insertAll(listOf(case.toEntity()))
+        if (_cases.value.none { it.id == case.id }) {
+            _cases.value = _cases.value + case
+        }
+    }
+
     private suspend fun saveToCache(cases: List<MissingPersonCase>) {
         db.caseDao().deleteAll()
         db.caseDao().insertAll(cases.map { it.toEntity() })

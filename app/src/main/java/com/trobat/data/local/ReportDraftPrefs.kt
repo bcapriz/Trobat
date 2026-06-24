@@ -14,6 +14,7 @@ class ReportDraftPrefs(context: Context) {
         val longitude: Double? = null,
         val locationLabel: String = "",
         val selectedCaseId: String? = null,
+        val selectedCaseName: String? = null,
         val description: String = "",
         val details: String = "",
         val isIdentified: Boolean = false
@@ -37,6 +38,7 @@ class ReportDraftPrefs(context: Context) {
             if (draft.longitude != null) putLong("lng", java.lang.Double.doubleToRawLongBits(draft.longitude)) else remove("lng")
             putString("location_label", draft.locationLabel)
             if (draft.selectedCaseId != null) putString("case_id", draft.selectedCaseId) else remove("case_id")
+            if (draft.selectedCaseName != null) putString("case_name", draft.selectedCaseName) else remove("case_name")
             putString("description", draft.description)
             putString("details", draft.details)
             putBoolean("is_identified", draft.isIdentified)
@@ -49,6 +51,7 @@ class ReportDraftPrefs(context: Context) {
         longitude = if (prefs.contains("lng")) java.lang.Double.longBitsToDouble(prefs.getLong("lng", 0L)) else null,
         locationLabel = prefs.getString("location_label", "") ?: "",
         selectedCaseId = prefs.getString("case_id", null),
+        selectedCaseName = prefs.getString("case_name", null),
         description = prefs.getString("description", "") ?: "",
         details = prefs.getString("details", "") ?: "",
         isIdentified = prefs.getBoolean("is_identified", false)

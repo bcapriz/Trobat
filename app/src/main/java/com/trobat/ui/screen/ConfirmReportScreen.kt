@@ -163,12 +163,14 @@ private fun ConfirmReportContent(
             }
         }
         ActiveCaseDropdown(
-            activeCases = uiState.activeCases,
-            selectedCase = uiState.selectedCase,
+            displayedCases = uiState.displayedCases,
+            selectedCaseLabel = uiState.selectedCaseLabel,
+            searchQuery = uiState.caseSearchQuery,
+            isSearching = uiState.isCaseSearching,
             showError = uiState.showCaseError,
-            onCaseSelected = { caseId ->
-                onEvent(ConfirmReportEvent.CaseSelected(caseId))
-            }
+            onSearchQueryChanged = { onEvent(ConfirmReportEvent.CaseSearchQueryChanged(it)) },
+            onCaseSelected = { caseId -> onEvent(ConfirmReportEvent.CaseSelected(caseId)) },
+            onDismiss = { onEvent(ConfirmReportEvent.CaseSearchQueryChanged("")) }
         )
         OutlinedTextField(
             value = uiState.requiredDescription,
@@ -332,47 +334,40 @@ private fun ConfirmReportContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ActiveCaseDropdown(
-    activeCases: List<MissingPersonCase>,
-    selectedCase: MissingPersonCase?,
+    displayedCases: List<MissingPersonCase>,
+    selectedCaseLabel: String?,
+    searchQuery: String,
+    isSearching: Boolean,
     showError: Boolean,
-    onCaseSelected: (String) -> Unit
+    onSearchQueryChanged: (String) -> Unit,
+    onCaseSelected: (String) -> Unit,
+    onDismiss: () -> Unit
 ) {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
+    var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = {
-            expanded = !expanded
+        onExpandedChange = { open ->
+            expanded = open
+            if (!open) onDismiss()
         }
     ) {
         OutlinedTextField(
-            value = selectedCase?.let { "${it.fullName}, ${it.age} años" } ?: "",
-            onValueChange = {},
-            readOnly = true,
-            label = {
-                Text(text = "¿A qué caso corresponde este reporte? *")
-            },
+            value = if (expanded) searchQuery else selectedCaseLabel ?: "",
+            onValueChange = { if (expanded) onSearchQueryChanged(it) },
+            label = { Text(text = "¿A qué caso corresponde este reporte? *") },
             placeholder = {
-                Text(text = "Seleccioná un caso activo")
+                Text(text = if (expanded) "Buscá por nombre..." else "Seleccioná un caso activo")
             },
             supportingText = {
-                if (showError) {
-                    Text(text = "Debés seleccionar un caso activo")
-                } else {
-                    Text(text = "Campo obligatorio")
-                }
+                if (showError) Text(text = "Debés seleccionar un caso activo")
+                else Text(text = "Campo obligatorio")
             },
             isError = showError,
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
-                )
-            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
             modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                 .fillMaxWidth()
         )
 
@@ -380,30 +375,59 @@ private fun ActiveCaseDropdown(
             expanded = expanded,
             onDismissRequest = {
                 expanded = false
+                onDismiss()
             }
         ) {
-            activeCases.forEach { activeCase ->
-                DropdownMenuItem(
-                    text = {
-                        Column {
+            when {
+                isSearching -> {
+                    DropdownMenuItem(
+                        text = {
                             Text(
-                                text = "${activeCase.fullName}, ${activeCase.age} años",
+                                text = "Buscando...",
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-
-                            Text(
-                                text = "${activeCase.lastSeenLocation} • ${activeCase.area}",
-                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        }
-                    },
-                    onClick = {
-                        onCaseSelected(activeCase.id)
-                        expanded = false
+                        },
+                        onClick = {}
+                    )
+                }
+                displayedCases.isEmpty() -> {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Sin resultados para \"$searchQuery\"",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        onClick = {}
+                    )
+                }
+                else -> {
+                    displayedCases.forEach { activeCase ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(
+                                        text = "${activeCase.fullName}, ${activeCase.age} años",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "${activeCase.lastSeenLocation} • ${activeCase.area}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
+                            onClick = {
+                                onCaseSelected(activeCase.id)
+                                onDismiss()
+                                expanded = false
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }

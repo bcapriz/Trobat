@@ -82,7 +82,13 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                     _isSearching.value = false
                 }
             }
-            is CitizenHomeEvent.CaseCardClicked -> _selectedCase.value = event.case
+            is CitizenHomeEvent.CaseCardClicked -> {
+                _selectedCase.value = event.case
+                val isFromSearch = _searchResults.value?.any { it.id == event.case.id } == true
+                if (isFromSearch) {
+                    viewModelScope.launch { caseRepository.cacheCase(event.case) }
+                }
+            }
             is CitizenHomeEvent.RadiusChanged -> _radiusKm.value = event.km
             CitizenHomeEvent.ResumeDraftClicked -> navigateToConfirmReport()
             CitizenHomeEvent.ScreenResumed -> checkPendingDraft()
