@@ -6,11 +6,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.trobat.data.repository.RepositoryProvider
 import com.trobat.ui.screen.LoginScreen
+import com.trobat.ui.screen.OnboardingScreen
 import com.trobat.ui.screen.RegisterScreen
 import com.trobat.ui.screen.TrobatMainScreen
 
 object AppRoutes {
     const val SPLASH = "splash"
+    const val ONBOARDING = "onboarding"
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val MAIN = "main"
@@ -36,7 +38,24 @@ fun AppNavigation() {
                         popUpTo(AppRoutes.SPLASH) { inclusive = true }
                     }
                 },
-                isLoggedIn = { RepositoryProvider.authRepository.isLoggedIn() }
+                onNavigateToOnboarding = {
+                    navController.navigate(AppRoutes.ONBOARDING) {
+                        popUpTo(AppRoutes.SPLASH) { inclusive = true }
+                    }
+                },
+                isLoggedIn = { RepositoryProvider.authRepository.isLoggedIn() },
+                hasSeenOnboarding = { RepositoryProvider.onboardingPrefs.hasSeenOnboarding }
+            )
+        }
+
+        composable(AppRoutes.ONBOARDING) {
+            OnboardingScreen(
+                onFinish = {
+                    RepositoryProvider.onboardingPrefs.hasSeenOnboarding = true
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(AppRoutes.ONBOARDING) { inclusive = true }
+                    }
+                }
             )
         }
 

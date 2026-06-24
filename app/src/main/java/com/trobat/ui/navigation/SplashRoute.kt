@@ -21,7 +21,9 @@ import kotlinx.coroutines.delay
 fun SplashRoute(
     onNavigateToMain: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
     isLoggedIn: () -> Boolean,
+    hasSeenOnboarding: () -> Boolean,
     viewModel: SplashViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -30,7 +32,11 @@ fun SplashRoute(
         delay(1800)
         viewModel.showLoadingScreen()
         delay(1800)
-        if (isLoggedIn()) onNavigateToMain() else onNavigateToLogin()
+        when {
+            isLoggedIn() -> onNavigateToMain()
+            !hasSeenOnboarding() -> onNavigateToOnboarding()
+            else -> onNavigateToLogin()
+        }
     }
 
     AnimatedContent(
