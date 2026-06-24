@@ -58,12 +58,12 @@ fun ActiveCaseCard(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.PersonSearch,
-                    contentDescription = stringResource(R.string.component_persona_buscada),
+                    contentDescription = stringResource(R.string.component_missing_person),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = stringResource(R.string.case_nombre_edad, case.fullName, case.age),
+                    text = stringResource(R.string.format_case_name_age, case.fullName, case.age),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -89,7 +89,7 @@ fun ActiveCaseCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.visto_ultima_vez, case.lastSeenLocation),
+                        text = stringResource(R.string.format_last_seen, case.lastSeenLocation),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )

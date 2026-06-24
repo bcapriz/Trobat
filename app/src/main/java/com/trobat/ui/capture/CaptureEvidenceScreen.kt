@@ -156,14 +156,14 @@ private fun CaptureEvidenceContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = stringResource(R.string.capture_titulo),
+            text = stringResource(R.string.capture_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            text = stringResource(R.string.capture_subtitulo),
+            text = stringResource(R.string.capture_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -186,9 +186,9 @@ private fun CaptureEvidenceContent(
             )
         }
 
-        val semanticsTomar = stringResource(R.string.capture_semantics_tomar)
-        val semanticsUsar = stringResource(R.string.capture_semantics_usar)
-        val semanticsRehacer = stringResource(R.string.capture_semantics_rehacer)
+        val semanticsTomar = stringResource(R.string.capture_semantics_take)
+        val semanticsUsar = stringResource(R.string.capture_semantics_use)
+        val semanticsRehacer = stringResource(R.string.capture_semantics_retake)
 
         if (!uiState.hasPhoto) {
             Button(
@@ -201,7 +201,7 @@ private fun CaptureEvidenceContent(
             ) {
                 Icon(imageVector = Icons.Outlined.PhotoCamera, contentDescription = null)
                 Text(
-                    text = stringResource(if (uiState.isCapturing) R.string.capture_tomando_foto else R.string.capture_tomar_foto),
+                    text = stringResource(if (uiState.isCapturing) R.string.capture_taking_photo else R.string.capture_take_photo),
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -215,7 +215,7 @@ private fun CaptureEvidenceContent(
             ) {
                 Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = null)
                 Text(
-                    text = stringResource(R.string.capture_usar_evidencia),
+                    text = stringResource(R.string.capture_use_evidence),
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -229,7 +229,7 @@ private fun CaptureEvidenceContent(
             ) {
                 Icon(imageVector = Icons.Outlined.Refresh, contentDescription = null)
                 Text(
-                    text = stringResource(R.string.capture_rehacer_foto),
+                    text = stringResource(R.string.capture_retake_photo),
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -241,7 +241,7 @@ private fun CaptureEvidenceContent(
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
-            Text(text = stringResource(R.string.accion_cancelar))
+            Text(text = stringResource(R.string.action_cancel))
         }
     }
 }
@@ -295,7 +295,7 @@ private fun CameraCard(
                 uiState.capturedPhotoUri != null -> {
                     AsyncImage(
                         model = uiState.capturedPhotoUri,
-                        contentDescription = stringResource(R.string.capture_foto_capturada),
+                        contentDescription = stringResource(R.string.capture_photo_captured),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -308,7 +308,7 @@ private fun CameraCard(
                     ) {
                         CircularProgressIndicator()
                         Text(
-                            text = stringResource(R.string.capture_capturando),
+                            text = stringResource(R.string.capture_capturing),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -329,17 +329,17 @@ private fun CameraCard(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.PhotoCamera,
-                            contentDescription = stringResource(R.string.capture_camara_preview),
+                            contentDescription = stringResource(R.string.capture_camera_preview),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = stringResource(R.string.capture_camara_preview),
+                            text = stringResource(R.string.capture_camera_preview),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = stringResource(R.string.capture_camara_habilitar),
+                            text = stringResource(R.string.capture_camera_enable),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -356,8 +356,8 @@ private fun PermissionInfoCard(
     hasLocationPermission: Boolean,
     onRequestPermissions: () -> Unit
 ) {
-    val habilitada = stringResource(R.string.capture_permiso_habilitado)
-    val pendiente = stringResource(R.string.capture_permiso_pendiente)
+    val habilitada = stringResource(R.string.capture_permission_enabled)
+    val pendiente = stringResource(R.string.capture_permission_pending)
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -371,23 +371,23 @@ private fun PermissionInfoCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = stringResource(R.string.capture_permisos_titulo),
+                text = stringResource(R.string.capture_permissions_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = stringResource(R.string.capture_permisos_desc),
+                text = stringResource(R.string.capture_permissions_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = stringResource(R.string.capture_camara_estado, if (hasCameraPermission) habilitada else pendiente),
+                text = stringResource(R.string.capture_camera_status, if (hasCameraPermission) habilitada else pendiente),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (hasCameraPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
             Text(
-                text = stringResource(R.string.capture_ubicacion_estado, if (hasLocationPermission) habilitada else pendiente),
+                text = stringResource(R.string.capture_location_status, if (hasLocationPermission) habilitada else pendiente),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (hasLocationPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
@@ -397,7 +397,7 @@ private fun PermissionInfoCard(
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text(text = stringResource(R.string.accion_habilitar_permisos))
+                Text(text = stringResource(R.string.action_enable_permissions))
             }
         }
     }

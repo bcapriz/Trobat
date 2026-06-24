@@ -64,7 +64,7 @@ fun ConfirmReportScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val sinConexionMsg = stringResource(R.string.confirm_sin_conexion)
+    val sinConexionMsg = stringResource(R.string.confirm_no_connection)
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -103,14 +103,14 @@ private fun ConfirmReportContent(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text(
-            text = stringResource(R.string.confirm_titulo),
+            text = stringResource(R.string.confirm_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            text = stringResource(R.string.confirm_subtitulo),
+            text = stringResource(R.string.confirm_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -133,7 +133,7 @@ private fun ConfirmReportContent(
                 if (uiState.photoUri != null) {
                     AsyncImage(
                         model = uiState.photoUri,
-                        contentDescription = stringResource(R.string.confirm_foto_capturada),
+                        contentDescription = stringResource(R.string.confirm_photo_captured),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -144,11 +144,11 @@ private fun ConfirmReportContent(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.PhotoCamera,
-                            contentDescription = stringResource(R.string.confirm_foto_capturada),
+                            contentDescription = stringResource(R.string.confirm_photo_captured),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = stringResource(R.string.confirm_foto_capturada),
+                            text = stringResource(R.string.confirm_photo_captured),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
@@ -168,7 +168,7 @@ private fun ConfirmReportContent(
             onDismiss = { onEvent(ConfirmReportEvent.CaseSearchQueryChanged("")) }
         )
 
-        val semanticsFotoDesc = stringResource(R.string.confirm_semantics_foto)
+        val semanticsFotoDesc = stringResource(R.string.confirm_semantics_photo)
         OutlinedTextField(
             value = uiState.requiredDescription,
             onValueChange = { newValue ->
@@ -177,13 +177,13 @@ private fun ConfirmReportContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics { contentDescription = semanticsFotoDesc },
-            label = { Text(text = stringResource(R.string.confirm_que_viste_label)) },
-            placeholder = { Text(text = stringResource(R.string.confirm_que_viste_placeholder)) },
+            label = { Text(text = stringResource(R.string.confirm_what_saw_label)) },
+            placeholder = { Text(text = stringResource(R.string.confirm_what_saw_placeholder)) },
             supportingText = {
                 if (uiState.showRequiredDescriptionError) {
-                    Text(text = stringResource(R.string.confirm_campo_obligatorio_error))
+                    Text(text = stringResource(R.string.confirm_required_field_error))
                 } else {
-                    Text(text = stringResource(R.string.confirm_campo_obligatorio))
+                    Text(text = stringResource(R.string.confirm_required_field))
                 }
             },
             isError = uiState.showRequiredDescriptionError,
@@ -192,7 +192,7 @@ private fun ConfirmReportContent(
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
         )
 
-        val semanticsAdicionalesDesc = stringResource(R.string.confirm_semantics_adicionales)
+        val semanticsAdicionalesDesc = stringResource(R.string.confirm_semantics_additional)
         OutlinedTextField(
             value = uiState.optionalDetails,
             onValueChange = { newValue ->
@@ -201,9 +201,9 @@ private fun ConfirmReportContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics { contentDescription = semanticsAdicionalesDesc },
-            label = { Text(text = stringResource(R.string.confirm_adicionales_label)) },
-            placeholder = { Text(text = stringResource(R.string.confirm_adicionales_placeholder)) },
-            supportingText = { Text(text = stringResource(R.string.confirm_campo_opcional)) },
+            label = { Text(text = stringResource(R.string.confirm_additional_label)) },
+            placeholder = { Text(text = stringResource(R.string.confirm_additional_placeholder)) },
+            supportingText = { Text(text = stringResource(R.string.confirm_optional_field)) },
             minLines = 2,
             maxLines = 3,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
@@ -222,11 +222,11 @@ private fun ConfirmReportContent(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.LocationOn,
-                    contentDescription = stringResource(R.string.confirm_ubicacion_icon_desc),
+                    contentDescription = stringResource(R.string.confirm_location_icon_description),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = stringResource(R.string.confirm_ubicacion_titulo),
+                    text = stringResource(R.string.confirm_location_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
@@ -246,13 +246,13 @@ private fun ConfirmReportContent(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.confirm_identificarme),
+                    text = stringResource(R.string.confirm_identify_me),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = stringResource(
-                        if (uiState.isIdentified) R.string.confirm_con_datos else R.string.confirm_anonimo
+                        if (uiState.isIdentified) R.string.confirm_with_contact_data else R.string.confirm_anonymous
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -273,7 +273,7 @@ private fun ConfirmReportContent(
         ) {
             Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = null)
             Text(
-                text = stringResource(if (uiState.isSending) R.string.confirm_enviando else R.string.confirm_enviar),
+                text = stringResource(if (uiState.isSending) R.string.confirm_sending else R.string.confirm_send),
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
@@ -284,7 +284,7 @@ private fun ConfirmReportContent(
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Text(text = stringResource(R.string.confirm_rehacer))
+            Text(text = stringResource(R.string.confirm_retake))
         }
 
         OutlinedButton(
@@ -293,7 +293,7 @@ private fun ConfirmReportContent(
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
-            Text(text = stringResource(R.string.accion_cancelar))
+            Text(text = stringResource(R.string.action_cancel))
         }
     }
 }
@@ -325,13 +325,13 @@ private fun ActiveCaseDropdown(
             label = { Text(text = stringResource(R.string.confirm_dropdown_label)) },
             placeholder = {
                 Text(
-                    text = if (expanded) stringResource(R.string.confirm_dropdown_buscar_placeholder)
+                    text = if (expanded) stringResource(R.string.confirm_dropdown_search_placeholder)
                     else stringResource(R.string.confirm_dropdown_placeholder)
                 )
             },
             supportingText = {
                 if (showError) Text(text = stringResource(R.string.confirm_dropdown_error))
-                else Text(text = stringResource(R.string.confirm_campo_obligatorio))
+                else Text(text = stringResource(R.string.confirm_required_field))
             },
             isError = showError,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -353,7 +353,7 @@ private fun ActiveCaseDropdown(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = stringResource(R.string.confirm_dropdown_buscando),
+                                text = stringResource(R.string.confirm_dropdown_searching),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -365,7 +365,7 @@ private fun ActiveCaseDropdown(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = stringResource(R.string.confirm_dropdown_sin_resultados, searchQuery),
+                                text = stringResource(R.string.confirm_dropdown_no_results, searchQuery),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -379,7 +379,7 @@ private fun ActiveCaseDropdown(
                             text = {
                                 Column {
                                     Text(
-                                        text = stringResource(R.string.case_nombre_edad, activeCase.fullName, activeCase.age),
+                                        text = stringResource(R.string.format_case_name_age, activeCase.fullName, activeCase.age),
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold
                                     )

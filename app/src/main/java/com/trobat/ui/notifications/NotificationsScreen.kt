@@ -62,7 +62,7 @@ fun NotificationsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = stringResource(R.string.notif_titulo),
+                text = stringResource(R.string.notif_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
@@ -74,7 +74,7 @@ fun NotificationsScreen(
 
         if (uiState.alerts.isEmpty()) {
             Text(
-                text = stringResource(R.string.notif_sin_alertas),
+                text = stringResource(R.string.notif_no_alerts),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -86,7 +86,7 @@ fun NotificationsScreen(
 
         if (uiState.pendingReports.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.notif_mis_reportes),
+                text = stringResource(R.string.notif_my_reports),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
@@ -182,14 +182,14 @@ private fun PendingReportCard(item: PendingReportItem) {
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = stringResource(if (isSent) R.string.notif_enviado else R.string.notif_pendiente_envio),
+                    text = stringResource(if (isSent) R.string.notif_sent else R.string.notif_pending_send),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (isSent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
                 )
             }
             Text(
-                text = item.caseName ?: stringResource(R.string.notif_reporte_ciudadano),
+                text = item.caseName ?: stringResource(R.string.notif_citizen_report),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
@@ -218,7 +218,7 @@ private fun PendingReportCard(item: PendingReportItem) {
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        text = stringResource(R.string.notif_auto_envio),
+                        text = stringResource(R.string.notif_auto_send),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

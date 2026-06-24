@@ -101,7 +101,7 @@ fun ProfileScreen(
             },
             confirmButton = {
                 TextButton(onClick = { activeDialog = null }) {
-                    Text(stringResource(R.string.accion_entendido))
+                    Text(stringResource(R.string.action_ok))
                 }
             }
         )
@@ -117,7 +117,7 @@ fun ProfileScreen(
     ) {
         ProfileHeader(name = uiState.name, email = uiState.email)
 
-        SectionLabel(stringResource(R.string.profile_section_mi_cuenta))
+        SectionLabel(stringResource(R.string.profile_section_my_account))
         AccountInfoCard(
             name = uiState.name,
             email = uiState.email,
@@ -125,7 +125,7 @@ fun ProfileScreen(
             phone = uiState.phone
         )
 
-        SectionLabel(stringResource(R.string.profile_section_configuracion))
+        SectionLabel(stringResource(R.string.profile_section_settings))
         SettingsCard {
             SettingsToggleRow(
                 icon = Icons.Outlined.DarkMode,
@@ -141,33 +141,33 @@ fun ProfileScreen(
             )
         }
 
-        SectionLabel(stringResource(R.string.profile_section_notificaciones))
+        SectionLabel(stringResource(R.string.profile_section_notifications))
         SettingsCard {
             SettingsToggleRow(
                 icon = Icons.Outlined.Notifications,
-                label = stringResource(R.string.profile_alertas),
+                label = stringResource(R.string.profile_alerts),
                 checked = uiState.notificationsEnabled,
                 onToggle = { viewModel.onEvent(ProfileEvent.NotificationsToggled(it)) }
             )
         }
 
-        SectionLabel(stringResource(R.string.profile_section_informacion))
+        SectionLabel(stringResource(R.string.profile_section_information))
         SettingsCard {
             SettingsNavRow(
                 icon = Icons.Outlined.Gavel,
-                label = stringResource(R.string.profile_terminos),
+                label = stringResource(R.string.profile_terms),
                 onClick = { activeDialog = ProfileDialog.TERMS }
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             SettingsNavRow(
                 icon = Icons.Outlined.Security,
-                label = stringResource(R.string.profile_privacidad),
+                label = stringResource(R.string.profile_privacy),
                 onClick = { activeDialog = ProfileDialog.PRIVACY }
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             SettingsNavRow(
                 icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                label = stringResource(R.string.profile_ayuda),
+                label = stringResource(R.string.profile_help),
                 onClick = { activeDialog = ProfileDialog.HELP }
             )
         }
@@ -188,7 +188,7 @@ fun ProfileScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = stringResource(R.string.profile_cerrar_sesion),
+                text = stringResource(R.string.profile_logout),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -224,7 +224,7 @@ private fun ProfileHeader(name: String, email: String) {
             )
         }
         Text(
-            text = name.ifEmpty { stringResource(R.string.profile_nombre_fallback) },
+            text = name.ifEmpty { stringResource(R.string.profile_name_fallback) },
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -265,13 +265,13 @@ private fun AccountInfoCard(
         )
     ) {
         Column(modifier = Modifier.padding(4.dp)) {
-            AccountField(icon = Icons.Outlined.Person, label = stringResource(R.string.profile_field_nombre), value = name)
+            AccountField(icon = Icons.Outlined.Person, label = stringResource(R.string.profile_field_name), value = name)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             AccountField(icon = Icons.Outlined.Email, label = stringResource(R.string.profile_field_email), value = email)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            AccountField(icon = Icons.Outlined.AssignmentInd, label = stringResource(R.string.profile_field_dni), value = nationalId)
+            AccountField(icon = Icons.Outlined.AssignmentInd, label = stringResource(R.string.profile_field_national_id), value = nationalId)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            AccountField(icon = Icons.Outlined.Phone, label = stringResource(R.string.profile_field_telefono), value = phone)
+            AccountField(icon = Icons.Outlined.Phone, label = stringResource(R.string.profile_field_phone), value = phone)
         }
     }
 }

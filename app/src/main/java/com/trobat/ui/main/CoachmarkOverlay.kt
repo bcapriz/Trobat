@@ -173,13 +173,13 @@ fun CoachmarkOverlay(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(onClick = onDismiss) {
-                            Text(stringResource(R.string.accion_saltar), color = TrobatTextSecondary)
+                            Text(stringResource(R.string.action_skip), color = TrobatTextSecondary)
                         }
                         Button(
                             onClick = { if (step.isLast) onDismiss() else controller.advance() },
                             colors = ButtonDefaults.buttonColors(containerColor = TrobatPurple)
                         ) {
-                            Text(stringResource(if (step.isLast) R.string.accion_entendido else R.string.accion_siguiente))
+                            Text(stringResource(if (step.isLast) R.string.action_ok else R.string.action_next))
                         }
                     }
                 }

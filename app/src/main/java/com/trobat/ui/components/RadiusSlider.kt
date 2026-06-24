@@ -28,7 +28,7 @@ fun RadiusSlider(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.component_radio_busqueda),
+                text = stringResource(R.string.component_radius_search),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

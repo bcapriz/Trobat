@@ -37,7 +37,7 @@ fun FloatingCameraButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val cameraDesc = stringResource(R.string.component_camara_abrir)
+    val cameraDesc = stringResource(R.string.component_camera_open)
 
     val cameraScale by animateFloatAsState(
         targetValue = if (selected) 1.04f else 1f,

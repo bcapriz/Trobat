@@ -130,7 +130,7 @@ private fun HeatMapContent(
         ) {
             item {
                 Text(
-                    text = stringResource(R.string.heatmap_titulo),
+                    text = stringResource(R.string.heatmap_title),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
@@ -139,7 +139,7 @@ private fun HeatMapContent(
 
             item {
                 Text(
-                    text = stringResource(R.string.heatmap_subtitulo),
+                    text = stringResource(R.string.heatmap_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -155,7 +155,7 @@ private fun HeatMapContent(
 
             item {
                 Text(
-                    text = stringResource(R.string.heatmap_casos_activos),
+                    text = stringResource(R.string.heatmap_active_cases),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
@@ -186,9 +186,9 @@ private fun HeatMapContent(
                 item {
                     Text(
                         text = if (uiState.cases.isEmpty())
-                            stringResource(R.string.heatmap_sin_casos)
+                            stringResource(R.string.heatmap_no_cases)
                         else
-                            stringResource(R.string.heatmap_sin_casos_radio, uiState.radiusKm.toInt()),
+                            stringResource(R.string.heatmap_no_cases_radius, uiState.radiusKm.toInt()),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -280,7 +280,7 @@ private fun HeatMapStatsCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = stringResource(R.string.heatmap_resumen_zona),
+                text = stringResource(R.string.heatmap_zone_summary),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
@@ -288,12 +288,12 @@ private fun HeatMapStatsCard(
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatItem(
-                    title = stringResource(R.string.heatmap_stat_casos),
+                    title = stringResource(R.string.heatmap_stat_cases),
                     value = totalCases.toString(),
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    title = stringResource(R.string.heatmap_stat_concentracion),
+                    title = stringResource(R.string.heatmap_stat_concentration),
                     value = if (mostActiveCount > 0) "$mostActiveArea ($mostActiveCount)" else mostActiveArea,
                     modifier = Modifier.weight(1f)
                 )

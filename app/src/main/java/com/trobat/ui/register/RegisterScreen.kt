@@ -85,14 +85,14 @@ fun RegisterScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.trobatlogooscuro),
-                contentDescription = stringResource(R.string.register_logo_desc),
+                contentDescription = stringResource(R.string.register_logo_description),
                 modifier = Modifier.size(140.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = stringResource(R.string.register_titulo),
+                text = stringResource(R.string.register_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = TrobatBackground
             )
@@ -102,7 +102,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.onEvent(RegisterEvent.NameChanged(it)) },
-                label = { Text(stringResource(R.string.register_nombre)) },
+                label = { Text(stringResource(R.string.register_name)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
@@ -115,7 +115,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.nationalId,
                 onValueChange = { viewModel.onEvent(RegisterEvent.NationalIdChanged(it)) },
-                label = { Text(stringResource(R.string.register_dni)) },
+                label = { Text(stringResource(R.string.register_national_id)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -131,7 +131,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.phone,
                 onValueChange = { viewModel.onEvent(RegisterEvent.PhoneChanged(it)) },
-                label = { Text(stringResource(R.string.register_telefono)) },
+                label = { Text(stringResource(R.string.register_phone)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone,
@@ -181,7 +181,7 @@ fun RegisterScreen(
                         Icon(
                             imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                             contentDescription = stringResource(
-                                if (passwordVisible) R.string.register_ocultar_password else R.string.register_mostrar_password
+                                if (passwordVisible) R.string.register_hide_password else R.string.register_show_password
                             ),
                             tint = TrobatBackground
                         )
@@ -219,7 +219,7 @@ fun RegisterScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text(stringResource(R.string.register_boton), style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.register_button), style = MaterialTheme.typography.labelLarge)
                 }
             }
 
@@ -227,7 +227,7 @@ fun RegisterScreen(
 
             TextButton(onClick = { viewModel.onEvent(RegisterEvent.LoginClicked) }) {
                 Text(
-                    text = stringResource(R.string.register_ir_a_login),
+                    text = stringResource(R.string.register_go_to_login),
                     color = TrobatBackground,
                     style = MaterialTheme.typography.bodyMedium
                 )

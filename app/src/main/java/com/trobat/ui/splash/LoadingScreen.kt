@@ -31,7 +31,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun LoadingScreen() {
-    val loadingText = stringResource(R.string.loading_texto)
+    val loadingText = stringResource(R.string.loading_text)
 
     val infiniteTransition = rememberInfiniteTransition(label = "loading_text")
 
@@ -75,7 +75,7 @@ fun LoadingScreen() {
 
                 Image(
                     painter = painterResource(id = R.drawable.trobatlogo),
-                    contentDescription = stringResource(R.string.loading_logo_desc),
+                    contentDescription = stringResource(R.string.loading_logo_description),
                     modifier = Modifier.size(92.dp)
                 )
             }

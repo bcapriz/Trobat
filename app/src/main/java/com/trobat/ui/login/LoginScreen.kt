@@ -87,14 +87,14 @@ fun LoginScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.trobatlogooscuro),
-                contentDescription = stringResource(R.string.login_logo_desc),
+                contentDescription = stringResource(R.string.login_logo_description),
                 modifier = Modifier.size(180.dp)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = stringResource(R.string.login_titulo),
+                text = stringResource(R.string.login_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = TrobatBackground
             )
@@ -140,7 +140,7 @@ fun LoginScreen(
                         Icon(
                             imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                             contentDescription = stringResource(
-                                if (passwordVisible) R.string.login_ocultar_password else R.string.login_mostrar_password
+                                if (passwordVisible) R.string.login_hide_password else R.string.login_show_password
                             ),
                             tint = TrobatBackground
                         )
@@ -178,7 +178,7 @@ fun LoginScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text(stringResource(R.string.login_boton), style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.login_button), style = MaterialTheme.typography.labelLarge)
                 }
             }
 
@@ -186,7 +186,7 @@ fun LoginScreen(
 
             TextButton(onClick = { viewModel.onEvent(LoginEvent.RegisterClicked) }) {
                 Text(
-                    text = stringResource(R.string.login_ir_a_registro),
+                    text = stringResource(R.string.login_go_to_register),
                     color = TrobatBackground,
                     style = MaterialTheme.typography.bodyMedium
                 )

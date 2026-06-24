@@ -55,18 +55,18 @@ fun OnboardingScreen(onFinish: () -> Unit) {
     val slides = listOf(
         OnboardingSlide(
             icon = Icons.Filled.PersonSearch,
-            title = stringResource(R.string.onboarding_slide1_titulo),
-            description = stringResource(R.string.onboarding_slide1_desc)
+            title = stringResource(R.string.onboarding_slide1_title),
+            description = stringResource(R.string.onboarding_slide1_description)
         ),
         OnboardingSlide(
             icon = Icons.Filled.CameraAlt,
-            title = stringResource(R.string.onboarding_slide2_titulo),
-            description = stringResource(R.string.onboarding_slide2_desc)
+            title = stringResource(R.string.onboarding_slide2_title),
+            description = stringResource(R.string.onboarding_slide2_description)
         ),
         OnboardingSlide(
             icon = Icons.Filled.People,
-            title = stringResource(R.string.onboarding_slide3_titulo),
-            description = stringResource(R.string.onboarding_slide3_desc)
+            title = stringResource(R.string.onboarding_slide3_title),
+            description = stringResource(R.string.onboarding_slide3_description)
         )
     )
 
@@ -92,7 +92,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             ) {
                 if (!isLastPage) {
                     TextButton(onClick = onFinish) {
-                        Text(stringResource(R.string.accion_saltar), color = TrobatBackground.copy(alpha = 0.7f))
+                        Text(stringResource(R.string.action_skip), color = TrobatBackground.copy(alpha = 0.7f))
                     }
                 }
             }
@@ -141,7 +141,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = TrobatPurple)
             ) {
                 Text(
-                    text = stringResource(if (isLastPage) R.string.accion_comenzar else R.string.accion_siguiente),
+                    text = stringResource(if (isLastPage) R.string.action_start else R.string.action_next),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

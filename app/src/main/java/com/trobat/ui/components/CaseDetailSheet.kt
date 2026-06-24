@@ -47,7 +47,7 @@ fun CaseDetailSheet(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = stringResource(R.string.case_nombre_edad, case.fullName, case.age),
+            text = stringResource(R.string.format_case_name_age, case.fullName, case.age),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
@@ -94,7 +94,7 @@ fun CaseDetailSheet(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = stringResource(R.string.visto_ultima_vez, case.lastSeenLocation),
+                text = stringResource(R.string.format_last_seen, case.lastSeenLocation),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -129,7 +129,7 @@ fun CaseDetailSheet(
                 onClick = onCargarReporte,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.component_cargar_reporte))
+                Text(text = stringResource(R.string.component_load_report))
             }
         }
     }

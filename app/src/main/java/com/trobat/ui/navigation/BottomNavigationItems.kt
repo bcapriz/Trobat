@@ -20,28 +20,28 @@ data class TrobatBottomBarItem(
 val trobatBottomBarItems = listOf(
     TrobatBottomBarItem(
         route = BottomRoutes.CASES,
-        labelRes = R.string.nav_casos,
+        labelRes = R.string.nav_cases,
         icon = Icons.Outlined.FolderOpen
     ),
     TrobatBottomBarItem(
         route = BottomRoutes.HEATMAP,
-        labelRes = R.string.nav_mapa,
+        labelRes = R.string.nav_map,
         icon = Icons.Outlined.Map
     ),
     TrobatBottomBarItem(
         route = BottomRoutes.CAMERA,
-        labelRes = R.string.nav_camara,
+        labelRes = R.string.nav_camera,
         icon = Icons.Outlined.PhotoCamera,
         isCenter = true
     ),
     TrobatBottomBarItem(
         route = BottomRoutes.NOTIFICATIONS,
-        labelRes = R.string.nav_alertas,
+        labelRes = R.string.nav_alerts,
         icon = Icons.Outlined.NotificationsNone
     ),
     TrobatBottomBarItem(
         route = BottomRoutes.PROFILE,
-        labelRes = R.string.nav_perfil,
+        labelRes = R.string.nav_profile,
         icon = Icons.Outlined.PersonOutline
     )
 )

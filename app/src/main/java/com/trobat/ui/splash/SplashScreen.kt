@@ -42,14 +42,14 @@ fun SplashScreen() {
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.trobatlogooscuro),
-                    contentDescription = stringResource(R.string.splash_logo_desc),
+                    contentDescription = stringResource(R.string.splash_logo_description),
                     modifier = Modifier.size(540.dp)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = stringResource(R.string.splash_eslogan),
+                    text = stringResource(R.string.splash_tagline),
                     style = MaterialTheme.typography.bodyLarge,
                     color = TrobatBackground,
                     textAlign = TextAlign.Center,
@@ -62,7 +62,7 @@ fun SplashScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(R.string.splash_creditos),
+                    text = stringResource(R.string.splash_credits),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TrobatBackground,
                     textAlign = TextAlign.Center

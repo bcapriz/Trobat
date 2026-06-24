@@ -167,7 +167,7 @@ private fun CitizenHomeContent(
         )
 
         Text(
-            text = stringResource(R.string.home_subtitulo),
+            text = stringResource(R.string.home_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -177,9 +177,9 @@ private fun CitizenHomeContent(
         }
 
         CollaborationOptionCard(
-            title = stringResource(R.string.home_mapa_titulo),
-            description = stringResource(R.string.home_mapa_desc),
-            label = stringResource(R.string.home_mapa_label),
+            title = stringResource(R.string.home_map_title),
+            description = stringResource(R.string.home_map_description),
+            label = stringResource(R.string.home_map_label),
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.Map,
@@ -191,9 +191,9 @@ private fun CitizenHomeContent(
         )
 
         CollaborationOptionCard(
-            title = stringResource(R.string.home_camara_titulo),
-            description = stringResource(R.string.home_camara_desc),
-            label = stringResource(R.string.home_camara_label),
+            title = stringResource(R.string.home_camera_title),
+            description = stringResource(R.string.home_camera_description),
+            label = stringResource(R.string.home_camera_label),
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.PhotoCamera,
@@ -205,7 +205,7 @@ private fun CitizenHomeContent(
         )
 
         Text(
-            text = stringResource(R.string.home_casos_activos),
+            text = stringResource(R.string.home_active_cases),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
@@ -217,7 +217,7 @@ private fun CitizenHomeContent(
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
-                    text = stringResource(R.string.home_buscar_placeholder),
+                    text = stringResource(R.string.home_search_placeholder),
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -241,22 +241,22 @@ private fun CitizenHomeContent(
 
         if (uiState.isLoading) {
             Text(
-                text = stringResource(R.string.home_cargando),
+                text = stringResource(R.string.home_loading),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else if (uiState.isSearching) {
             Text(
-                text = stringResource(R.string.home_buscando),
+                text = stringResource(R.string.home_searching),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else if (uiState.filteredCases.isEmpty()) {
             Text(
                 text = when {
-                    uiState.searchQuery.isNotBlank() -> stringResource(R.string.sin_resultados_busqueda, uiState.searchQuery)
-                    uiState.userLat != null -> stringResource(R.string.home_sin_casos_cercanos, uiState.radiusKm.roundToInt())
-                    else -> stringResource(R.string.home_sin_casos)
+                    uiState.searchQuery.isNotBlank() -> stringResource(R.string.search_no_results, uiState.searchQuery)
+                    uiState.userLat != null -> stringResource(R.string.home_no_nearby_cases, uiState.radiusKm.roundToInt())
+                    else -> stringResource(R.string.home_no_cases)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -353,13 +353,13 @@ private fun PendingDraftCard(onResumeDraft: () -> Unit) {
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.home_draft_titulo),
+                    text = stringResource(R.string.home_draft_title),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.home_draft_subtitulo),
+                    text = stringResource(R.string.home_draft_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -382,13 +382,13 @@ private fun LocationPermissionCard(onRequestLocationPermission: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = stringResource(R.string.home_ubicacion_titulo),
+                text = stringResource(R.string.home_location_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = stringResource(R.string.home_ubicacion_desc),
+                text = stringResource(R.string.home_location_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -398,7 +398,7 @@ private fun LocationPermissionCard(onRequestLocationPermission: () -> Unit) {
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text(text = stringResource(R.string.home_habilitar_ubicacion))
+                Text(text = stringResource(R.string.home_enable_location))
             }
         }
     }

@@ -8,9 +8,9 @@ import androidx.compose.ui.geometry.Rect
 import com.trobat.R
 
 enum class CoachmarkStep(@StringRes val titleRes: Int, @StringRes val descriptionRes: Int) {
-    CASES(R.string.coachmark_casos_titulo, R.string.coachmark_casos_desc),
-    CAMERA(R.string.coachmark_camara_titulo, R.string.coachmark_camara_desc),
-    HEATMAP(R.string.coachmark_mapa_titulo, R.string.coachmark_mapa_desc),
+    CASES(R.string.coachmark_cases_title, R.string.coachmark_cases_description),
+    CAMERA(R.string.coachmark_camera_title, R.string.coachmark_camera_description),
+    HEATMAP(R.string.coachmark_map_title, R.string.coachmark_map_description),
     DONE(0, 0);
 
     val isLast: Boolean get() = this == HEATMAP
