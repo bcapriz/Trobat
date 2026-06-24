@@ -1,17 +1,20 @@
 package com.trobat.ui.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.trobat.data.repository.RepositoryProvider
 import com.trobat.ui.navigation.BottomRoutes
 import com.trobat.ui.navigation.TrobatBottomBar
 import com.trobat.ui.navigation.MainRoutes
@@ -23,6 +26,12 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
+    val onboardingPrefs = remember { RepositoryProvider.onboardingPrefs }
+    val coachmarkController = remember {
+        if (!onboardingPrefs.hasSeenCoachmarks) CoachmarkController() else null
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
@@ -41,7 +50,7 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                     }
                 },
                 onCameraClick = {
-                    if (!com.trobat.data.repository.RepositoryProvider.reportDraftPrefs.isEmpty()) {
+                    if (!RepositoryProvider.reportDraftPrefs.isEmpty()) {
                         navController.navigate(MainRoutes.CONFIRM_REPORT)
                     } else {
                         navController.navigate(BottomRoutes.CAMERA) {
@@ -50,7 +59,8 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                             restoreState = true
                         }
                     }
-                }
+                },
+                coachmarkController = coachmarkController
             )
         }
     ) { paddingValues ->
@@ -120,5 +130,18 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
             }
         }
     }
+
+    coachmarkController?.let { controller ->
+        if (controller.currentStep != CoachmarkStep.DONE) {
+            CoachmarkOverlay(
+                controller = controller,
+                onDismiss = {
+                    onboardingPrefs.hasSeenCoachmarks = true
+                    controller.dismiss()
+                }
+            )
+        }
+    }
+    } // Box
 }
 
