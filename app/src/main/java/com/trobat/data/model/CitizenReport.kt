@@ -3,7 +3,6 @@ package com.trobat.data.model
 data class CitizenReport(
     val id: String,
     val caseId: String,
-    val title: String,
     val description: String,
     val optionalDetails: String?,
     val address: String,

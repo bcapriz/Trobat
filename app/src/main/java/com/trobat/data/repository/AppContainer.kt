@@ -14,6 +14,9 @@ object AppContainer {
     lateinit var authRepository: AuthRepository
         private set
 
+    lateinit var userPreferencesRepository: UserPreferencesRepository
+        private set
+
     lateinit var caseRepository: CaseRepository
         private set
 
@@ -30,9 +33,6 @@ object AppContainer {
         private set
 
     lateinit var onboardingPrefs: com.trobat.data.local.OnboardingPrefs
-        private set
-
-    var darkModeEnabled: Boolean = false
         private set
 
     private fun createEncryptedPrefs(context: Context): android.content.SharedPreferences {
@@ -64,7 +64,6 @@ object AppContainer {
     fun init(context: Context) {
         val prefs = createEncryptedPrefs(context)
         val sessionManager = SessionManager(prefs)
-        darkModeEnabled = sessionManager.darkModeEnabled
         NetworkProvider.init(sessionManager)
         val api = NetworkProvider.api
         val db = TrobatDatabase.build(context.applicationContext)
@@ -72,9 +71,11 @@ object AppContainer {
         lastLocationPrefs = LastLocationPrefs(context.applicationContext)
         reportDraftPrefs = com.trobat.data.local.ReportDraftPrefs(context.applicationContext)
         onboardingPrefs = com.trobat.data.local.OnboardingPrefs(context.applicationContext)
-        authRepository = RemoteAuthRepository(api, sessionManager, db, lastLocationPrefs, context.applicationContext)
+        val remoteAuth = RemoteAuthRepository(api, sessionManager, db, lastLocationPrefs, context.applicationContext)
+        authRepository = remoteAuth
+        userPreferencesRepository = remoteAuth
         caseRepository = RemoteCaseRepository(api, db)
-        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao(), authRepository)
+        citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao())
         notificationRepository = NotificationRepository(db)
     }
 }

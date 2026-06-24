@@ -20,13 +20,13 @@ class RemoteAuthRepository(
     private val db: TrobatDatabase,
     private val lastLocationPrefs: LastLocationPrefs,
     private val context: Context
-) : AuthRepository {
+) : AuthRepository, UserPreferencesRepository {
 
     override suspend fun login(email: String, password: String): Result<Unit> {
         return try {
             val response = api.login(LoginRequestDto(email = email, password = password))
             if (response.isSuccessful) {
-                val body = response.body() ?: return Result.failure(Exception("Respuesta vacía"))
+                val body = response.body() ?: return Result.failure(AuthError.EmptyResponse)
                 sessionManager.token = body.token
                 sessionManager.userId = body.id
                 sessionManager.userName = body.nombre
@@ -34,7 +34,7 @@ class RemoteAuthRepository(
                 FirebaseMessaging.getInstance().subscribeToTopic(TrobatApplication.ALERTS_TOPIC)
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Credenciales inválidas"))
+                Result.failure(AuthError.InvalidCredentials)
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -74,7 +74,7 @@ class RemoteAuthRepository(
                 )
             ))
             if (response.isSuccessful) Result.success(Unit)
-            else Result.failure(Exception("El email ya está registrado"))
+            else Result.failure(AuthError.EmailAlreadyRegistered)
         } catch (e: Exception) {
             Result.failure(e)
         }

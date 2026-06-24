@@ -281,7 +281,6 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             val newReport = CitizenReport(
                 id = UUID.randomUUID().toString(),
                 caseId = currentState.selectedCaseId ?: "",
-                title = "Reporte ciudadano",
                 description = currentState.requiredDescription,
                 optionalDetails = currentState.optionalDetails.ifBlank { null },
                 address = currentState.locationLabel,

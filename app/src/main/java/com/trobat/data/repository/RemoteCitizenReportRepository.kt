@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
+import com.trobat.data.TWO_DAYS_MS
 import com.trobat.data.local.PendingReportDao
 import com.trobat.data.local.PendingReportEntity
 import com.trobat.data.model.CitizenReport
@@ -21,17 +22,16 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 private const val TAG = "RemoteCitizenReportRepo"
-private const val TWO_DAYS_MS = 2L * 24 * 60 * 60 * 1000
 
 class RemoteCitizenReportRepository(
     private val api: TrobatApi,
     private val context: Context,
-    private val pendingReportDao: PendingReportDao,
-    private val authRepository: AuthRepository
+    private val pendingReportDao: PendingReportDao
 ) : CitizenReportRepository {
 
     private val gson = Gson()
@@ -83,7 +83,6 @@ class RemoteCitizenReportRepository(
                 val report = CitizenReport(
                     id = entity.id,
                     caseId = entity.caseId,
-                    title = "Reporte ciudadano",
                     description = entity.description,
                     optionalDetails = entity.optionalDetails,
                     address = entity.address,
@@ -117,17 +116,15 @@ class RemoteCitizenReportRepository(
     }
 
     private suspend fun markSent(id: String) {
-        pendingReportDao.getById(id)?.let { entity ->
-            pendingReportDao.insert(entity.copy(status = ReportStatus.SENT.name, localPhotoPath = null))
-        }
+        pendingReportDao.markSent(id, ReportStatus.SENT.name)
     }
 
     private suspend fun trySendToApi(report: CitizenReport, localPhotoPath: String?, photoUri: Uri?): Boolean {
         val contactInfo = if (!report.isAnonymous) {
             ContactInfoDto(
-                name = report.contactName ?: authRepository.getUserName(),
-                phone = report.contactPhone ?: authRepository.getPhone(),
-                email = report.contactEmail ?: authRepository.getEmail()
+                name = report.contactName,
+                phone = report.contactPhone,
+                email = report.contactEmail
             )
         } else {
             ContactInfoDto()
@@ -153,7 +150,7 @@ class RemoteCitizenReportRepository(
                     MultipartBody.Part.createFormData(
                         name = "foto",
                         filename = "photo.jpg",
-                        body = file.readBytes().toRequestBody("image/jpeg".toMediaType())
+                        body = file.asRequestBody("image/jpeg".toMediaType())
                     )
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to read local photo file", e)

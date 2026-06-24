@@ -21,7 +21,7 @@ class TrobatApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         AppContainer.init(this)
-        ThemeManager.init(AppContainer.darkModeEnabled)
+        ThemeManager.init(AppContainer.userPreferencesRepository.getDarkModeEnabled())
         applicationScope.launch {
             AppContainer.citizenReportRepository.resetStuckSending()
             AppContainer.citizenReportRepository.retrySyncPending()

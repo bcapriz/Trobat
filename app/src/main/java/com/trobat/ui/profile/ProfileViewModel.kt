@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel : ViewModel() {
 
     private val authRepository = AppContainer.authRepository
+    private val userPreferencesRepository = AppContainer.userPreferencesRepository
 
     private val _uiState = MutableStateFlow(
         ProfileUiState(
@@ -22,8 +23,8 @@ class ProfileViewModel : ViewModel() {
             email = authRepository.getEmail() ?: "",
             nationalId = authRepository.getNationalId() ?: "",
             phone = authRepository.getPhone() ?: "",
-            notificationsEnabled = authRepository.getNotificationsEnabled(),
-            darkModeEnabled = authRepository.getDarkModeEnabled()
+            notificationsEnabled = userPreferencesRepository.getNotificationsEnabled(),
+            darkModeEnabled = userPreferencesRepository.getDarkModeEnabled()
         )
     )
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -35,11 +36,11 @@ class ProfileViewModel : ViewModel() {
         when (event) {
             ProfileEvent.LogoutClicked -> logout()
             is ProfileEvent.NotificationsToggled -> {
-                authRepository.setNotificationsEnabled(event.enabled)
+                userPreferencesRepository.setNotificationsEnabled(event.enabled)
                 _uiState.value = _uiState.value.copy(notificationsEnabled = event.enabled)
             }
             is ProfileEvent.DarkModeToggled -> {
-                authRepository.setDarkModeEnabled(event.enabled)
+                userPreferencesRepository.setDarkModeEnabled(event.enabled)
                 ThemeManager.setDarkMode(event.enabled)
                 _uiState.value = _uiState.value.copy(darkModeEnabled = event.enabled)
             }
