@@ -175,14 +175,24 @@ class RemoteCitizenReportRepository(
     }
 
     private fun copyPhotoToInternalStorage(reportId: String): String? {
-        val uri = CapturedEvidenceHolder.photoUri ?: return null
+        val dir = File(context.filesDir, "pending_reports").also { it.mkdirs() }
+        val dest = File(dir, "$reportId.jpg")
         return try {
-            val dir = File(context.filesDir, "pending_reports").also { it.mkdirs() }
-            val dest = File(dir, "$reportId.jpg")
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                dest.outputStream().use { output -> input.copyTo(output) }
+            val sourcePath = CapturedEvidenceHolder.localFilePath
+            val sourceUri = CapturedEvidenceHolder.photoUri
+            when {
+                sourcePath != null && File(sourcePath).exists() -> {
+                    File(sourcePath).copyTo(dest, overwrite = true)
+                    dest.absolutePath
+                }
+                sourceUri != null -> {
+                    val copied = context.contentResolver.openInputStream(sourceUri)?.use { input ->
+                        dest.outputStream().use { output -> input.copyTo(output) }
+                    }
+                    if (copied != null) dest.absolutePath else null
+                }
+                else -> null
             }
-            dest.absolutePath
         } catch (_: Exception) {
             null
         }

@@ -58,6 +58,7 @@ class CaptureEvidenceViewModel : ViewModel() {
         CapturedEvidenceHolder.photoUri = uri
         CapturedEvidenceHolder.latitude = latitude
         CapturedEvidenceHolder.longitude = longitude
+        CapturedEvidenceHolder.localFilePath = uri.path
 
         _uiState.value = _uiState.value.copy(
             hasPhoto = true,

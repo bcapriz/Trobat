@@ -137,6 +137,13 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
         } else if (!draftPrefs.isEmpty()) {
             // Sin nueva captura — restaurar borrador completo del disco
             val restoredUri = draft.photoUri
+            // Restore holder so copyPhotoToInternalStorage can find the file on submit
+            if (restoredUri != null) {
+                CapturedEvidenceHolder.photoUri = restoredUri
+                CapturedEvidenceHolder.latitude = draft.latitude
+                CapturedEvidenceHolder.longitude = draft.longitude
+                CapturedEvidenceHolder.localFilePath = restoredUri.path
+            }
             val resolvedCaseId = preselectedCaseId ?: draft.selectedCaseId
             val resolvedCase = resolveCase(resolvedCaseId)
             _uiState.value = _uiState.value.copy(
