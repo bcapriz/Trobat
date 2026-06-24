@@ -45,6 +45,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlin.coroutines.resume
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.suspendCancellableCoroutine
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -309,24 +312,38 @@ private fun CameraCard(
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
 
-    // Re-bind camera when permissions are granted or when returning to preview after a capture
+    DisposableEffect(lifecycleOwner) {
+        onDispose {
+            val future = ProcessCameraProvider.getInstance(context)
+            if (future.isDone) runCatching { future.get()?.unbindAll() }
+        }
+    }
+
     LaunchedEffect(uiState.hasRequiredPermissions, uiState.capturedPhotoUri) {
         if (!uiState.hasRequiredPermissions) return@LaunchedEffect
         if (uiState.capturedPhotoUri != null) return@LaunchedEffect
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
-            }
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(
-                lifecycleOwner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
-                preview,
-                imageCapture
-            )
-        }, ContextCompat.getMainExecutor(context))
+
+        val cameraProvider = suspendCancellableCoroutine { cont ->
+            val future = ProcessCameraProvider.getInstance(context)
+            future.addListener({
+                if (cont.isActive) {
+                    runCatching { cont.resume(future.get()) }.onFailure { cont.cancel(it) }
+                }
+            }, ContextCompat.getMainExecutor(context))
+        }
+
+        ensureActive()
+
+        val preview = Preview.Builder().build().also {
+            it.surfaceProvider = previewView.surfaceProvider
+        }
+        cameraProvider.unbindAll()
+        cameraProvider.bindToLifecycle(
+            lifecycleOwner,
+            CameraSelector.DEFAULT_BACK_CAMERA,
+            preview,
+            imageCapture
+        )
     }
 
     ElevatedCard(

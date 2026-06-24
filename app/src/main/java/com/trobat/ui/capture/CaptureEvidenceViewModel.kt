@@ -47,6 +47,7 @@ class CaptureEvidenceViewModel : ViewModel() {
 
     private fun startCapture() {
         val state = _uiState.value
+        if (state.isCapturing) return
         if (!state.hasRequiredPermissions) {
             _uiState.value = state.copy(errorMessage = "Necesitamos permisos de cámara y ubicación para continuar.")
             return

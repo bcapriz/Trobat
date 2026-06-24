@@ -58,13 +58,18 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                     }
                 },
                 onCameraClick = {
+                    val actualRoute = navController.currentDestination?.route
                     if (viewModel.hasPendingDraft()) {
-                        navController.navigate(MainRoutes.CONFIRM_REPORT)
+                        if (actualRoute != MainRoutes.CONFIRM_REPORT) {
+                            navController.navigate(MainRoutes.CONFIRM_REPORT)
+                        }
                     } else {
-                        navController.navigate(BottomRoutes.CAMERA) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                        if (actualRoute != BottomRoutes.CAMERA) {
+                            navController.navigate(BottomRoutes.CAMERA) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     }
                 },
