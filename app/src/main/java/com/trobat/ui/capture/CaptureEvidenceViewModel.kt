@@ -54,7 +54,7 @@ class CaptureEvidenceViewModel : ViewModel() {
         _uiState.value = state.copy(isCapturing = true, errorMessage = null)
     }
 
-    private fun onPhotoCaptured(uri: Uri, latitude: Double, longitude: Double) {
+    private fun onPhotoCaptured(uri: Uri, latitude: Double?, longitude: Double?) {
         CapturedEvidenceHolder.photoUri = uri
         CapturedEvidenceHolder.latitude = latitude
         CapturedEvidenceHolder.longitude = longitude

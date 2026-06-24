@@ -12,4 +12,5 @@ sealed interface CitizenHomeEvent {
     data class RadiusChanged(val km: Float) : CitizenHomeEvent
     data object ResumeDraftClicked : CitizenHomeEvent
     data object ScreenResumed : CitizenHomeEvent
+    data class CaseSelectedForReport(val caseId: String) : CitizenHomeEvent
 }

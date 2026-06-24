@@ -15,7 +15,7 @@ interface CitizenReportRepository {
 
     fun getUnreadNotificationsCount(): Int
 
-    suspend fun sendReport(report: CitizenReport): Boolean
+    suspend fun sendReport(report: CitizenReport, photoUri: android.net.Uri?, localFilePath: String?): Boolean
 
     suspend fun retrySyncPending()
 

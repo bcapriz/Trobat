@@ -51,7 +51,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.data.model.MissingPersonCase
-import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.components.CaseDetailSheet
 import com.trobat.ui.home.CitizenHomeEffect
@@ -104,6 +103,9 @@ fun CitizenHomeScreen(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
             )
         }
+    }
+
+    LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 CitizenHomeEffect.NavigateToMap -> onOpenMap()
@@ -123,8 +125,7 @@ fun CitizenHomeScreen(
         },
         onEvent = viewModel::onEvent,
         onCargarReporte = { caseId ->
-            CapturedEvidenceHolder.preselectedCaseId = caseId
-            onCaptureEvidence()
+            viewModel.onEvent(CitizenHomeEvent.CaseSelectedForReport(caseId))
         },
         modifier = modifier,
         onResumeDraft = onResumeDraft

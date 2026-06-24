@@ -11,8 +11,8 @@ sealed interface CaptureEvidenceEvent {
     data object TakePhotoClicked : CaptureEvidenceEvent
     data class PhotoCaptured(
         val uri: Uri,
-        val latitude: Double,
-        val longitude: Double
+        val latitude: Double?,
+        val longitude: Double?
     ) : CaptureEvidenceEvent
     data class CaptureError(val message: String?) : CaptureEvidenceEvent
     data object UseEvidenceClicked : CaptureEvidenceEvent

@@ -3,7 +3,6 @@ package com.trobat.data.repository
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.trobat.TrobatApplication
 import com.trobat.data.local.LastLocationPrefs
 import com.trobat.data.local.SessionManager
 import com.trobat.data.local.TrobatDatabase
@@ -68,15 +67,14 @@ object AppContainer {
         darkModeEnabled = sessionManager.darkModeEnabled
         NetworkProvider.init(sessionManager)
         val api = NetworkProvider.api
-        val appScope = (context.applicationContext as TrobatApplication).applicationScope
         val db = TrobatDatabase.build(context.applicationContext)
 
         lastLocationPrefs = LastLocationPrefs(context.applicationContext)
         reportDraftPrefs = com.trobat.data.local.ReportDraftPrefs(context.applicationContext)
         onboardingPrefs = com.trobat.data.local.OnboardingPrefs(context.applicationContext)
         authRepository = RemoteAuthRepository(api, sessionManager, db, lastLocationPrefs, context.applicationContext)
-        caseRepository = RemoteCaseRepository(api, appScope, db)
+        caseRepository = RemoteCaseRepository(api, db)
         citizenReportRepository = RemoteCitizenReportRepository(api, context.applicationContext, db.pendingReportDao(), authRepository)
-        notificationRepository = NotificationRepository(db.notificationDao())
+        notificationRepository = NotificationRepository(db)
     }
 }

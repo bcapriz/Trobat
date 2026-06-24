@@ -17,6 +17,7 @@ data class ConfirmReportUiState(
     val showRequiredDescriptionError: Boolean = false,
     val isSending: Boolean = false,
     val photoUri: Uri? = null,
+    val localFilePath: String? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
     val locationLabel: String = "Obteniendo dirección...",

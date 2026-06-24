@@ -16,7 +16,7 @@ import java.io.File
 fun takePictureWithLocation(
     context: Context,
     imageCapture: ImageCapture,
-    onResult: (Uri, Double, Double) -> Unit,
+    onResult: (Uri, Double?, Double?) -> Unit,
     onError: (String?) -> Unit
 ) {
     val fusedLocation = LocationServices.getFusedLocationProviderClient(context)
@@ -24,28 +24,28 @@ fun takePictureWithLocation(
 
     fusedLocation.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
         .addOnSuccessListener { location ->
-            val lat = location?.latitude ?: -34.6037
-            val lng = location?.longitude ?: -58.3816
-            capturePhotoWithExif(context, imageCapture, lat, lng, onResult, onError)
+            capturePhotoWithExif(context, imageCapture, location?.latitude, location?.longitude, onResult, onError)
         }
         .addOnFailureListener {
-            capturePhotoWithExif(context, imageCapture, -34.6037, -58.3816, onResult, onError)
+            capturePhotoWithExif(context, imageCapture, null, null, onResult, onError)
         }
 }
 
 private fun capturePhotoWithExif(
     context: Context,
     imageCapture: ImageCapture,
-    lat: Double,
-    lng: Double,
-    onResult: (Uri, Double, Double) -> Unit,
+    lat: Double?,
+    lng: Double?,
+    onResult: (Uri, Double?, Double?) -> Unit,
     onError: (String?) -> Unit
 ) {
     val photoFile = File(context.filesDir, "evidence_${System.currentTimeMillis()}.jpg")
     val metadata = ImageCapture.Metadata().apply {
-        location = AndroidLocation("gps").apply {
-            latitude = lat
-            longitude = lng
+        if (lat != null && lng != null) {
+            location = AndroidLocation("gps").apply {
+                latitude = lat
+                longitude = lng
+            }
         }
     }
     val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile)

@@ -51,7 +51,9 @@ class RemoteAuthRepository(
                 sessionManager.phone = body.personal_info.phone.ifBlank { null }
                 sessionManager.userName = body.personal_info.full_name.ifBlank { sessionManager.userName }
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            android.util.Log.w("RemoteAuthRepository", "fetchAndSavePerfil failed", e)
+        }
     }
 
     override suspend fun register(

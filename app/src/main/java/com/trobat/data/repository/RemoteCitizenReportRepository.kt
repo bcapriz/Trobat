@@ -1,10 +1,11 @@
 package com.trobat.data.repository
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import com.google.gson.Gson
 import com.trobat.data.local.PendingReportDao
 import com.trobat.data.local.PendingReportEntity
-import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.ReportStatus
 import com.trobat.data.remote.TrobatApi
@@ -22,6 +23,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+
+private const val TAG = "RemoteCitizenReportRepo"
+private const val TWO_DAYS_MS = 2L * 24 * 60 * 60 * 1000
 
 class RemoteCitizenReportRepository(
     private val api: TrobatApi,
@@ -41,12 +45,8 @@ class RemoteCitizenReportRepository(
     override fun getUnreadNotificationsCount(): Int =
         _reports.value.count { it.status == ReportStatus.NEW }
 
-    override suspend fun sendReport(report: CitizenReport): Boolean {
-        val localPhotoPath = copyPhotoToInternalStorage(report.id)
-        // Clear holder synchronously before the first suspension point so that
-        // a new ConfirmReportViewModel created while this coroutine is in-flight
-        // does not find stale evidence and allow a duplicate submission.
-        CapturedEvidenceHolder.clear()
+    override suspend fun sendReport(report: CitizenReport, photoUri: Uri?, localFilePath: String?): Boolean {
+        val localPhotoPath = copyPhotoToInternalStorage(report.id, photoUri, localFilePath)
 
         pendingReportDao.insert(
             PendingReportEntity(
@@ -66,7 +66,7 @@ class RemoteCitizenReportRepository(
             )
         )
 
-        val sent = trySendToApi(report, localPhotoPath)
+        val sent = trySendToApi(report, localPhotoPath, photoUri)
         if (sent) {
             markSent(report.id)
             localPhotoPath?.let { File(it).delete() }
@@ -77,9 +77,9 @@ class RemoteCitizenReportRepository(
     override suspend fun retrySyncPending() {
         if (!syncMutex.tryLock()) return
         try {
-            val pending = pendingReportDao.getAll().filter { it.status == "PENDING_SYNC" }
+            val pending = pendingReportDao.getAll().filter { it.status == ReportStatus.PENDING_SYNC.name }
             for (entity in pending) {
-                pendingReportDao.updateStatus(entity.id, "SENDING")
+                pendingReportDao.updateStatus(entity.id, ReportStatus.SENDING.name)
                 val report = CitizenReport(
                     id = entity.id,
                     caseId = entity.caseId,
@@ -96,11 +96,11 @@ class RemoteCitizenReportRepository(
                     contactEmail = entity.contactEmail,
                     status = ReportStatus.PENDING_SYNC
                 )
-                if (trySendToApi(report, entity.localPhotoPath)) {
+                if (trySendToApi(report, entity.localPhotoPath, null)) {
                     markSent(entity.id)
                     entity.localPhotoPath?.let { File(it).delete() }
                 } else {
-                    pendingReportDao.updateStatus(entity.id, "PENDING_SYNC")
+                    pendingReportDao.updateStatus(entity.id, ReportStatus.PENDING_SYNC.name)
                 }
             }
         } finally {
@@ -113,17 +113,16 @@ class RemoteCitizenReportRepository(
     }
 
     override suspend fun cleanupSentReports() {
-        val twoDaysAgo = System.currentTimeMillis() - 2L * 24 * 60 * 60 * 1000
-        pendingReportDao.deleteSentOlderThan(twoDaysAgo)
+        pendingReportDao.deleteSentOlderThan(System.currentTimeMillis() - TWO_DAYS_MS)
     }
 
     private suspend fun markSent(id: String) {
         pendingReportDao.getById(id)?.let { entity ->
-            pendingReportDao.insert(entity.copy(status = "SENT", localPhotoPath = null))
+            pendingReportDao.insert(entity.copy(status = ReportStatus.SENT.name, localPhotoPath = null))
         }
     }
 
-    private suspend fun trySendToApi(report: CitizenReport, localPhotoPath: String?): Boolean {
+    private suspend fun trySendToApi(report: CitizenReport, localPhotoPath: String?, photoUri: Uri?): Boolean {
         val contactInfo = if (!report.isAnonymous) {
             ContactInfoDto(
                 name = report.contactName ?: authRepository.getUserName(),
@@ -148,17 +147,20 @@ class RemoteCitizenReportRepository(
         val datosPart = gson.toJson(datos).toRequestBody("application/json".toMediaType())
 
         val fotoPart = localPhotoPath?.let { path ->
-            try {
-                val file = File(path)
-                if (file.exists()) {
+            val file = File(path)
+            if (file.exists()) {
+                try {
                     MultipartBody.Part.createFormData(
                         name = "foto",
                         filename = "photo.jpg",
                         body = file.readBytes().toRequestBody("image/jpeg".toMediaType())
                     )
-                } else null
-            } catch (_: Exception) { null }
-        } ?: CapturedEvidenceHolder.photoUri?.let { uri ->
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to read local photo file", e)
+                    null
+                }
+            } else null
+        } ?: photoUri?.let { uri ->
             try {
                 context.contentResolver.openInputStream(uri)?.use { stream ->
                     val bytes = stream.readBytes()
@@ -168,36 +170,39 @@ class RemoteCitizenReportRepository(
                         body = bytes.toRequestBody("image/jpeg".toMediaType())
                     )
                 }
-            } catch (_: Exception) { null }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to read photo from URI", e)
+                null
+            }
         }
 
         return try {
             api.crearReporte(fotoPart, datosPart).isSuccessful
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "API call failed", e)
             false
         }
     }
 
-    private fun copyPhotoToInternalStorage(reportId: String): String? {
+    private fun copyPhotoToInternalStorage(reportId: String, photoUri: Uri?, localFilePath: String?): String? {
         val dir = File(context.filesDir, "pending_reports").also { it.mkdirs() }
         val dest = File(dir, "$reportId.jpg")
         return try {
-            val sourcePath = CapturedEvidenceHolder.localFilePath
-            val sourceUri = CapturedEvidenceHolder.photoUri
             when {
-                sourcePath != null && File(sourcePath).exists() -> {
-                    File(sourcePath).copyTo(dest, overwrite = true)
+                localFilePath != null && File(localFilePath).exists() -> {
+                    File(localFilePath).copyTo(dest, overwrite = true)
                     dest.absolutePath
                 }
-                sourceUri != null -> {
-                    val copied = context.contentResolver.openInputStream(sourceUri)?.use { input ->
+                photoUri != null -> {
+                    val copied = context.contentResolver.openInputStream(photoUri)?.use { input ->
                         dest.outputStream().use { output -> input.copyTo(output) }
                     }
                     if (copied != null) dest.absolutePath else null
                 }
                 else -> null
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to copy photo to internal storage", e)
             null
         }
     }

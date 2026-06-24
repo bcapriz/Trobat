@@ -6,14 +6,15 @@ import com.trobat.data.local.toEntity
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.repository.mapper.toDomain
 import com.trobat.data.model.MissingPersonCase
-import kotlinx.coroutines.CoroutineScope
+import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+private const val TAG = "RemoteCaseRepository"
+
 class RemoteCaseRepository(
     private val api: TrobatApi,
-    private val scope: CoroutineScope,
     private val db: TrobatDatabase
 ) : CaseRepository {
 
@@ -29,7 +30,9 @@ class RemoteCaseRepository(
                 if (cases.isNotEmpty()) saveToCache(cases)
                 return
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.w(TAG, "refresh failed", e)
+        }
         loadFromCache()
     }
 
@@ -42,7 +45,9 @@ class RemoteCaseRepository(
                 if (cases.isNotEmpty()) saveToCache(cases)
                 return
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.w(TAG, "refreshCercanos failed", e)
+        }
         if (_cases.value.isEmpty()) loadFromCache()
     }
 

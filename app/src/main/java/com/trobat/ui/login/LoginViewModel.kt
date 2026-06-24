@@ -40,6 +40,7 @@ class LoginViewModel : ViewModel() {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             val result = authRepository.login(state.email.trim(), state.password)
             if (result.isSuccess) {
+                _uiState.value = _uiState.value.copy(isLoading = false)
                 _effect.emit(LoginEffect.NavigateToMain)
             } else {
                 _uiState.value = _uiState.value.copy(

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.AppContainer
+import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.ui.utils.fetchCurrentLocation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,8 +13,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
@@ -28,100 +29,93 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     val effect: SharedFlow<CitizenHomeEffect> = _effect.asSharedFlow()
 
     private val _searchQuery = MutableStateFlow("")
-    private val _selectedCase = MutableStateFlow<com.trobat.data.model.MissingPersonCase?>(null)
-    private val _radiusKm = MutableStateFlow(50f)
-    private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
-    private val _isLoading = MutableStateFlow(true)
-    private val _searchResults = MutableStateFlow<List<com.trobat.data.model.MissingPersonCase>?>(null)
-    private val _isSearching = MutableStateFlow(false)
-    private val _hasPendingDraft = MutableStateFlow(false)
 
     init {
-        fetchUserLocation()
-        observeData()
+        observeCases()
         observeSearch()
+        fetchUserLocation()
         checkPendingDraft()
     }
 
     private fun checkPendingDraft() {
-        _hasPendingDraft.value = !draftPrefs.isEmpty()
+        _uiState.update { it.copy(hasPendingDraft = !draftPrefs.isEmpty()) }
+    }
+
+    private fun observeCases() {
+        viewModelScope.launch {
+            caseRepository.cases.collect { cases ->
+                _uiState.update { it.copy(activeCases = cases) }
+            }
+        }
     }
 
     private fun fetchUserLocation() {
         fetchCurrentLocation { location ->
-            _userLocation.value = location
+            _uiState.update { it.copy(userLat = location?.first, userLng = location?.second) }
             if (location != null) AppContainer.lastLocationPrefs.save(location.first, location.second)
             viewModelScope.launch {
-                _isLoading.value = true
+                _uiState.update { it.copy(isLoading = true) }
                 if (location != null) {
-                    caseRepository.refreshCercanosConFallback(location.first, location.second, _radiusKm.value.toDouble())
+                    caseRepository.refreshCercanosConFallback(
+                        location.first,
+                        location.second,
+                        _uiState.value.radiusKm.toDouble()
+                    )
                 } else {
                     caseRepository.refresh()
                 }
-                _isLoading.value = false
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
     fun onEvent(event: CitizenHomeEvent) {
         when (event) {
-            CitizenHomeEvent.OpenMapClicked -> navigateToMap()
+            CitizenHomeEvent.OpenMapClicked ->
+                viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToMap) }
+
             CitizenHomeEvent.CaptureEvidenceClicked -> {
-                if (!draftPrefs.isEmpty()) navigateToConfirmReport() else navigateToCamera()
+                if (!draftPrefs.isEmpty()) {
+                    viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToConfirmReport) }
+                } else {
+                    viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToCamera) }
+                }
             }
+
             CitizenHomeEvent.RefreshClicked -> {
                 _searchQuery.value = ""
-                _selectedCase.value = null
+                _uiState.update { it.copy(searchQuery = "", selectedCase = null, searchResults = null, isSearching = false) }
                 fetchUserLocation()
             }
-            CitizenHomeEvent.DismissCaseModal -> _selectedCase.value = null
+
+            CitizenHomeEvent.DismissCaseModal ->
+                _uiState.update { it.copy(selectedCase = null) }
+
             is CitizenHomeEvent.SearchQueryChanged -> {
                 _searchQuery.value = event.query
+                _uiState.update { it.copy(searchQuery = event.query) }
                 if (event.query.isBlank()) {
-                    _searchResults.value = null
-                    _isSearching.value = false
+                    _uiState.update { it.copy(searchResults = null, isSearching = false) }
                 }
             }
-            is CitizenHomeEvent.CaseCardClicked -> {
-                _selectedCase.value = event.case
-                val isFromSearch = _searchResults.value?.any { it.id == event.case.id } == true
-                if (isFromSearch) {
-                    viewModelScope.launch { caseRepository.cacheCase(event.case) }
-                }
-            }
-            is CitizenHomeEvent.RadiusChanged -> _radiusKm.value = event.km
-            CitizenHomeEvent.ResumeDraftClicked -> navigateToConfirmReport()
-            CitizenHomeEvent.ScreenResumed -> checkPendingDraft()
-        }
-    }
 
-    private fun observeData() {
-        viewModelScope.launch {
-            combine(
-                caseRepository.cases,
-                _searchQuery,
-                _selectedCase,
-                _radiusKm,
-                _userLocation
-            ) { cases, query, selectedCase, radius, location ->
-                CitizenHomeUiState(
-                    activeCases = cases,
-                    searchQuery = query,
-                    selectedCase = selectedCase,
-                    userLat = location?.first,
-                    userLng = location?.second,
-                    radiusKm = radius
-                )
-            }.combine(_isLoading) { state, loading ->
-                state.copy(isLoading = loading)
-            }.combine(_searchResults) { state, searchResults ->
-                state.copy(searchResults = searchResults)
-            }.combine(_isSearching) { state, isSearching ->
-                state.copy(isSearching = isSearching)
-            }.combine(_hasPendingDraft) { state, hasPendingDraft ->
-                state.copy(hasPendingDraft = hasPendingDraft)
-            }.collect { state ->
-                _uiState.value = state
+            is CitizenHomeEvent.CaseCardClicked -> {
+                val isFromSearch = _uiState.value.searchResults?.any { it.id == event.case.id } == true
+                _uiState.update { it.copy(selectedCase = event.case) }
+                if (isFromSearch) viewModelScope.launch { caseRepository.cacheCase(event.case) }
+            }
+
+            is CitizenHomeEvent.RadiusChanged ->
+                _uiState.update { it.copy(radiusKm = event.km) }
+
+            CitizenHomeEvent.ResumeDraftClicked ->
+                viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToConfirmReport) }
+
+            CitizenHomeEvent.ScreenResumed -> checkPendingDraft()
+
+            is CitizenHomeEvent.CaseSelectedForReport -> {
+                CapturedEvidenceHolder.preselectedCaseId = event.caseId
+                viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToCamera) }
             }
         }
     }
@@ -133,28 +127,14 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                 .debounce(300)
                 .collect { query ->
                     if (query.length >= 2) {
-                        _isSearching.value = true
+                        _uiState.update { it.copy(isSearching = true) }
                         try {
-                            _searchResults.value = caseRepository.searchByName(query)
+                            _uiState.update { it.copy(searchResults = caseRepository.searchByName(query), isSearching = false) }
                         } catch (_: Exception) {
-                            _searchResults.value = emptyList()
-                        } finally {
-                            _isSearching.value = false
+                            _uiState.update { it.copy(searchResults = emptyList(), isSearching = false) }
                         }
                     }
                 }
         }
-    }
-
-    private fun navigateToMap() {
-        viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToMap) }
-    }
-
-    private fun navigateToCamera() {
-        viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToCamera) }
-    }
-
-    private fun navigateToConfirmReport() {
-        viewModelScope.launch { _effect.emit(CitizenHomeEffect.NavigateToConfirmReport) }
     }
 }

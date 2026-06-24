@@ -20,5 +20,6 @@ data class CitizenReport(
 enum class ReportStatus {
     NEW,
     SENT,
-    PENDING_SYNC
+    PENDING_SYNC,
+    SENDING
 }

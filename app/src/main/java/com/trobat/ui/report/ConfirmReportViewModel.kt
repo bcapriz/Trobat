@@ -9,8 +9,8 @@ import com.trobat.data.model.CitizenReport
 import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.data.model.ReportStatus
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.util.UUID
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.AppContainer
@@ -105,6 +105,7 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             // Nueva sesión de captura — usar evidencia nueva, restaurar texto del borrador
             val lat = holder.latitude
             val lng = holder.longitude
+            val filePath = holder.localFilePath
             val resolvedCaseId = preselectedCaseId ?: draft.selectedCaseId
             val resolvedCase = resolveCase(resolvedCaseId)
             draftPrefs.save(draft.copy(
@@ -117,6 +118,7 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             ))
             _uiState.value = _uiState.value.copy(
                 photoUri = holder.photoUri,
+                localFilePath = filePath,
                 latitude = lat,
                 longitude = lng,
                 locationLabel = if (lat != null && lng != null) "Obteniendo dirección..." else "Ubicación no disponible",
@@ -137,17 +139,11 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
         } else if (!draftPrefs.isEmpty()) {
             // Sin nueva captura — restaurar borrador completo del disco
             val restoredUri = draft.photoUri
-            // Restore holder so copyPhotoToInternalStorage can find the file on submit
-            if (restoredUri != null) {
-                CapturedEvidenceHolder.photoUri = restoredUri
-                CapturedEvidenceHolder.latitude = draft.latitude
-                CapturedEvidenceHolder.longitude = draft.longitude
-                CapturedEvidenceHolder.localFilePath = restoredUri.path
-            }
             val resolvedCaseId = preselectedCaseId ?: draft.selectedCaseId
             val resolvedCase = resolveCase(resolvedCaseId)
             _uiState.value = _uiState.value.copy(
                 photoUri = restoredUri,
+                localFilePath = restoredUri?.path,
                 latitude = draft.latitude,
                 longitude = draft.longitude,
                 locationLabel = draft.locationLabel.ifBlank {
@@ -275,20 +271,23 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
         // navigates away mid-send the form doesn't reappear pre-filled.
         draftPrefs.clear()
 
+        val photoUri = currentState.photoUri
+        val localFilePath = currentState.localFilePath
+
         viewModelScope.launch {
             _uiState.value = currentState.copy(isSending = true)
 
             val identified = currentState.isIdentified
             val newReport = CitizenReport(
-                id = System.currentTimeMillis().toString(),
+                id = UUID.randomUUID().toString(),
                 caseId = currentState.selectedCaseId ?: "",
                 title = "Reporte ciudadano",
                 description = currentState.requiredDescription,
                 optionalDetails = currentState.optionalDetails.ifBlank { null },
                 address = currentState.locationLabel,
-                createdAt = "Hoy, ${LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))}",
-                latitude = currentState.latitude ?: -34.6037,
-                longitude = currentState.longitude ?: -58.3816,
+                createdAt = Instant.now().toString(),
+                latitude = currentState.latitude ?: 0.0,
+                longitude = currentState.longitude ?: 0.0,
                 isAnonymous = !identified,
                 contactName = if (identified) authRepository.getUserName() else null,
                 contactPhone = if (identified) authRepository.getPhone() else null,
@@ -296,7 +295,8 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                 status = ReportStatus.NEW
             )
 
-            val sent = reportRepository.sendReport(newReport)
+            val sent = reportRepository.sendReport(newReport, photoUri, localFilePath)
+            CapturedEvidenceHolder.clear()
             _uiState.value = _uiState.value.copy(isSending = false)
             if (sent) {
                 _effect.emit(ConfirmReportEffect.NavigateToHeatMap)

@@ -53,7 +53,7 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         }
     }
 
-    override suspend fun sendReport(report: CitizenReport): Boolean {
+    override suspend fun sendReport(report: CitizenReport, photoUri: android.net.Uri?, localFilePath: String?): Boolean {
         _reports.value = _reports.value + report
         return true
     }
