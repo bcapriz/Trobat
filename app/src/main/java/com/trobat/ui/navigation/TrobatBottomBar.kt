@@ -33,9 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.semantics.Role
+import com.trobat.ui.screen.CoachmarkController
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -51,6 +55,7 @@ fun TrobatBottomBar(
     currentRoute: String?,
     onNavigate: (String) -> Unit,
     onCameraClick: (() -> Unit)? = null,
+    coachmarkController: CoachmarkController? = null,
     modifier: Modifier = Modifier
 ) {
     val cameraSelected = currentRoute == BottomRoutes.CAMERA
@@ -106,8 +111,15 @@ fun TrobatBottomBar(
                         TrobatNavigationBarItem(
                             item = item,
                             selected = currentRoute == item.route,
-                            onClick = {
-                                onNavigate(item.route)
+                            onClick = { onNavigate(item.route) },
+                            onBoundsChanged = when (item.route) {
+                                BottomRoutes.CASES -> coachmarkController?.let {
+                                    { rect -> it.casesBounds.value = rect }
+                                }
+                                BottomRoutes.HEATMAP -> coachmarkController?.let {
+                                    { rect -> it.heatmapBounds.value = rect }
+                                }
+                                else -> null
                             }
                         )
                     }
@@ -121,6 +133,19 @@ fun TrobatBottomBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = 14.dp)
+                .then(
+                    coachmarkController?.let {
+                        Modifier.onGloballyPositioned { coords ->
+                            val pos = coords.positionInRoot()
+                            it.cameraBounds.value = Rect(
+                                left = pos.x,
+                                top = pos.y,
+                                right = pos.x + coords.size.width,
+                                bottom = pos.y + coords.size.height
+                            )
+                        }
+                    } ?: Modifier
+                )
         )
     }
 }
@@ -129,7 +154,8 @@ fun TrobatBottomBar(
 private fun RowScope.TrobatNavigationBarItem(
     item: TrobatBottomBarItem,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onBoundsChanged: ((Rect) -> Unit)? = null
 ) {
     val selectedColor = MaterialTheme.colorScheme.primary
     val unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -162,6 +188,21 @@ private fun RowScope.TrobatNavigationBarItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
+            )
+            .then(
+                if (onBoundsChanged != null) {
+                    Modifier.onGloballyPositioned { coords ->
+                        val pos = coords.positionInRoot()
+                        onBoundsChanged(
+                            Rect(
+                                left = pos.x,
+                                top = pos.y,
+                                right = pos.x + coords.size.width,
+                                bottom = pos.y + coords.size.height
+                            )
+                        )
+                    }
+                } else Modifier
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
