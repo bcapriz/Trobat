@@ -1,9 +1,13 @@
 package com.trobat.ui.home
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.trobat.ui.utils.findActivity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -69,21 +74,26 @@ fun CitizenHomeScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.onEvent(CitizenHomeEvent.ScreenResumed)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
     var hasLocationPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         )
+    }
+    var isLocationPermanentlyDenied by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val locationGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                hasLocationPermission = locationGranted
+                if (locationGranted) isLocationPermanentlyDenied = false
+                viewModel.onEvent(CitizenHomeEvent.ScreenResumed)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -92,7 +102,15 @@ fun CitizenHomeScreen(
         val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                       permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         hasLocationPermission = granted
-        if (granted) viewModel.onEvent(CitizenHomeEvent.RefreshClicked)
+        if (granted) {
+            isLocationPermanentlyDenied = false
+            viewModel.onEvent(CitizenHomeEvent.RefreshClicked)
+        } else {
+            val activity = context.findActivity()
+            isLocationPermanentlyDenied = activity != null &&
+                    !ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION) &&
+                    !ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -116,10 +134,17 @@ fun CitizenHomeScreen(
     CitizenHomeContent(
         uiState = uiState,
         hasLocationPermission = hasLocationPermission,
+        isLocationPermanentlyDenied = isLocationPermanentlyDenied,
         onRequestLocationPermission = {
             locationPermissionLauncher.launch(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
             )
+        },
+        onOpenSettings = {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+            }
+            context.startActivity(intent)
         },
         onEvent = viewModel::onEvent,
         onCargarReporte = { caseId ->
@@ -135,7 +160,9 @@ fun CitizenHomeScreen(
 private fun CitizenHomeContent(
     uiState: CitizenHomeUiState,
     hasLocationPermission: Boolean,
+    isLocationPermanentlyDenied: Boolean,
     onRequestLocationPermission: () -> Unit,
+    onOpenSettings: () -> Unit,
     onEvent: (CitizenHomeEvent) -> Unit,
     onCargarReporte: (caseId: String) -> Unit,
     onResumeDraft: () -> Unit = {},
@@ -229,7 +256,11 @@ private fun CitizenHomeContent(
         )
 
         if (!hasLocationPermission && !uiState.isLoading) {
-            LocationPermissionCard(onRequestLocationPermission = onRequestLocationPermission)
+            LocationPermissionCard(
+                isLocationPermanentlyDenied = isLocationPermanentlyDenied,
+                onRequestLocationPermission = onRequestLocationPermission,
+                onOpenSettings = onOpenSettings
+            )
         }
 
         if (uiState.userLat != null && !uiState.isLoading) {
@@ -369,7 +400,11 @@ private fun PendingDraftCard(onResumeDraft: () -> Unit) {
 }
 
 @Composable
-private fun LocationPermissionCard(onRequestLocationPermission: () -> Unit) {
+private fun LocationPermissionCard(
+    isLocationPermanentlyDenied: Boolean,
+    onRequestLocationPermission: () -> Unit,
+    onOpenSettings: () -> Unit
+) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
@@ -392,13 +427,23 @@ private fun LocationPermissionCard(onRequestLocationPermission: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (isLocationPermanentlyDenied) {
+                Text(
+                    text = stringResource(R.string.home_location_permanently_denied_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
             Button(
-                onClick = onRequestLocationPermission,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
+                onClick = if (isLocationPermanentlyDenied) onOpenSettings else onRequestLocationPermission,
+                modifier = Modifier.fillMaxWidth().height(52.dp)
             ) {
-                Text(text = stringResource(R.string.home_enable_location))
+                Text(
+                    text = stringResource(
+                        if (isLocationPermanentlyDenied) R.string.capture_go_to_settings
+                        else R.string.home_enable_location
+                    )
+                )
             }
         }
     }

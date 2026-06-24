@@ -269,6 +269,10 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             return
         }
 
+        val lat = currentState.latitude
+        val lng = currentState.longitude
+        if (lat == null || lng == null) return
+
         // Clear draft synchronously before the async work so that if the user
         // navigates away mid-send the form doesn't reappear pre-filled.
         draftPrefs.clear()
@@ -287,8 +291,8 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
                 optionalDetails = currentState.optionalDetails.ifBlank { null },
                 address = currentState.locationLabel,
                 createdAt = Instant.now().toString(),
-                latitude = currentState.latitude ?: 0.0,
-                longitude = currentState.longitude ?: 0.0,
+                latitude = lat,
+                longitude = lng,
                 isAnonymous = !identified,
                 contactName = if (identified) authRepository.getUserName() else null,
                 contactPhone = if (identified) authRepository.getPhone() else null,

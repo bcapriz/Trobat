@@ -1,8 +1,12 @@
 package com.trobat.ui.capture
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.core.app.ActivityCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -34,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,6 +51,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -54,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.trobat.ui.utils.findActivity
 import coil.compose.AsyncImage
 import com.trobat.R
 import com.trobat.ui.utils.takePictureWithLocation
@@ -77,12 +85,35 @@ fun CaptureEvidenceScreen(
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         )
     }
+    var isLocationPermanentlyDenied by remember { mutableStateOf(false) }
 
     val permissionsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         hasCameraPermission = permissions[Manifest.permission.CAMERA] == true
-        hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val locationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        hasLocationPermission = locationGranted
+        if (!locationGranted) {
+            val activity = context.findActivity()
+            isLocationPermanentlyDenied = activity != null &&
+                    !ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            isLocationPermanentlyDenied = false
+        }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val locationGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                hasCameraPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                hasLocationPermission = locationGranted
+                if (locationGranted) isLocationPermanentlyDenied = false
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(hasCameraPermission, hasLocationPermission) {
@@ -92,6 +123,17 @@ fun CaptureEvidenceScreen(
                 hasLocationPermission = hasLocationPermission
             )
         )
+    }
+
+    // Detecta denegación permanente al entrar a la pantalla sin esperar a que el usuario toque el botón.
+    // Si el permiso no está otorgado, dispara el launcher silenciosamente: el sistema no muestra diálogo
+    // cuando está bloqueado, pero el callback sí se ejecuta y actualiza isLocationPermanentlyDenied.
+    LaunchedEffect(Unit) {
+        if (!hasLocationPermission) {
+            permissionsLauncher.launch(
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION)
+            )
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -127,10 +169,17 @@ fun CaptureEvidenceScreen(
     CaptureEvidenceContent(
         uiState = uiState,
         imageCapture = imageCapture,
+        isLocationPermanentlyDenied = isLocationPermanentlyDenied,
         onRequestPermissions = {
             permissionsLauncher.launch(
                 arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION)
             )
+        },
+        onOpenSettings = {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+            }
+            context.startActivity(intent)
         },
         onTakePhoto = onTakePhoto,
         onCancel = onCancel,
@@ -142,7 +191,9 @@ fun CaptureEvidenceScreen(
 private fun CaptureEvidenceContent(
     uiState: CaptureEvidenceUiState,
     imageCapture: ImageCapture,
+    isLocationPermanentlyDenied: Boolean,
     onRequestPermissions: () -> Unit,
+    onOpenSettings: () -> Unit,
     onTakePhoto: () -> Unit,
     onCancel: () -> Unit,
     onEvent: (CaptureEvidenceEvent) -> Unit
@@ -172,7 +223,9 @@ private fun CaptureEvidenceContent(
             PermissionInfoCard(
                 hasCameraPermission = uiState.hasCameraPermission,
                 hasLocationPermission = uiState.hasLocationPermission,
-                onRequestPermissions = onRequestPermissions
+                isLocationPermanentlyDenied = isLocationPermanentlyDenied,
+                onRequestPermissions = onRequestPermissions,
+                onOpenSettings = onOpenSettings
             )
         }
 
@@ -208,6 +261,7 @@ private fun CaptureEvidenceContent(
         } else {
             Button(
                 onClick = { onEvent(CaptureEvidenceEvent.UseEvidenceClicked) },
+                enabled = uiState.hasLocationData,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
@@ -354,10 +408,19 @@ private fun CameraCard(
 private fun PermissionInfoCard(
     hasCameraPermission: Boolean,
     hasLocationPermission: Boolean,
-    onRequestPermissions: () -> Unit
+    isLocationPermanentlyDenied: Boolean,
+    onRequestPermissions: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
     val habilitada = stringResource(R.string.capture_permission_enabled)
     val pendiente = stringResource(R.string.capture_permission_pending)
+    val bloqueada = stringResource(R.string.capture_permission_blocked)
+
+    val locationLabel = when {
+        hasLocationPermission -> habilitada
+        isLocationPermanentlyDenied -> bloqueada
+        else -> pendiente
+    }
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -387,17 +450,29 @@ private fun PermissionInfoCard(
                 color = if (hasCameraPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
             Text(
-                text = stringResource(R.string.capture_location_status, if (hasLocationPermission) habilitada else pendiente),
+                text = stringResource(R.string.capture_location_status, locationLabel),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (hasLocationPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
+            if (isLocationPermanentlyDenied) {
+                Text(
+                    text = stringResource(R.string.capture_location_permanently_denied_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
             Button(
-                onClick = onRequestPermissions,
+                onClick = if (isLocationPermanentlyDenied) onOpenSettings else onRequestPermissions,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text(text = stringResource(R.string.action_enable_permissions))
+                Text(
+                    text = stringResource(
+                        if (isLocationPermanentlyDenied) R.string.capture_go_to_settings
+                        else R.string.action_enable_permissions
+                    )
+                )
             }
         }
     }

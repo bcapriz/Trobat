@@ -29,8 +29,12 @@ data class ConfirmReportUiState(
     val displayedCases: List<MissingPersonCase>
         get() = caseSearchResults ?: activeCases
 
+    val hasLocationData: Boolean
+        get() = latitude != null && longitude != null
+
     val canSendReport: Boolean
         get() = selectedCaseId != null &&
                 requiredDescription.isNotBlank() &&
+                hasLocationData &&
                 !isSending
 }

@@ -209,10 +209,14 @@ private fun ConfirmReportContent(
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
         )
 
+        val locationMissing = !uiState.hasLocationData
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                containerColor = if (locationMissing)
+                    MaterialTheme.colorScheme.errorContainer
+                else
+                    MaterialTheme.colorScheme.surfaceVariant
             ),
             shape = RoundedCornerShape(20.dp)
         ) {
@@ -223,19 +227,26 @@ private fun ConfirmReportContent(
                 Icon(
                     imageVector = Icons.Outlined.LocationOn,
                     contentDescription = stringResource(R.string.confirm_location_icon_description),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = if (locationMissing) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = stringResource(R.string.confirm_location_title),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = if (locationMissing) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = uiState.locationLabel,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (locationMissing) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (locationMissing) {
+                    Text(
+                        text = stringResource(R.string.confirm_location_missing_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
             }
         }
 

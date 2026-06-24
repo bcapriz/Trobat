@@ -1,7 +1,8 @@
 package com.trobat.ui.utils
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location as AndroidLocation
 import android.net.Uri
 import androidx.camera.core.ImageCapture
@@ -12,13 +13,19 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import java.io.File
 
-@SuppressLint("MissingPermission")
 fun takePictureWithLocation(
     context: Context,
     imageCapture: ImageCapture,
     onResult: (Uri, Double?, Double?) -> Unit,
     onError: (String?) -> Unit
 ) {
+    val locationGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    if (!locationGranted) {
+        onError("Permiso de ubicación no otorgado.")
+        return
+    }
+
     val fusedLocation = LocationServices.getFusedLocationProviderClient(context)
     val tokenSource = CancellationTokenSource()
 

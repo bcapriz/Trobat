@@ -65,16 +65,20 @@ class CaptureEvidenceViewModel : ViewModel() {
             isCapturing = false,
             capturedPhotoUri = uri,
             capturedLatitude = latitude,
-            capturedLongitude = longitude
+            capturedLongitude = longitude,
+            errorMessage = if (latitude == null || longitude == null)
+                "No se pudo obtener la ubicación. Activá el GPS y retomá la foto."
+            else null
         )
     }
 
     private fun useEvidence() {
         viewModelScope.launch {
-            if (_uiState.value.hasPhoto) {
-                _effect.emit(CaptureEvidenceEffect.NavigateToConfirmReport)
-            } else {
-                _uiState.value = _uiState.value.copy(errorMessage = "Primero tenés que tomar una foto.")
+            val state = _uiState.value
+            when {
+                !state.hasPhoto -> _uiState.value = state.copy(errorMessage = "Primero tenés que tomar una foto.")
+                !state.hasLocationData -> _uiState.value = state.copy(errorMessage = "Esta foto no tiene ubicación. Retomá la foto con el GPS activo.")
+                else -> _effect.emit(CaptureEvidenceEffect.NavigateToConfirmReport)
             }
         }
     }

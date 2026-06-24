@@ -14,4 +14,7 @@ data class CaptureEvidenceUiState(
 ) {
     val hasRequiredPermissions: Boolean
         get() = hasCameraPermission && hasLocationPermission
+
+    val hasLocationData: Boolean
+        get() = capturedLatitude != null && capturedLongitude != null
 }
