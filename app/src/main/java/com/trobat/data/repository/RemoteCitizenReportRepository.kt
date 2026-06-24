@@ -43,6 +43,10 @@ class RemoteCitizenReportRepository(
 
     override suspend fun sendReport(report: CitizenReport): Boolean {
         val localPhotoPath = copyPhotoToInternalStorage(report.id)
+        // Clear holder synchronously before the first suspension point so that
+        // a new ConfirmReportViewModel created while this coroutine is in-flight
+        // does not find stale evidence and allow a duplicate submission.
+        CapturedEvidenceHolder.clear()
 
         pendingReportDao.insert(
             PendingReportEntity(

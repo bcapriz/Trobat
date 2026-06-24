@@ -258,6 +258,8 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun sendReport() {
         val currentState = _uiState.value
+        if (currentState.isSending) return
+
         val hasCaseError = currentState.selectedCaseId == null
         val hasDescriptionError = currentState.requiredDescription.isBlank()
 
@@ -268,6 +270,10 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             )
             return
         }
+
+        // Clear draft synchronously before the async work so that if the user
+        // navigates away mid-send the form doesn't reappear pre-filled.
+        draftPrefs.clear()
 
         viewModelScope.launch {
             _uiState.value = currentState.copy(isSending = true)
@@ -291,8 +297,6 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
             )
 
             val sent = reportRepository.sendReport(newReport)
-            CapturedEvidenceHolder.clear()
-            draftPrefs.clear()
             _uiState.value = _uiState.value.copy(isSending = false)
             if (sent) {
                 _effect.emit(ConfirmReportEffect.NavigateToHeatMap)
