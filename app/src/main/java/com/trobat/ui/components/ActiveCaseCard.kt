@@ -12,11 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.NearMe
 import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.Place
-import coil.compose.SubcomposeAsyncImage
 import com.trobat.utils.GeoUtils
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -29,7 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.trobat.R
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.utils.formatLastSeenDate
 
@@ -58,12 +58,12 @@ fun ActiveCaseCard(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.PersonSearch,
-                    contentDescription = "Persona buscada",
+                    contentDescription = stringResource(R.string.component_missing_person),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "${case.fullName}, ${case.age} años",
+                    text = stringResource(R.string.format_case_name_age, case.fullName, case.age),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -89,7 +89,7 @@ fun ActiveCaseCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Visto por última vez: ${case.lastSeenLocation}",
+                        text = stringResource(R.string.format_last_seen, case.lastSeenLocation),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )

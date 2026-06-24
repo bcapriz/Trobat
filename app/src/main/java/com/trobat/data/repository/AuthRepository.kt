@@ -10,8 +10,4 @@ interface AuthRepository {
     fun getNationalId(): String?
     fun getPhone(): String?
     fun getEmail(): String?
-    fun getNotificationsEnabled(): Boolean
-    fun setNotificationsEnabled(enabled: Boolean)
-    fun getDarkModeEnabled(): Boolean
-    fun setDarkModeEnabled(enabled: Boolean)
 }

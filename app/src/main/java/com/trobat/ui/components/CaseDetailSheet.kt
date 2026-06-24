@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,13 +22,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import com.trobat.R
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.utils.formatLastSeenDate
 
@@ -44,7 +48,7 @@ fun CaseDetailSheet(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "${case.fullName}, ${case.age} años",
+            text = stringResource(R.string.format_case_name_age, case.fullName, case.age),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
@@ -56,9 +60,10 @@ fun CaseDetailSheet(
             SubcomposeAsyncImage(
                 model = case.imageUrl,
                 contentDescription = case.fullName,
-                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(max = 240.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 loading = {
                     Box(
@@ -90,7 +95,7 @@ fun CaseDetailSheet(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "Visto por última vez: ${case.lastSeenLocation}",
+                text = stringResource(R.string.format_last_seen, case.lastSeenLocation),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -105,7 +110,7 @@ fun CaseDetailSheet(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = formatLastSeenDate(case.lastSeenDate),
+                text = remember(case.lastSeenDate) { formatLastSeenDate(case.lastSeenDate) },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -125,7 +130,7 @@ fun CaseDetailSheet(
                 onClick = onCargarReporte,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Cargar Reporte")
+                Text(text = stringResource(R.string.component_load_report))
             }
         }
     }

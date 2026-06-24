@@ -29,6 +29,9 @@ interface PendingReportDao {
     @Query("UPDATE pending_reports SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: String, status: String)
 
+    @Query("UPDATE pending_reports SET status = :status, localPhotoPath = NULL WHERE id = :id")
+    suspend fun markSent(id: String, status: String)
+
     @Query("UPDATE pending_reports SET status = 'PENDING_SYNC' WHERE status = 'SENDING'")
     suspend fun resetSendingToPending()
 

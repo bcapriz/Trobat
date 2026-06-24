@@ -15,7 +15,6 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         CitizenReport(
             id = "1",
             caseId = "1",
-            title = "Nuevo reporte cercano",
             description = "Posible avistamiento registrado cerca de una plaza.",
             optionalDetails = "La persona caminaba por Avenida Mitre hacia el centro de Avellaneda.",
             address = "Av. Mitre y Las Flores, Wilde",
@@ -27,7 +26,6 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         CitizenReport(
             id = "2",
             caseId = "2",
-            title = "Nueva evidencia",
             description = "Se recibió una foto desde la cámara de la app.",
             optionalDetails = null,
             address = "Retiro, CABA",
@@ -53,7 +51,7 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         }
     }
 
-    override suspend fun sendReport(report: CitizenReport): Boolean {
+    override suspend fun sendReport(report: CitizenReport, photoUri: android.net.Uri?, localFilePath: String?): Boolean {
         _reports.value = _reports.value + report
         return true
     }

@@ -3,7 +3,6 @@ package com.trobat.data.model
 data class CitizenReport(
     val id: String,
     val caseId: String,
-    val title: String,
     val description: String,
     val optionalDetails: String?,
     val address: String,
@@ -20,5 +19,6 @@ data class CitizenReport(
 enum class ReportStatus {
     NEW,
     SENT,
-    PENDING_SYNC
+    PENDING_SYNC,
+    SENDING
 }

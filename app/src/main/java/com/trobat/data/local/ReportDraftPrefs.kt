@@ -58,7 +58,8 @@ class ReportDraftPrefs(context: Context) {
     )
 
     fun isEmpty(): Boolean = prefs.getString("photo_uri", null) == null &&
-            prefs.getString("description", "").isNullOrBlank()
+            prefs.getString("description", "").isNullOrBlank() &&
+            prefs.getString("case_id", null) == null
 
     fun clear() = prefs.edit().clear().apply()
 }
