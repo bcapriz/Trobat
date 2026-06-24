@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,9 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import com.trobat.ui.main.CoachmarkController
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -49,6 +55,8 @@ import com.trobat.ui.components.FloatingCameraButton
 fun TrobatBottomBar(
     currentRoute: String?,
     onNavigate: (String) -> Unit,
+    onCameraClick: (() -> Unit)? = null,
+    coachmarkController: CoachmarkController? = null,
     modifier: Modifier = Modifier
 ) {
     val cameraSelected = currentRoute == BottomRoutes.CAMERA
@@ -74,7 +82,7 @@ fun TrobatBottomBar(
                         bottomEnd = 0.dp
                     )
                 ),
-            color = Color(0xFFF7F4FC),
+            color = MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(
                 topStart = 24.dp,
                 topEnd = 24.dp,
@@ -104,8 +112,15 @@ fun TrobatBottomBar(
                         TrobatNavigationBarItem(
                             item = item,
                             selected = currentRoute == item.route,
-                            onClick = {
-                                onNavigate(item.route)
+                            onClick = { onNavigate(item.route) },
+                            onBoundsChanged = when (item.route) {
+                                BottomRoutes.CASES -> coachmarkController?.let {
+                                    { rect -> it.casesBounds.value = rect }
+                                }
+                                BottomRoutes.HEATMAP -> coachmarkController?.let {
+                                    { rect -> it.heatmapBounds.value = rect }
+                                }
+                                else -> null
                             }
                         )
                     }
@@ -115,12 +130,23 @@ fun TrobatBottomBar(
 
         FloatingCameraButton(
             selected = cameraSelected,
-            onClick = {
-                onNavigate(BottomRoutes.CAMERA)
-            },
+            onClick = onCameraClick ?: { onNavigate(BottomRoutes.CAMERA) },
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = 14.dp)
+                .then(
+                    coachmarkController?.let {
+                        Modifier.onGloballyPositioned { coords ->
+                            val pos = coords.positionInRoot()
+                            it.cameraBounds.value = Rect(
+                                left = pos.x,
+                                top = pos.y,
+                                right = pos.x + coords.size.width,
+                                bottom = pos.y + coords.size.height
+                            )
+                        }
+                    } ?: Modifier
+                )
         )
     }
 }
@@ -129,10 +155,12 @@ fun TrobatBottomBar(
 private fun RowScope.TrobatNavigationBarItem(
     item: TrobatBottomBarItem,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onBoundsChanged: ((Rect) -> Unit)? = null
 ) {
-    val selectedColor = Color(0xFF5E1DD3)
-    val unselectedColor = Color(0xFF6D6778)
+    val label = stringResource(item.labelRes)
+    val selectedColor = MaterialTheme.colorScheme.primary
+    val unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     val itemScale by animateFloatAsState(
         targetValue = if (selected) 1.02f else 1f,
@@ -156,12 +184,27 @@ private fun RowScope.TrobatNavigationBarItem(
             .semantics {
                 role = Role.Tab
                 this.selected = selected
-                contentDescription = item.label
+                contentDescription = label
             }
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
+            )
+            .then(
+                if (onBoundsChanged != null) {
+                    Modifier.onGloballyPositioned { coords ->
+                        val pos = coords.positionInRoot()
+                        onBoundsChanged(
+                            Rect(
+                                left = pos.x,
+                                top = pos.y,
+                                right = pos.x + coords.size.width,
+                                bottom = pos.y + coords.size.height
+                            )
+                        )
+                    }
+                } else Modifier
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
@@ -202,7 +245,7 @@ private fun RowScope.TrobatNavigationBarItem(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = item.label,
+            text = label,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontSize = 10.sp,

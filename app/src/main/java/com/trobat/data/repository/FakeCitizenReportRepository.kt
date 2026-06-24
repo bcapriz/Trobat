@@ -1,10 +1,13 @@
 package com.trobat.data.repository
 
+import com.trobat.data.local.PendingReportEntity
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.ReportStatus
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 
 class FakeCitizenReportRepository : CitizenReportRepository {
 
@@ -12,7 +15,6 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         CitizenReport(
             id = "1",
             caseId = "1",
-            title = "Nuevo reporte cercano",
             description = "Posible avistamiento registrado cerca de una plaza.",
             optionalDetails = "La persona caminaba por Avenida Mitre hacia el centro de Avellaneda.",
             address = "Av. Mitre y Las Flores, Wilde",
@@ -24,7 +26,6 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         CitizenReport(
             id = "2",
             caseId = "2",
-            title = "Nueva evidencia",
             description = "Se recibió una foto desde la cámara de la app.",
             optionalDetails = null,
             address = "Retiro, CABA",
@@ -37,8 +38,8 @@ class FakeCitizenReportRepository : CitizenReportRepository {
 
     private val _reports = MutableStateFlow(initialReports)
 
-    override val reports: StateFlow<List<CitizenReport>> =
-        _reports.asStateFlow()
+    override val reports: StateFlow<List<CitizenReport>> = _reports.asStateFlow()
+    override val pendingReports: Flow<List<PendingReportEntity>> = flowOf(emptyList())
 
     override fun getNearbyReports(): List<CitizenReport> {
         return _reports.value
@@ -50,7 +51,14 @@ class FakeCitizenReportRepository : CitizenReportRepository {
         }
     }
 
-    override fun sendReport(report: CitizenReport) {
+    override suspend fun sendReport(report: CitizenReport, photoUri: android.net.Uri?, localFilePath: String?): Boolean {
         _reports.value = _reports.value + report
+        return true
     }
+
+    override suspend fun retrySyncPending() {}
+
+    override suspend fun resetStuckSending() {}
+
+    override suspend fun cleanupSentReports() {}
 }

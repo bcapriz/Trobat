@@ -46,4 +46,10 @@ class FakeCaseRepository : CaseRepository {
     )
 
     override val cases: StateFlow<List<MissingPersonCase>> = _cases.asStateFlow()
+
+    override suspend fun refresh() {}
+    override suspend fun refreshCercanos(lat: Double, lng: Double, radioKm: Double) {}
+    override suspend fun refreshCercanosConFallback(lat: Double, lng: Double, initialRadioKm: Double) {}
+    override suspend fun searchByName(query: String): List<MissingPersonCase> = emptyList()
+    override suspend fun cacheCase(case: MissingPersonCase) {}
 }
