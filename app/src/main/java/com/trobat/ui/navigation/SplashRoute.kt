@@ -12,9 +12,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.ui.splash.LoadingScreen
+import com.trobat.ui.splash.SplashEffect
 import com.trobat.ui.splash.SplashScreen
 import com.trobat.ui.splash.SplashViewModel
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -22,20 +22,18 @@ fun SplashRoute(
     onNavigateToMain: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToOnboarding: () -> Unit,
-    isLoggedIn: () -> Boolean,
-    hasSeenOnboarding: () -> Boolean,
     viewModel: SplashViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        delay(1800)
-        viewModel.showLoadingScreen()
-        delay(1800)
-        when {
-            isLoggedIn() -> onNavigateToMain()
-            !hasSeenOnboarding() -> onNavigateToOnboarding()
-            else -> onNavigateToLogin()
+        viewModel.startSplash()
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                SplashEffect.NavigateToMain -> onNavigateToMain()
+                SplashEffect.NavigateToLogin -> onNavigateToLogin()
+                SplashEffect.NavigateToOnboarding -> onNavigateToOnboarding()
+            }
         }
     }
 

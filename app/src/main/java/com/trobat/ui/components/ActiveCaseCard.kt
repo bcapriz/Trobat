@@ -12,11 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.NearMe
 import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.Place
-import coil.compose.SubcomposeAsyncImage
 import com.trobat.utils.GeoUtils
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard

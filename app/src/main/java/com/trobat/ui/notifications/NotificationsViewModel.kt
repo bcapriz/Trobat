@@ -51,7 +51,13 @@ class NotificationsViewModel : ViewModel() {
         }
     }
 
-    fun markAllRead() {
+    fun onEvent(event: NotificationsEvent) {
+        when (event) {
+            NotificationsEvent.MarkAllRead -> markAllRead()
+        }
+    }
+
+    private fun markAllRead() {
         viewModelScope.launch {
             _uiState.value.alerts
                 .filter { !it.isRead }

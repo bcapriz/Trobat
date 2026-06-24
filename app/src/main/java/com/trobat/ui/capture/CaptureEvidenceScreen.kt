@@ -100,12 +100,12 @@ fun CaptureEvidenceScreen(
     }
 
     LaunchedEffect(Unit) {
-        // If state was restored with a photo but the evidence was already sent (holder cleared),
-        // reset so the user starts a fresh capture instead of seeing the old photo
         if (viewModel.uiState.value.hasPhoto && CapturedEvidenceHolder.photoUri == null) {
             viewModel.onEvent(CaptureEvidenceEvent.RetakePhotoClicked)
         }
+    }
 
+    LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 CaptureEvidenceEffect.NavigateToConfirmReport -> onConfirmReport()

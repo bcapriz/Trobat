@@ -26,13 +26,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.data.local.NotificationEntity
-import com.trobat.ui.notifications.NotificationsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,7 +44,7 @@ fun NotificationsScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.markAllRead()
+        viewModel.onEvent(NotificationsEvent.MarkAllRead)
     }
 
     Column(
@@ -98,8 +98,10 @@ fun NotificationsScreen(
 
 @Composable
 private fun AlertCard(alert: NotificationEntity) {
-    val timestamp = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.forLanguageTag("es-AR"))
-        .format(Date(alert.receivedAt))
+    val timestamp = remember(alert.receivedAt) {
+        SimpleDateFormat("d MMM yyyy, HH:mm", Locale.forLanguageTag("es-AR"))
+            .format(Date(alert.receivedAt))
+    }
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -151,8 +153,10 @@ private fun AlertCard(alert: NotificationEntity) {
 private fun PendingReportCard(item: PendingReportItem) {
     val report = item.entity
     val isSent = report.status == "SENT"
-    val dateFormat = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.forLanguageTag("es-AR"))
-    val formattedDate = dateFormat.format(Date(report.createdAtMillis))
+    val formattedDate = remember(report.createdAtMillis) {
+        SimpleDateFormat("d MMM yyyy, HH:mm", Locale.forLanguageTag("es-AR"))
+            .format(Date(report.createdAtMillis))
+    }
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),

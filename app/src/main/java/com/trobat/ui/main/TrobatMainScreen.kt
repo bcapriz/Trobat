@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +29,7 @@ import com.trobat.ui.report.ConfirmReportScreen
 
 @Composable
 fun TrobatMainScreen(onLogout: () -> Unit) {
+    val viewModel: TrobatMainViewModel = viewModel()
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -56,7 +58,7 @@ fun TrobatMainScreen(onLogout: () -> Unit) {
                     }
                 },
                 onCameraClick = {
-                    if (!AppContainer.reportDraftPrefs.isEmpty()) {
+                    if (viewModel.hasPendingDraft()) {
                         navController.navigate(MainRoutes.CONFIRM_REPORT)
                     } else {
                         navController.navigate(BottomRoutes.CAMERA) {

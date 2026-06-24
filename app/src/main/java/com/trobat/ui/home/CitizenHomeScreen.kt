@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -53,11 +52,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.components.CaseDetailSheet
+import com.trobat.ui.components.RadiusSlider
+import kotlin.math.roundToInt
 import com.trobat.ui.home.CitizenHomeEffect
 import com.trobat.ui.home.CitizenHomeEvent
 import com.trobat.ui.home.CitizenHomeUiState
 import com.trobat.ui.home.CitizenHomeViewModel
-import kotlin.math.roundToInt
 
 @Composable
 fun CitizenHomeScreen(
@@ -238,31 +238,10 @@ private fun CitizenHomeContent(
         }
 
         if (uiState.userLat != null && !uiState.isLoading) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Radio de búsqueda",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "${uiState.radiusKm.roundToInt()} km",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Slider(
-                    value = uiState.radiusKm,
-                    onValueChange = { onEvent(CitizenHomeEvent.RadiusChanged(it)) },
-                    valueRange = 5f..100f,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            RadiusSlider(
+                radiusKm = uiState.radiusKm,
+                onRadiusChanged = { onEvent(CitizenHomeEvent.RadiusChanged(it)) }
+            )
         }
 
         if (uiState.isLoading) {

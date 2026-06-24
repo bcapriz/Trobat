@@ -3,12 +3,17 @@ package com.trobat.ui.heatmap
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.trobat.data.repository.CaseRepository
+import com.trobat.data.model.MissingPersonCase
 import com.trobat.data.repository.AppContainer
-import com.trobat.utils.ConcentrationUtil
+import com.trobat.data.repository.CaseRepository
+import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.ui.utils.fetchCurrentLocation
+import com.trobat.utils.ConcentrationUtil
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
@@ -21,9 +26,11 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
     private val _uiState = MutableStateFlow(HeatMapUiState())
     val uiState: StateFlow<HeatMapUiState> = _uiState.asStateFlow()
 
+    private val _effect = MutableSharedFlow<HeatMapEffect>()
+    val effect: SharedFlow<HeatMapEffect> = _effect.asSharedFlow()
+
     private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
-    private val _isLoading = MutableStateFlow(true)
 
     init {
         fetchUserLocation()
@@ -36,54 +43,57 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
             if (location != null) AppContainer.lastLocationPrefs.save(location.first, location.second)
             viewModelScope.launch {
                 if (caseRepository.cases.value.isNotEmpty()) {
-                    _isLoading.value = false
+                    _uiState.update { it.copy(isLoading = false) }
                     return@launch
                 }
-                _isLoading.value = true
+                _uiState.update { it.copy(isLoading = true) }
                 if (location != null) {
                     caseRepository.refreshCercanosConFallback(location.first, location.second, _radiusKm.value.toDouble())
                 } else {
                     caseRepository.refresh()
                 }
-                _isLoading.value = false
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
-    fun onCaseClicked(case: com.trobat.data.model.MissingPersonCase) {
-        _uiState.update { state -> state.copy(selectedCase = case) }
+    fun onCaseClicked(case: MissingPersonCase) {
+        _uiState.update { it.copy(selectedCase = case) }
     }
 
     fun onDismissCaseModal() {
-        _uiState.update { state -> state.copy(selectedCase = null) }
+        _uiState.update { it.copy(selectedCase = null) }
     }
 
     fun onRadiusChanged(km: Float) {
         _radiusKm.value = km
     }
 
+    fun onCargarReporte(case: MissingPersonCase) {
+        CapturedEvidenceHolder.preselectedCaseId = case.id
+        viewModelScope.launch { _effect.emit(HeatMapEffect.NavigateToCamera) }
+    }
+
     private fun observeCases() {
         viewModelScope.launch {
-            combine(
-                caseRepository.cases,
-                _radiusKm,
-                _userLocation
-            ) { cases, radius, location ->
+            combine(caseRepository.cases, _radiusKm, _userLocation) { cases, radius, location ->
                 val concentration = ConcentrationUtil.mostConcentrated(cases)
                 HeatMapUiState(
                     cases = cases,
                     totalCases = cases.size,
                     mostActiveArea = concentration?.label ?: "-",
                     mostActiveCount = concentration?.count ?: 0,
-                    selectedCase = _uiState.value.selectedCase,
                     userLat = location?.first,
                     userLng = location?.second,
                     radiusKm = radius
                 )
-            }.combine(_isLoading) { state, loading ->
-                state.copy(isLoading = loading)
-            }.collect { state ->
-                _uiState.value = state
+            }.collect { newState ->
+                _uiState.update { current ->
+                    newState.copy(
+                        isLoading = current.isLoading,
+                        selectedCase = current.selectedCase
+                    )
+                }
             }
         }
     }

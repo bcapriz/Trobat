@@ -42,9 +42,7 @@ fun AppNavigation() {
                     navController.navigate(AppRoutes.ONBOARDING) {
                         popUpTo(AppRoutes.SPLASH) { inclusive = true }
                     }
-                },
-                isLoggedIn = { AppContainer.authRepository.isLoggedIn() },
-                hasSeenOnboarding = { AppContainer.onboardingPrefs.hasSeenOnboarding }
+                }
             )
         }
 

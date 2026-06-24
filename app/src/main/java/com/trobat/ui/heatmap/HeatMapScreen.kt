@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.google.android.gms.maps.CameraUpdateFactory
-import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -31,11 +30,9 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.trobat.data.model.MissingPersonCase
-import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.components.CaseDetailSheet
-import com.trobat.ui.heatmap.HeatMapUiState
-import com.trobat.ui.heatmap.HeatMapViewModel
+import com.trobat.ui.components.RadiusSlider
 
 @Composable
 fun HeatMapScreen(
@@ -45,12 +42,20 @@ fun HeatMapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                HeatMapEffect.NavigateToCamera -> onNavigateToCamera()
+            }
+        }
+    }
+
     HeatMapContent(
         uiState = uiState,
         onCaseClicked = viewModel::onCaseClicked,
         onDismissCaseModal = viewModel::onDismissCaseModal,
         onRadiusChanged = viewModel::onRadiusChanged,
-        onNavigateToCamera = onNavigateToCamera,
+        onCargarReporte = viewModel::onCargarReporte,
         modifier = modifier
     )
 }
@@ -62,7 +67,7 @@ private fun HeatMapContent(
     onCaseClicked: (MissingPersonCase) -> Unit,
     onDismissCaseModal: () -> Unit,
     onRadiusChanged: (Float) -> Unit,
-    onNavigateToCamera: () -> Unit,
+    onCargarReporte: (MissingPersonCase) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -105,7 +110,6 @@ private fun HeatMapContent(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection)
     ) {
-        // Map lives outside the scroll container — panning always works
         HeatMapCard(
             cases = uiState.filteredCases,
             userLat = uiState.userLat,
@@ -158,31 +162,10 @@ private fun HeatMapContent(
 
             if (uiState.userLat != null) {
                 item {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Radio de búsqueda",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "${uiState.radiusKm.roundToInt()} km",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Slider(
-                            value = uiState.radiusKm,
-                            onValueChange = onRadiusChanged,
-                            valueRange = 5f..100f,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                    RadiusSlider(
+                        radiusKm = uiState.radiusKm,
+                        onRadiusChanged = onRadiusChanged
+                    )
                 }
             }
 
@@ -203,7 +186,7 @@ private fun HeatMapContent(
                         text = if (uiState.cases.isEmpty())
                             "No hay casos activos registrados."
                         else
-                            "No hay casos activos en un radio de ${uiState.radiusKm.roundToInt()} km.",
+                            "No hay casos activos en un radio de ${uiState.radiusKm.toInt()} km.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -227,10 +210,7 @@ private fun HeatMapContent(
         ) {
             CaseDetailSheet(
                 case = uiState.selectedCase,
-                onCargarReporte = {
-                    CapturedEvidenceHolder.preselectedCaseId = uiState.selectedCase.id
-                    onNavigateToCamera()
-                }
+                onCargarReporte = { onCargarReporte(uiState.selectedCase) }
             )
         }
     }
@@ -349,4 +329,3 @@ private fun StatItem(
         )
     }
 }
-
