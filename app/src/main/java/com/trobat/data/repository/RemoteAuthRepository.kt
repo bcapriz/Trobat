@@ -74,7 +74,10 @@ class RemoteAuthRepository(
                 )
             ))
             if (response.isSuccessful) Result.success(Unit)
-            else Result.failure(AuthError.EmailAlreadyRegistered)
+            else Result.failure(
+                if (response.code() == 409) AuthError.EmailAlreadyRegistered
+                else AuthError.ServerError(response.code())
+            )
         } catch (e: Exception) {
             Result.failure(e)
         }

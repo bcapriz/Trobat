@@ -24,7 +24,11 @@ class SplashViewModel : ViewModel() {
     private val _effect = MutableSharedFlow<SplashEffect>()
     val effect: SharedFlow<SplashEffect> = _effect.asSharedFlow()
 
+    private var started = false
+
     fun startSplash() {
+        if (started) return
+        started = true
         viewModelScope.launch {
             delay(1800)
             _uiState.update { it.copy(showLoading = true) }

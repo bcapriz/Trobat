@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -52,14 +53,15 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
     private fun observeCases() {
         viewModelScope.launch {
             caseRepository.cases.collect { cases ->
-                val current = _uiState.value
-                val matched = if (current.selectedCase == null && current.selectedCaseId != null)
-                    cases.firstOrNull { it.id == current.selectedCaseId }
-                else null
-                _uiState.value = current.copy(
-                    activeCases = cases,
-                    selectedCase = matched ?: current.selectedCase
-                )
+                _uiState.update { current ->
+                    val matched = if (current.selectedCase == null && current.selectedCaseId != null)
+                        cases.firstOrNull { it.id == current.selectedCaseId }
+                    else null
+                    current.copy(
+                        activeCases = cases,
+                        selectedCase = matched ?: current.selectedCase
+                    )
+                }
             }
         }
     }

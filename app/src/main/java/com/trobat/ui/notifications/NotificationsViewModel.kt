@@ -33,10 +33,9 @@ class NotificationsViewModel : ViewModel() {
         viewModelScope.launch {
             combine(
                 notificationRepository.observeAll(),
-                notificationRepository.observeUnreadCount(),
                 reportRepository.pendingReports,
                 caseRepository.cases
-            ) { alerts, unread, pending, cases ->
+            ) { alerts, pending, cases ->
                 NotificationsUiState(
                     alerts = alerts,
                     pendingReports = pending.map { entity ->
@@ -45,7 +44,7 @@ class NotificationsViewModel : ViewModel() {
                             caseName = cases.firstOrNull { it.id == entity.caseId }?.fullName
                         )
                     },
-                    unreadCount = unread
+                    unreadCount = alerts.count { !it.isRead }
                 )
             }.collect { _uiState.value = it }
         }
@@ -59,9 +58,7 @@ class NotificationsViewModel : ViewModel() {
 
     private fun markAllRead() {
         viewModelScope.launch {
-            _uiState.value.alerts
-                .filter { !it.isRead }
-                .forEach { notificationRepository.markAsRead(it.id) }
+            notificationRepository.markAllRead()
         }
     }
 }

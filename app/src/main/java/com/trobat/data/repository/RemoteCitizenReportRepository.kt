@@ -80,6 +80,9 @@ class RemoteCitizenReportRepository(
             val pending = pendingReportDao.getAll().filter { it.status == ReportStatus.PENDING_SYNC.name }
             for (entity in pending) {
                 pendingReportDao.updateStatus(entity.id, ReportStatus.SENDING.name)
+                if (entity.localPhotoPath != null && !File(entity.localPhotoPath).exists()) {
+                    Log.w(TAG, "Photo file missing for report ${entity.id}, retrying without photo")
+                }
                 val report = CitizenReport(
                     id = entity.id,
                     caseId = entity.caseId,

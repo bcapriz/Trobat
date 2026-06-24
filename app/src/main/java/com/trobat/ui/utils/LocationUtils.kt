@@ -9,7 +9,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 
-fun AndroidViewModel.fetchCurrentLocation(onLocation: (Pair<Double, Double>?) -> Unit) {
+fun AndroidViewModel.fetchCurrentLocation(onLocation: (Pair<Double, Double>?) -> Unit): CancellationTokenSource? {
     val app = getApplication<Application>()
     val granted = ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED ||
@@ -17,7 +17,7 @@ fun AndroidViewModel.fetchCurrentLocation(onLocation: (Pair<Double, Double>?) ->
             PackageManager.PERMISSION_GRANTED
     if (!granted) {
         onLocation(null)
-        return
+        return null
     }
 
     val client = LocationServices.getFusedLocationProviderClient(app)
@@ -41,4 +41,5 @@ fun AndroidViewModel.fetchCurrentLocation(onLocation: (Pair<Double, Double>?) ->
                 }
                 .addOnFailureListener { onLocation(null) }
         }
+    return tokenSource
 }

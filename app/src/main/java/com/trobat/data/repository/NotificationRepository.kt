@@ -33,4 +33,6 @@ class NotificationRepository(private val db: TrobatDatabase) {
     }
 
     suspend fun markAsRead(id: Int) = dao.markAsRead(id)
+
+    suspend fun markAllRead() = dao.markAllRead()
 }

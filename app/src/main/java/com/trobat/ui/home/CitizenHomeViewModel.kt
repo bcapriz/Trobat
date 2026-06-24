@@ -3,6 +3,7 @@ package com.trobat.ui.home
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.trobat.data.repository.CaseRepository
 import com.trobat.data.repository.AppContainer
 import com.trobat.ui.capture.CapturedEvidenceHolder
@@ -29,12 +30,18 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     val effect: SharedFlow<CitizenHomeEffect> = _effect.asSharedFlow()
 
     private val _searchQuery = MutableStateFlow("")
+    private var locationTokenSource: CancellationTokenSource? = null
 
     init {
         observeCases()
         observeSearch()
         fetchUserLocation()
         checkPendingDraft()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        locationTokenSource?.cancel()
     }
 
     private fun checkPendingDraft() {
@@ -50,7 +57,7 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun fetchUserLocation() {
-        fetchCurrentLocation { location ->
+        locationTokenSource = fetchCurrentLocation { location ->
             _uiState.update { it.copy(userLat = location?.first, userLng = location?.second) }
             if (location != null) AppContainer.lastLocationPrefs.save(location.first, location.second)
             viewModelScope.launch {
@@ -133,6 +140,8 @@ class CitizenHomeViewModel(app: Application) : AndroidViewModel(app) {
                         } catch (_: Exception) {
                             _uiState.update { it.copy(searchResults = emptyList(), isSearching = false) }
                         }
+                    } else {
+                        _uiState.update { it.copy(searchResults = null, isSearching = false) }
                     }
                 }
         }

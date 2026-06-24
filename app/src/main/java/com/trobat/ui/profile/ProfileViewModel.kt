@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trobat.data.repository.AppContainer
 import com.trobat.ui.theme.ThemeManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,17 +18,21 @@ class ProfileViewModel : ViewModel() {
     private val authRepository = AppContainer.authRepository
     private val userPreferencesRepository = AppContainer.userPreferencesRepository
 
-    private val _uiState = MutableStateFlow(
-        ProfileUiState(
-            name = authRepository.getUserName() ?: "",
-            email = authRepository.getEmail() ?: "",
-            nationalId = authRepository.getNationalId() ?: "",
-            phone = authRepository.getPhone() ?: "",
-            notificationsEnabled = userPreferencesRepository.getNotificationsEnabled(),
-            darkModeEnabled = userPreferencesRepository.getDarkModeEnabled()
-        )
-    )
+    private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.value = ProfileUiState(
+                name = authRepository.getUserName() ?: "",
+                email = authRepository.getEmail() ?: "",
+                nationalId = authRepository.getNationalId() ?: "",
+                phone = authRepository.getPhone() ?: "",
+                notificationsEnabled = userPreferencesRepository.getNotificationsEnabled(),
+                darkModeEnabled = userPreferencesRepository.getDarkModeEnabled()
+            )
+        }
+    }
 
     private val _effect = MutableSharedFlow<ProfileEffect>()
     val effect: SharedFlow<ProfileEffect> = _effect.asSharedFlow()

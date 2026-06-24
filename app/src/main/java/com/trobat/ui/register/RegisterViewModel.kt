@@ -55,6 +55,7 @@ class RegisterViewModel : ViewModel() {
                 phone = state.phone.trim()
             )
             if (result.isSuccess) {
+                _uiState.value = _uiState.value.copy(isLoading = false)
                 _effect.emit(RegisterEffect.NavigateToLogin)
             } else {
                 _uiState.value = _uiState.value.copy(

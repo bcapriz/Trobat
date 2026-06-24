@@ -3,6 +3,7 @@ package com.trobat.ui.heatmap
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.data.repository.AppContainer
 import com.trobat.data.repository.CaseRepository
@@ -31,14 +32,20 @@ class HeatMapViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _radiusKm = MutableStateFlow(50f)
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    private var locationTokenSource: CancellationTokenSource? = null
 
     init {
         fetchUserLocation()
         observeCases()
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        locationTokenSource?.cancel()
+    }
+
     private fun fetchUserLocation() {
-        fetchCurrentLocation { location ->
+        locationTokenSource = fetchCurrentLocation { location ->
             _userLocation.value = location
             if (location != null) AppContainer.lastLocationPrefs.save(location.first, location.second)
             viewModelScope.launch {
