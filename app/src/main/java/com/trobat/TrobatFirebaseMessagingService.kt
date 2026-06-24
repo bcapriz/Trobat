@@ -10,8 +10,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.trobat.data.repository.AppContainer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class TrobatFirebaseMessagingService : FirebaseMessagingService() {
@@ -28,7 +26,7 @@ class TrobatFirebaseMessagingService : FirebaseMessagingService() {
                 ?: intent.getStringExtra("descripcion") ?: ""
             val id = intent.getStringExtra("google.message_id")?.hashCode()
                 ?: (title + body).hashCode()
-            CoroutineScope(Dispatchers.IO).launch {
+            (applicationContext as TrobatApplication).applicationScope.launch {
                 AppContainer.notificationRepository.save(title, body, id)
             }
         }

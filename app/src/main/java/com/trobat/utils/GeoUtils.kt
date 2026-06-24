@@ -21,8 +21,10 @@ object GeoUtils {
     ): List<MissingPersonCase> {
         val (withCoords, withoutCoords) = cases.partition { it.latitude != 0.0 || it.longitude != 0.0 }
         val nearby = withCoords
-            .filter { haversineKm(userLat, userLng, it.latitude, it.longitude) <= radiusKm }
-            .sortedBy { haversineKm(userLat, userLng, it.latitude, it.longitude) }
+            .map { it to haversineKm(userLat, userLng, it.latitude, it.longitude) }
+            .filter { (_, d) -> d <= radiusKm }
+            .sortedBy { (_, d) -> d }
+            .map { (case, _) -> case }
         return nearby + withoutCoords
     }
 

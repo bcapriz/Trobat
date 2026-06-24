@@ -112,8 +112,10 @@ private fun HeatMapContent(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection)
     ) {
-        HeatMapCard(
-            cases = uiState.filteredCases,
+        val filteredCases = uiState.filteredCases
+
+    HeatMapCard(
+            cases = filteredCases,
             userLat = uiState.userLat,
             userLng = uiState.userLng,
             modifier = Modifier
@@ -182,7 +184,7 @@ private fun HeatMapContent(
                         CircularProgressIndicator()
                     }
                 }
-            } else if (uiState.filteredCases.isEmpty()) {
+            } else if (filteredCases.isEmpty()) {
                 item {
                     Text(
                         text = if (uiState.cases.isEmpty())
@@ -194,7 +196,7 @@ private fun HeatMapContent(
                     )
                 }
             } else {
-                items(uiState.filteredCases) { caseItem ->
+                items(filteredCases) { caseItem ->
                     ActiveCaseCard(
                         case = caseItem,
                         distanceKm = uiState.distanceTo(caseItem),
@@ -247,7 +249,9 @@ private fun HeatMapCard(
             .padding(horizontal = 22.dp),
         shape = RoundedCornerShape(28.dp)
     ) {
-        GoogleMap(
+        val lastSeenSnippet = stringResource(R.string.heatmap_marker_last_seen)
+
+    GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
@@ -255,7 +259,7 @@ private fun HeatMapCard(
                 Marker(
                     state = MarkerState(position = LatLng(caseItem.latitude, caseItem.longitude)),
                     title = caseItem.fullName,
-                    snippet = "Última vez visto: ${caseItem.lastSeenLocation}"
+                    snippet = lastSeenSnippet.format(caseItem.lastSeenLocation)
                 )
             }
         }

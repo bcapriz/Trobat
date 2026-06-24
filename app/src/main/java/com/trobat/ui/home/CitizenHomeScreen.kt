@@ -187,7 +187,7 @@ private fun CitizenHomeContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = uiState.title,
+            text = stringResource(R.string.home_collaborate_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
@@ -270,6 +270,8 @@ private fun CitizenHomeContent(
             )
         }
 
+        val filteredCases = uiState.filteredCases
+
         if (uiState.isLoading) {
             Text(
                 text = stringResource(R.string.home_loading),
@@ -282,7 +284,7 @@ private fun CitizenHomeContent(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        } else if (uiState.filteredCases.isEmpty()) {
+        } else if (filteredCases.isEmpty()) {
             Text(
                 text = when {
                     uiState.searchQuery.isNotBlank() -> stringResource(R.string.search_no_results, uiState.searchQuery)
@@ -293,7 +295,7 @@ private fun CitizenHomeContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
-            uiState.filteredCases.forEach { case ->
+            filteredCases.forEach { case ->
                 ActiveCaseCard(
                     case = case,
                     distanceKm = uiState.distanceTo(case),

@@ -4,7 +4,6 @@ import com.trobat.data.model.MissingPersonCase
 import com.trobat.utils.GeoUtils
 
 data class CitizenHomeUiState(
-    val title: String = "¿Cómo querés colaborar?",
     val activeCases: List<MissingPersonCase> = emptyList(),
     val searchQuery: String = "",
     val searchResults: List<MissingPersonCase>? = null,

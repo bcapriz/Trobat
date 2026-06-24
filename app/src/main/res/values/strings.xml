@@ -78,6 +78,7 @@
     <string name="home_location_description">Para ver casos cercanos y filtrar por distancia, Trobat necesita acceder a tu ubicación.</string>
     <string name="home_enable_location">Habilitar ubicación</string>
     <string name="home_location_permanently_denied_hint">Bloqueaste el permiso de ubicación. Habilitalo desde Configuración → Permisos.</string>
+    <string name="home_collaborate_title">¿Cómo querés colaborar?</string>
 
     <!-- HeatMap -->
     <string name="heatmap_title">Zonas de búsqueda</string>
@@ -88,6 +89,7 @@
     <string name="heatmap_zone_summary">Resumen de zona</string>
     <string name="heatmap_stat_cases">Casos activos</string>
     <string name="heatmap_stat_concentration">Mayor concentración</string>
+    <string name="heatmap_marker_last_seen">Última vez visto: %s</string>
 
     <!-- Capture evidence -->
     <string name="capture_title">Capturar evidencia</string>
