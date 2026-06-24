@@ -29,9 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.trobat.R
 import com.trobat.data.local.NotificationEntity
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -60,7 +62,7 @@ fun NotificationsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Alertas",
+                text = stringResource(R.string.notif_titulo),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
@@ -72,7 +74,7 @@ fun NotificationsScreen(
 
         if (uiState.alerts.isEmpty()) {
             Text(
-                text = "No hay alertas recibidas.",
+                text = stringResource(R.string.notif_sin_alertas),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -84,7 +86,7 @@ fun NotificationsScreen(
 
         if (uiState.pendingReports.isNotEmpty()) {
             Text(
-                text = "Mis reportes",
+                text = stringResource(R.string.notif_mis_reportes),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
@@ -180,14 +182,14 @@ private fun PendingReportCard(item: PendingReportItem) {
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = if (isSent) "Enviado" else "Pendiente de envío",
+                    text = stringResource(if (isSent) R.string.notif_enviado else R.string.notif_pendiente_envio),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (isSent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
                 )
             }
             Text(
-                text = item.caseName ?: "Reporte ciudadano",
+                text = item.caseName ?: stringResource(R.string.notif_reporte_ciudadano),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
@@ -216,7 +218,7 @@ private fun PendingReportCard(item: PendingReportItem) {
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        text = "Se enviará automáticamente al recuperar conexión",
+                        text = stringResource(R.string.notif_auto_envio),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -1,24 +1,17 @@
 package com.trobat.ui.main
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Rect
+import com.trobat.R
 
-enum class CoachmarkStep(val title: String, val description: String) {
-    CASES(
-        title = "Casos activos",
-        description = "Explorá las personas buscadas cercanas a tu ubicación y sus últimas novedades."
-    ),
-    CAMERA(
-        title = "Reportar avistamiento",
-        description = "Sacá una foto y enviá tu reporte con ubicación exacta en pocos segundos."
-    ),
-    HEATMAP(
-        title = "Mapa de calor",
-        description = "Visualizá las zonas con mayor concentración de reportes en tu ciudad."
-    ),
-    DONE("", "");
+enum class CoachmarkStep(@StringRes val titleRes: Int, @StringRes val descriptionRes: Int) {
+    CASES(R.string.coachmark_casos_titulo, R.string.coachmark_casos_desc),
+    CAMERA(R.string.coachmark_camara_titulo, R.string.coachmark_camara_desc),
+    HEATMAP(R.string.coachmark_mapa_titulo, R.string.coachmark_mapa_desc),
+    DONE(0, 0);
 
     val isLast: Boolean get() = this == HEATMAP
 

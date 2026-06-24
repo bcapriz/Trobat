@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -52,9 +53,6 @@ import com.trobat.ui.theme.TrobatBackground
 import com.trobat.ui.theme.TrobatOutline
 import com.trobat.ui.theme.TrobatPurple
 import com.trobat.ui.theme.TrobatRed
-import com.trobat.ui.register.RegisterEffect
-import com.trobat.ui.register.RegisterEvent
-import com.trobat.ui.register.RegisterViewModel
 
 @Composable
 fun RegisterScreen(
@@ -87,14 +85,14 @@ fun RegisterScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.trobatlogooscuro),
-                contentDescription = "Logo de Trobat",
+                contentDescription = stringResource(R.string.register_logo_desc),
                 modifier = Modifier.size(140.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Crear cuenta",
+                text = stringResource(R.string.register_titulo),
                 style = MaterialTheme.typography.headlineMedium,
                 color = TrobatBackground
             )
@@ -104,7 +102,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.onEvent(RegisterEvent.NameChanged(it)) },
-                label = { Text("Nombre completo") },
+                label = { Text(stringResource(R.string.register_nombre)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
@@ -117,7 +115,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.nationalId,
                 onValueChange = { viewModel.onEvent(RegisterEvent.NationalIdChanged(it)) },
-                label = { Text("National ID (DNI)") },
+                label = { Text(stringResource(R.string.register_dni)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -133,7 +131,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.phone,
                 onValueChange = { viewModel.onEvent(RegisterEvent.PhoneChanged(it)) },
-                label = { Text("Teléfono") },
+                label = { Text(stringResource(R.string.register_telefono)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone,
@@ -149,7 +147,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = { viewModel.onEvent(RegisterEvent.EmailChanged(it)) },
-                label = { Text("Correo electrónico") },
+                label = { Text(stringResource(R.string.register_email)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -165,7 +163,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = { viewModel.onEvent(RegisterEvent.PasswordChanged(it)) },
-                label = { Text("Contraseña") },
+                label = { Text(stringResource(R.string.register_password)) },
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -182,7 +180,9 @@ fun RegisterScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                            contentDescription = stringResource(
+                                if (passwordVisible) R.string.register_ocultar_password else R.string.register_mostrar_password
+                            ),
                             tint = TrobatBackground
                         )
                     }
@@ -219,7 +219,7 @@ fun RegisterScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Registrarse", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.register_boton), style = MaterialTheme.typography.labelLarge)
                 }
             }
 
@@ -227,7 +227,7 @@ fun RegisterScreen(
 
             TextButton(onClick = { viewModel.onEvent(RegisterEvent.LoginClicked) }) {
                 Text(
-                    text = "¿Ya tenés cuenta? Iniciá sesión",
+                    text = stringResource(R.string.register_ir_a_login),
                     color = TrobatBackground,
                     style = MaterialTheme.typography.bodyMedium
                 )

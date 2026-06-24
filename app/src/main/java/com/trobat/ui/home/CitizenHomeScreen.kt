@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -49,15 +50,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.trobat.R
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.components.CaseDetailSheet
 import com.trobat.ui.components.RadiusSlider
 import kotlin.math.roundToInt
-import com.trobat.ui.home.CitizenHomeEffect
-import com.trobat.ui.home.CitizenHomeEvent
-import com.trobat.ui.home.CitizenHomeUiState
-import com.trobat.ui.home.CitizenHomeViewModel
 
 @Composable
 fun CitizenHomeScreen(
@@ -152,7 +150,7 @@ private fun CitizenHomeContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "TROBAT",
+            text = stringResource(R.string.home_app_label),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -169,7 +167,7 @@ private fun CitizenHomeContent(
         )
 
         Text(
-            text = "Podés consultar reportes cercanos o aportar evidencia de forma anónima.",
+            text = stringResource(R.string.home_subtitulo),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -179,9 +177,9 @@ private fun CitizenHomeContent(
         }
 
         CollaborationOptionCard(
-            title = "Mapa de reportes",
-            description = "Consultá zonas activas y reportes cercanos.",
-            label = "MAPA",
+            title = stringResource(R.string.home_mapa_titulo),
+            description = stringResource(R.string.home_mapa_desc),
+            label = stringResource(R.string.home_mapa_label),
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.Map,
@@ -193,9 +191,9 @@ private fun CitizenHomeContent(
         )
 
         CollaborationOptionCard(
-            title = "Reportar evidencia",
-            description = "Tomá una foto y adjuntá una descripción para colaborar.",
-            label = "CÁMARA",
+            title = stringResource(R.string.home_camara_titulo),
+            description = stringResource(R.string.home_camara_desc),
+            label = stringResource(R.string.home_camara_label),
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.PhotoCamera,
@@ -207,7 +205,7 @@ private fun CitizenHomeContent(
         )
 
         Text(
-            text = "Casos activos",
+            text = stringResource(R.string.home_casos_activos),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
@@ -219,15 +217,12 @@ private fun CitizenHomeContent(
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
-                    text = "Buscar por nombre...",
+                    text = stringResource(R.string.home_buscar_placeholder),
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = null
-                )
+                Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
             },
             singleLine = true,
             shape = RoundedCornerShape(16.dp)
@@ -246,22 +241,22 @@ private fun CitizenHomeContent(
 
         if (uiState.isLoading) {
             Text(
-                text = "Cargando casos...",
+                text = stringResource(R.string.home_cargando),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else if (uiState.isSearching) {
             Text(
-                text = "Buscando...",
+                text = stringResource(R.string.home_buscando),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else if (uiState.filteredCases.isEmpty()) {
             Text(
                 text = when {
-                    uiState.searchQuery.isNotBlank() -> "Sin resultados para \"${uiState.searchQuery}\""
-                    uiState.userLat != null -> "No se encontraron casos cercanos en un radio de ${uiState.radiusKm.roundToInt()} km."
-                    else -> "No hay casos para mostrar."
+                    uiState.searchQuery.isNotBlank() -> stringResource(R.string.sin_resultados_busqueda, uiState.searchQuery)
+                    uiState.userLat != null -> stringResource(R.string.home_sin_casos_cercanos, uiState.radiusKm.roundToInt())
+                    else -> stringResource(R.string.home_sin_casos)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -289,6 +284,7 @@ private fun CitizenHomeContent(
         }
     }
 }
+
 @Composable
 private fun CollaborationOptionCard(
     title: String,
@@ -304,9 +300,7 @@ private fun CollaborationOptionCard(
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 2.dp
-        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(22.dp)
     ) {
         Column(
@@ -314,21 +308,18 @@ private fun CollaborationOptionCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             icon()
-
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
-
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
-
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
@@ -362,13 +353,13 @@ private fun PendingDraftCard(onResumeDraft: () -> Unit) {
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Tenés un reporte pendiente",
+                    text = stringResource(R.string.home_draft_titulo),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Tocá para continuar donde lo dejaste.",
+                    text = stringResource(R.string.home_draft_subtitulo),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -391,13 +382,13 @@ private fun LocationPermissionCard(onRequestLocationPermission: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Permiso de ubicación",
+                text = stringResource(R.string.home_ubicacion_titulo),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Para ver casos cercanos y filtrar por distancia, Trobat necesita acceder a tu ubicación.",
+                text = stringResource(R.string.home_ubicacion_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -407,7 +398,7 @@ private fun LocationPermissionCard(onRequestLocationPermission: () -> Unit) {
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text(text = "Habilitar ubicación")
+                Text(text = stringResource(R.string.home_habilitar_ubicacion))
             }
         }
     }

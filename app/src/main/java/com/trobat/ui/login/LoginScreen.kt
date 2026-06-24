@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -52,9 +53,6 @@ import com.trobat.ui.theme.TrobatBackground
 import com.trobat.ui.theme.TrobatOutline
 import com.trobat.ui.theme.TrobatPurple
 import com.trobat.ui.theme.TrobatRed
-import com.trobat.ui.login.LoginEffect
-import com.trobat.ui.login.LoginEvent
-import com.trobat.ui.login.LoginViewModel
 
 @Composable
 fun LoginScreen(
@@ -89,14 +87,14 @@ fun LoginScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.trobatlogooscuro),
-                contentDescription = "Logo de Trobat",
+                contentDescription = stringResource(R.string.login_logo_desc),
                 modifier = Modifier.size(180.dp)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Iniciar sesión",
+                text = stringResource(R.string.login_titulo),
                 style = MaterialTheme.typography.headlineMedium,
                 color = TrobatBackground
             )
@@ -106,7 +104,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = { viewModel.onEvent(LoginEvent.EmailChanged(it)) },
-                label = { Text("Correo electrónico") },
+                label = { Text(stringResource(R.string.login_email)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -124,7 +122,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = { viewModel.onEvent(LoginEvent.PasswordChanged(it)) },
-                label = { Text("Contraseña") },
+                label = { Text(stringResource(R.string.login_password)) },
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -141,7 +139,9 @@ fun LoginScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                            contentDescription = stringResource(
+                                if (passwordVisible) R.string.login_ocultar_password else R.string.login_mostrar_password
+                            ),
                             tint = TrobatBackground
                         )
                     }
@@ -178,7 +178,7 @@ fun LoginScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Ingresar", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.login_boton), style = MaterialTheme.typography.labelLarge)
                 }
             }
 
@@ -186,7 +186,7 @@ fun LoginScreen(
 
             TextButton(onClick = { viewModel.onEvent(LoginEvent.RegisterClicked) }) {
                 Text(
-                    text = "¿No tenés cuenta? Registrate",
+                    text = stringResource(R.string.login_ir_a_registro),
                     color = TrobatBackground,
                     style = MaterialTheme.typography.bodyMedium
                 )

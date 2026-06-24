@@ -34,8 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.trobat.R
 import com.trobat.ui.theme.BackgroundPrincipal
 import com.trobat.ui.theme.TrobatBackground
 import com.trobat.ui.theme.TrobatPurple
@@ -48,26 +50,26 @@ private data class OnboardingSlide(
     val description: String
 )
 
-private val slides = listOf(
-    OnboardingSlide(
-        icon = Icons.Filled.PersonSearch,
-        title = "Encontrá a quien falta",
-        description = "Explorá casos activos cerca tuyo y mantenete al tanto de las personas buscadas en tu zona."
-    ),
-    OnboardingSlide(
-        icon = Icons.Filled.CameraAlt,
-        title = "Reportá lo que ves",
-        description = "Sacá una foto y enviá tu avistamiento en segundos, con tu ubicación exacta incluida."
-    ),
-    OnboardingSlide(
-        icon = Icons.Filled.People,
-        title = "Juntos somos más fuertes",
-        description = "Cada reporte importa. La comunidad es la herramienta más poderosa para encontrar a alguien."
-    )
-)
-
 @Composable
 fun OnboardingScreen(onFinish: () -> Unit) {
+    val slides = listOf(
+        OnboardingSlide(
+            icon = Icons.Filled.PersonSearch,
+            title = stringResource(R.string.onboarding_slide1_titulo),
+            description = stringResource(R.string.onboarding_slide1_desc)
+        ),
+        OnboardingSlide(
+            icon = Icons.Filled.CameraAlt,
+            title = stringResource(R.string.onboarding_slide2_titulo),
+            description = stringResource(R.string.onboarding_slide2_desc)
+        ),
+        OnboardingSlide(
+            icon = Icons.Filled.People,
+            title = stringResource(R.string.onboarding_slide3_titulo),
+            description = stringResource(R.string.onboarding_slide3_desc)
+        )
+    )
+
     val pagerState = rememberPagerState(pageCount = { slides.size })
     val scope = rememberCoroutineScope()
     val isLastPage = pagerState.currentPage == slides.lastIndex
@@ -90,7 +92,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             ) {
                 if (!isLastPage) {
                     TextButton(onClick = onFinish) {
-                        Text("Saltar", color = TrobatBackground.copy(alpha = 0.7f))
+                        Text(stringResource(R.string.accion_saltar), color = TrobatBackground.copy(alpha = 0.7f))
                     }
                 }
             }
@@ -139,7 +141,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = TrobatPurple)
             ) {
                 Text(
-                    text = if (isLastPage) "Comenzar" else "Siguiente",
+                    text = stringResource(if (isLastPage) R.string.accion_comenzar else R.string.accion_siguiente),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

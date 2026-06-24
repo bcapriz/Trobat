@@ -23,11 +23,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.trobat.R
 
 @Composable
 fun FloatingCameraButton(
@@ -35,6 +37,8 @@ fun FloatingCameraButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val cameraDesc = stringResource(R.string.component_camara_abrir)
+
     val cameraScale by animateFloatAsState(
         targetValue = if (selected) 1.04f else 1f,
         animationSpec = spring(
@@ -94,7 +98,7 @@ fun FloatingCameraButton(
             )
             .semantics {
                 role = Role.Button
-                contentDescription = "Abrir cámara para reportar evidencia"
+                contentDescription = cameraDesc
             }
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

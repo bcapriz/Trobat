@@ -40,8 +40,10 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.trobat.R
 import com.trobat.ui.theme.TrobatOutline
 import com.trobat.ui.theme.TrobatPurple
 import com.trobat.ui.theme.TrobatSurface
@@ -153,14 +155,14 @@ fun CoachmarkOverlay(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = step.title,
+                        text = stringResource(step.titleRes),
                         style = MaterialTheme.typography.titleMedium,
                         color = TrobatPurple,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = step.description,
+                        text = stringResource(step.descriptionRes),
                         style = MaterialTheme.typography.bodyMedium,
                         color = TrobatText
                     )
@@ -171,13 +173,13 @@ fun CoachmarkOverlay(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(onClick = onDismiss) {
-                            Text("Saltar", color = TrobatTextSecondary)
+                            Text(stringResource(R.string.accion_saltar), color = TrobatTextSecondary)
                         }
                         Button(
                             onClick = { if (step.isLast) onDismiss() else controller.advance() },
                             colors = ButtonDefaults.buttonColors(containerColor = TrobatPurple)
                         ) {
-                            Text(if (step.isLast) "Entendido" else "Siguiente")
+                            Text(stringResource(if (step.isLast) R.string.accion_entendido else R.string.accion_siguiente))
                         }
                     }
                 }

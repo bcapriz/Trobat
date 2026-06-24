@@ -27,8 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import com.trobat.R
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.utils.formatLastSeenDate
 
@@ -45,7 +47,7 @@ fun CaseDetailSheet(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "${case.fullName}, ${case.age} años",
+            text = stringResource(R.string.case_nombre_edad, case.fullName, case.age),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
@@ -92,7 +94,7 @@ fun CaseDetailSheet(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "Visto por última vez: ${case.lastSeenLocation}",
+                text = stringResource(R.string.visto_ultima_vez, case.lastSeenLocation),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -127,7 +129,7 @@ fun CaseDetailSheet(
                 onClick = onCargarReporte,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Cargar Reporte")
+                Text(text = stringResource(R.string.component_cargar_reporte))
             }
         }
     }

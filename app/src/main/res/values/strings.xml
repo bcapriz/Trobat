@@ -1,3 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Trobat</string>
+
+    <!-- Acciones comunes -->
+    <string name="accion_cancelar">Cancelar</string>
+    <string name="accion_entendido">Entendido</string>
+    <string name="accion_siguiente">Siguiente</string>
+    <string name="accion_saltar">Saltar</string>
+    <string name="accion_comenzar">Comenzar</string>
+    <string name="accion_habilitar_permisos">Habilitar permisos</string>
+
+    <!-- Formatos de datos -->
+    <string name="case_nombre_edad">%1$s, %2$d años</string>
+    <string name="visto_ultima_vez">Visto por última vez: %s</string>
+    <string name="km_distancia">%d km</string>
+    <string name="sin_resultados_busqueda">Sin resultados para &quot;%s&quot;</string>
+
+    <!-- Splash -->
+    <string name="splash_logo_desc">Logo principal de Trobat</string>
+    <string name="splash_eslogan">Información que importa.\nPersonas que ayudan.</string>
+    <string name="splash_creditos">Desarrollado por Bruno Capriz y Franco Verón Peralta</string>
+    <string name="splash_version">Versión 1.0</string>
+
+    <!-- Loading -->
+    <string name="loading_logo_desc">Logo de Trobat durante la carga</string>
+    <string name="loading_texto">Cargando Trobat...</string>
+
+    <!-- Login -->
+    <string name="login_logo_desc">Logo de Trobat</string>
+    <string name="login_titulo">Iniciar sesión</string>
+    <string name="login_email">Correo electrónico</string>
+    <string name="login_password">Contraseña</string>
+    <string name="login_boton">Ingresar</string>
+    <string name="login_ir_a_registro">¿No tenés cuenta? Registrate</string>
+    <string name="login_mostrar_password">Mostrar contraseña</string>
+    <string name="login_ocultar_password">Ocultar contraseña</string>
+
+    <!-- Registro -->
+    <string name="register_logo_desc">Logo de Trobat</string>
+    <string name="register_titulo">Crear cuenta</string>
+    <string name="register_nombre">Nombre completo</string>
+    <string name="register_dni">National ID (DNI)</string>
+    <string name="register_telefono">Teléfono</string>
+    <string name="register_email">Correo electrónico</string>
+    <string name="register_password">Contraseña</string>
+    <string name="register_boton">Registrarse</string>
+    <string name="register_ir_a_login">¿Ya tenés cuenta? Iniciá sesión</string>
+    <string name="register_mostrar_password">Mostrar contraseña</string>
+    <string name="register_ocultar_password">Ocultar contraseña</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_slide1_titulo">Encontrá a quien falta</string>
+    <string name="onboarding_slide1_desc">Explorá casos activos cerca tuyo y mantenete al tanto de las personas buscadas en tu zona.</string>
+    <string name="onboarding_slide2_titulo">Reportá lo que ves</string>
+    <string name="onboarding_slide2_desc">Sacá una foto y enviá tu avistamiento en segundos, con tu ubicación exacta incluida.</string>
+    <string name="onboarding_slide3_titulo">Juntos somos más fuertes</string>
+    <string name="onboarding_slide3_desc">Cada reporte importa. La comunidad es la herramienta más poderosa para encontrar a alguien.</string>
+
+    <!-- Home -->
+    <string name="home_app_label">TROBAT</string>
+    <string name="home_subtitulo">Podés consultar reportes cercanos o aportar evidencia de forma anónima.</string>
+    <string name="home_draft_titulo">Tenés un reporte pendiente</string>
+    <string name="home_draft_subtitulo">Tocá para continuar donde lo dejaste.</string>
+    <string name="home_mapa_label">MAPA</string>
+    <string name="home_mapa_titulo">Mapa de reportes</string>
+    <string name="home_mapa_desc">Consultá zonas activas y reportes cercanos.</string>
+    <string name="home_camara_label">CÁMARA</string>
+    <string name="home_camara_titulo">Reportar evidencia</string>
+    <string name="home_camara_desc">Tomá una foto y adjuntá una descripción para colaborar.</string>
+    <string name="home_casos_activos">Casos activos</string>
+    <string name="home_buscar_placeholder">Buscar por nombre…</string>
+    <string name="home_cargando">Cargando casos…</string>
+    <string name="home_buscando">Buscando…</string>
+    <string name="home_sin_casos_cercanos">No se encontraron casos cercanos en un radio de %d km.</string>
+    <string name="home_sin_casos">No hay casos para mostrar.</string>
+    <string name="home_ubicacion_titulo">Permiso de ubicación</string>
+    <string name="home_ubicacion_desc">Para ver casos cercanos y filtrar por distancia, Trobat necesita acceder a tu ubicación.</string>
+    <string name="home_habilitar_ubicacion">Habilitar ubicación</string>
+
+    <!-- HeatMap -->
+    <string name="heatmap_titulo">Zonas de búsqueda</string>
+    <string name="heatmap_subtitulo">Visualizá las áreas con mayor concentración de casos activos.</string>
+    <string name="heatmap_casos_activos">Casos activos</string>
+    <string name="heatmap_sin_casos">No hay casos activos registrados.</string>
+    <string name="heatmap_sin_casos_radio">No hay casos activos en un radio de %d km.</string>
+    <string name="heatmap_resumen_zona">Resumen de zona</string>
+    <string name="heatmap_stat_casos">Casos activos</string>
+    <string name="heatmap_stat_concentracion">Mayor concentración</string>
+
+    <!-- Captura de evidencia -->
+    <string name="capture_titulo">Capturar evidencia</string>
+    <string name="capture_subtitulo">Tomá una foto desde la app. Luego podrás agregar descripción y asociarla a un caso activo.</string>
+    <string name="capture_tomar_foto">Tomar foto</string>
+    <string name="capture_tomando_foto">Tomando foto…</string>
+    <string name="capture_usar_evidencia">Usar esta evidencia</string>
+    <string name="capture_rehacer_foto">Rehacer foto</string>
+    <string name="capture_capturando">Capturando evidencia…</string>
+    <string name="capture_camara_preview">Vista previa de cámara</string>
+    <string name="capture_camara_habilitar">Habilitá los permisos para continuar.</string>
+    <string name="capture_foto_capturada">Foto capturada</string>
+    <string name="capture_permisos_titulo">Permisos necesarios</string>
+    <string name="capture_permisos_desc">Para reportar evidencia, Trobat necesita acceder a la cámara y a tu ubicación.</string>
+    <string name="capture_camara_estado">Cámara: %s</string>
+    <string name="capture_ubicacion_estado">Ubicación: %s</string>
+    <string name="capture_permiso_habilitado">habilitada</string>
+    <string name="capture_permiso_pendiente">pendiente</string>
+    <string name="capture_semantics_tomar">Tomar foto para reportar evidencia</string>
+    <string name="capture_semantics_usar">Usar esta evidencia para continuar</string>
+    <string name="capture_semantics_rehacer">Rehacer foto</string>
+
+    <!-- Confirmar reporte -->
+    <string name="confirm_titulo">Confirmar reporte</string>
+    <string name="confirm_subtitulo">Revisá la evidencia y agregá información útil antes de enviarla.</string>
+    <string name="confirm_foto_capturada">Foto capturada</string>
+    <string name="confirm_que_viste_label">¿Qué viste? *</string>
+    <string name="confirm_que_viste_placeholder">Ej: Vi a una persona similar cerca de la plaza.</string>
+    <string name="confirm_campo_obligatorio_error">Este campo es obligatorio</string>
+    <string name="confirm_campo_obligatorio">Campo obligatorio</string>
+    <string name="confirm_adicionales_label">Datos adicionales</string>
+    <string name="confirm_adicionales_placeholder">Ej: Vestimenta, dirección hacia donde caminaba, compañía, etc.</string>
+    <string name="confirm_campo_opcional">Campo opcional</string>
+    <string name="confirm_ubicacion_titulo">Ubicación de la foto</string>
+    <string name="confirm_ubicacion_icon_desc">Ubicación</string>
+    <string name="confirm_identificarme">Identificarme en el reporte</string>
+    <string name="confirm_con_datos">El reporte se enviará con tus datos de contacto.</string>
+    <string name="confirm_anonimo">El reporte se enviará de forma anónima.</string>
+    <string name="confirm_enviando">Enviando…</string>
+    <string name="confirm_enviar">Enviar reporte</string>
+    <string name="confirm_rehacer">Rehacer foto</string>
+    <string name="confirm_dropdown_label">¿A qué caso corresponde este reporte? *</string>
+    <string name="confirm_dropdown_placeholder">Seleccioná un caso activo</string>
+    <string name="confirm_dropdown_buscar_placeholder">Buscá por nombre…</string>
+    <string name="confirm_dropdown_buscando">Buscando…</string>
+    <string name="confirm_dropdown_sin_resultados">Sin resultados para &quot;%s&quot;</string>
+    <string name="confirm_dropdown_error">Debés seleccionar un caso activo</string>
+    <string name="confirm_sin_conexion">Sin conexión. El reporte se enviará automáticamente cuando vuelvas a tener internet.</string>
+    <string name="confirm_semantics_foto">Campo obligatorio para describir lo visto</string>
+    <string name="confirm_semantics_adicionales">Campo opcional para agregar datos adicionales</string>
+
+    <!-- Notificaciones -->
+    <string name="notif_titulo">Alertas</string>
+    <string name="notif_sin_alertas">No hay alertas recibidas.</string>
+    <string name="notif_mis_reportes">Mis reportes</string>
+    <string name="notif_enviado">Enviado</string>
+    <string name="notif_pendiente_envio">Pendiente de envío</string>
+    <string name="notif_reporte_ciudadano">Reporte ciudadano</string>
+    <string name="notif_auto_envio">Se enviará automáticamente al recuperar conexión</string>
+
+    <!-- Perfil -->
+    <string name="profile_section_mi_cuenta">Mi cuenta</string>
+    <string name="profile_section_configuracion">Configuración</string>
+    <string name="profile_section_notificaciones">Notificaciones</string>
+    <string name="profile_section_informacion">Información</string>
+    <string name="profile_dark_mode">Modo oscuro</string>
+    <string name="profile_version_label">Versión de la app</string>
+    <string name="profile_version_value">1.0.0</string>
+    <string name="profile_alertas">Alertas</string>
+    <string name="profile_terminos">Términos y condiciones</string>
+    <string name="profile_privacidad">Política de privacidad</string>
+    <string name="profile_ayuda">Ayuda y soporte</string>
+    <string name="profile_cerrar_sesion">Cerrar sesión</string>
+    <string name="profile_nombre_fallback">Usuario</string>
+    <string name="profile_field_nombre">Nombre</string>
+    <string name="profile_field_email">Email</string>
+    <string name="profile_field_dni">DNI</string>
+    <string name="profile_field_telefono">Teléfono</string>
+    <string name="profile_terms_title">Términos y condiciones</string>
+    <string name="profile_terms_body">Al utilizar Trobat, aceptás nuestros términos de servicio. Esta aplicación tiene como finalidad colaborar con la búsqueda de personas desaparecidas. El uso indebido de la plataforma está prohibido y puede resultar en la suspensión de la cuenta.</string>
+    <string name="profile_privacy_title">Política de privacidad</string>
+    <string name="profile_privacy_body">Tus datos personales (nombre, email, teléfono y DNI) son utilizados exclusivamente para identificar reportes y coordinar búsquedas. No compartimos tu información con terceros sin consentimiento. Podés solicitar la eliminación de tu cuenta contactándonos.</string>
+    <string name="profile_help_title">Ayuda y soporte</string>
+    <string name="profile_help_body">Para consultas o inconvenientes con la app, contactanos:\n\nEmail: soporte@trobat.com.ar\nTeléfono: 0800-555-TROBAT\n\nDisponible lunes a viernes de 9:00 a 18:00 hs.</string>
+
+    <!-- Componentes compartidos -->
+    <string name="component_radio_busqueda">Radio de búsqueda</string>
+    <string name="component_persona_buscada">Persona buscada</string>
+    <string name="component_cargar_reporte">Cargar Reporte</string>
+    <string name="component_camara_abrir">Abrir cámara para reportar evidencia</string>
+
+    <!-- Navegación inferior -->
+    <string name="nav_casos">Casos</string>
+    <string name="nav_mapa">Mapa</string>
+    <string name="nav_camara">Cámara</string>
+    <string name="nav_alertas">Alertas</string>
+    <string name="nav_perfil">Perfil</string>
+
+    <!-- Coachmark -->
+    <string name="coachmark_casos_titulo">Casos activos</string>
+    <string name="coachmark_casos_desc">Explorá las personas buscadas cercanas a tu ubicación y sus últimas novedades.</string>
+    <string name="coachmark_camara_titulo">Reportar avistamiento</string>
+    <string name="coachmark_camara_desc">Sacá una foto y enviá tu reporte con ubicación exacta en pocos segundos.</string>
+    <string name="coachmark_mapa_titulo">Mapa de calor</string>
+    <string name="coachmark_mapa_desc">Visualizá las zonas con mayor concentración de reportes en tu ciudad.</string>
 </resources>

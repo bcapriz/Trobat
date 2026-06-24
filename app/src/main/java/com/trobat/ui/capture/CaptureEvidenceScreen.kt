@@ -1,9 +1,7 @@
 package com.trobat.ui.capture
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -47,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -56,12 +55,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.trobat.ui.capture.CapturedEvidenceHolder
+import com.trobat.R
 import com.trobat.ui.utils.takePictureWithLocation
-import com.trobat.ui.capture.CaptureEvidenceEffect
-import com.trobat.ui.capture.CaptureEvidenceEvent
-import com.trobat.ui.capture.CaptureEvidenceUiState
-import com.trobat.ui.capture.CaptureEvidenceViewModel
 
 @Composable
 fun CaptureEvidenceScreen(
@@ -161,14 +156,14 @@ private fun CaptureEvidenceContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Capturar evidencia",
+            text = stringResource(R.string.capture_titulo),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            text = "Tomá una foto desde la app. Luego podrás agregar descripción y asociarla a un caso activo.",
+            text = stringResource(R.string.capture_subtitulo),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -181,10 +176,7 @@ private fun CaptureEvidenceContent(
             )
         }
 
-        CameraCard(
-            uiState = uiState,
-            imageCapture = imageCapture
-        )
+        CameraCard(uiState = uiState, imageCapture = imageCapture)
 
         uiState.errorMessage?.let { message ->
             Text(
@@ -194,6 +186,10 @@ private fun CaptureEvidenceContent(
             )
         }
 
+        val semanticsTomar = stringResource(R.string.capture_semantics_tomar)
+        val semanticsUsar = stringResource(R.string.capture_semantics_usar)
+        val semanticsRehacer = stringResource(R.string.capture_semantics_rehacer)
+
         if (!uiState.hasPhoto) {
             Button(
                 onClick = onTakePhoto,
@@ -201,11 +197,11 @@ private fun CaptureEvidenceContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .semantics { contentDescription = "Tomar foto para reportar evidencia" }
+                    .semantics { contentDescription = semanticsTomar }
             ) {
                 Icon(imageVector = Icons.Outlined.PhotoCamera, contentDescription = null)
                 Text(
-                    text = if (uiState.isCapturing) "Tomando foto..." else "Tomar foto",
+                    text = stringResource(if (uiState.isCapturing) R.string.capture_tomando_foto else R.string.capture_tomar_foto),
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -215,10 +211,13 @@ private fun CaptureEvidenceContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .semantics { contentDescription = "Usar esta evidencia para continuar" }
+                    .semantics { contentDescription = semanticsUsar }
             ) {
                 Icon(imageVector = Icons.Outlined.CheckCircle, contentDescription = null)
-                Text(text = "Usar esta evidencia", modifier = Modifier.padding(start = 8.dp))
+                Text(
+                    text = stringResource(R.string.capture_usar_evidencia),
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
 
             OutlinedButton(
@@ -226,10 +225,13 @@ private fun CaptureEvidenceContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .semantics { contentDescription = "Rehacer foto" }
+                    .semantics { contentDescription = semanticsRehacer }
             ) {
                 Icon(imageVector = Icons.Outlined.Refresh, contentDescription = null)
-                Text(text = "Rehacer foto", modifier = Modifier.padding(start = 8.dp))
+                Text(
+                    text = stringResource(R.string.capture_rehacer_foto),
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
         }
 
@@ -239,7 +241,7 @@ private fun CaptureEvidenceContent(
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
-            Text(text = "Cancelar")
+            Text(text = stringResource(R.string.accion_cancelar))
         }
     }
 }
@@ -293,7 +295,7 @@ private fun CameraCard(
                 uiState.capturedPhotoUri != null -> {
                     AsyncImage(
                         model = uiState.capturedPhotoUri,
-                        contentDescription = "Foto capturada",
+                        contentDescription = stringResource(R.string.capture_foto_capturada),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -306,7 +308,7 @@ private fun CameraCard(
                     ) {
                         CircularProgressIndicator()
                         Text(
-                            text = "Capturando evidencia...",
+                            text = stringResource(R.string.capture_capturando),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -327,17 +329,17 @@ private fun CameraCard(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.PhotoCamera,
-                            contentDescription = "Vista previa de cámara",
+                            contentDescription = stringResource(R.string.capture_camara_preview),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "Vista previa de cámara",
+                            text = stringResource(R.string.capture_camara_preview),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Habilitá los permisos para continuar.",
+                            text = stringResource(R.string.capture_camara_habilitar),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -354,6 +356,9 @@ private fun PermissionInfoCard(
     hasLocationPermission: Boolean,
     onRequestPermissions: () -> Unit
 ) {
+    val habilitada = stringResource(R.string.capture_permiso_habilitado)
+    val pendiente = stringResource(R.string.capture_permiso_pendiente)
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
@@ -366,23 +371,23 @@ private fun PermissionInfoCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Permisos necesarios",
+                text = stringResource(R.string.capture_permisos_titulo),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Para reportar evidencia, Trobat necesita acceder a la cámara y a tu ubicación.",
+                text = stringResource(R.string.capture_permisos_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Cámara: ${if (hasCameraPermission) "habilitada" else "pendiente"}",
+                text = stringResource(R.string.capture_camara_estado, if (hasCameraPermission) habilitada else pendiente),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (hasCameraPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
             Text(
-                text = "Ubicación: ${if (hasLocationPermission) "habilitada" else "pendiente"}",
+                text = stringResource(R.string.capture_ubicacion_estado, if (hasLocationPermission) habilitada else pendiente),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (hasLocationPermission) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
             )
@@ -392,7 +397,7 @@ private fun PermissionInfoCard(
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text(text = "Habilitar permisos")
+                Text(text = stringResource(R.string.accion_habilitar_permisos))
             }
         }
     }

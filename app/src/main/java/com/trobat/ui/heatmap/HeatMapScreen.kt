@@ -20,6 +20,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,6 +30,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.trobat.R
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.ui.components.ActiveCaseCard
 import com.trobat.ui.components.CaseDetailSheet
@@ -128,7 +130,7 @@ private fun HeatMapContent(
         ) {
             item {
                 Text(
-                    text = "Zonas de búsqueda",
+                    text = stringResource(R.string.heatmap_titulo),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
@@ -137,7 +139,7 @@ private fun HeatMapContent(
 
             item {
                 Text(
-                    text = "Visualizá las áreas con mayor concentración de casos activos.",
+                    text = stringResource(R.string.heatmap_subtitulo),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -153,7 +155,7 @@ private fun HeatMapContent(
 
             item {
                 Text(
-                    text = "Casos activos",
+                    text = stringResource(R.string.heatmap_casos_activos),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
@@ -184,9 +186,9 @@ private fun HeatMapContent(
                 item {
                     Text(
                         text = if (uiState.cases.isEmpty())
-                            "No hay casos activos registrados."
+                            stringResource(R.string.heatmap_sin_casos)
                         else
-                            "No hay casos activos en un radio de ${uiState.radiusKm.toInt()} km.",
+                            stringResource(R.string.heatmap_sin_casos_radio, uiState.radiusKm.toInt()),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -251,9 +253,7 @@ private fun HeatMapCard(
         ) {
             cases.forEach { caseItem ->
                 Marker(
-                    state = MarkerState(
-                        position = LatLng(caseItem.latitude, caseItem.longitude)
-                    ),
+                    state = MarkerState(position = LatLng(caseItem.latitude, caseItem.longitude)),
                     title = caseItem.fullName,
                     snippet = "Última vez visto: ${caseItem.lastSeenLocation}"
                 )
@@ -280,23 +280,20 @@ private fun HeatMapStatsCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Resumen de zona",
+                text = stringResource(R.string.heatmap_resumen_zona),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatItem(
-                    title = "Casos activos",
+                    title = stringResource(R.string.heatmap_stat_casos),
                     value = totalCases.toString(),
                     modifier = Modifier.weight(1f)
                 )
-
                 StatItem(
-                    title = "Mayor concentración",
+                    title = stringResource(R.string.heatmap_stat_concentracion),
                     value = if (mostActiveCount > 0) "$mostActiveArea ($mostActiveCount)" else mostActiveArea,
                     modifier = Modifier.weight(1f)
                 )
@@ -320,7 +317,6 @@ private fun StatItem(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,

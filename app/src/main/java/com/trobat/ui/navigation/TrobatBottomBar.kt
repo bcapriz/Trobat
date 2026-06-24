@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.trobat.ui.main.CoachmarkController
 import androidx.compose.ui.semantics.contentDescription
@@ -157,6 +158,7 @@ private fun RowScope.TrobatNavigationBarItem(
     onClick: () -> Unit,
     onBoundsChanged: ((Rect) -> Unit)? = null
 ) {
+    val label = stringResource(item.labelRes)
     val selectedColor = MaterialTheme.colorScheme.primary
     val unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -182,7 +184,7 @@ private fun RowScope.TrobatNavigationBarItem(
             .semantics {
                 role = Role.Tab
                 this.selected = selected
-                contentDescription = item.label
+                contentDescription = label
             }
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -243,7 +245,7 @@ private fun RowScope.TrobatNavigationBarItem(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = item.label,
+            text = label,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontSize = 10.sp,

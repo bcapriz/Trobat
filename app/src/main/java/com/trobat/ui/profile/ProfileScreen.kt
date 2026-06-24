@@ -1,5 +1,6 @@
 package com.trobat.ui.profile
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,26 +55,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.trobat.ui.profile.ProfileEffect
-import com.trobat.ui.profile.ProfileEvent
-import com.trobat.ui.profile.ProfileViewModel
+import com.trobat.R
 
-private enum class ProfileDialog(val title: String, val body: String) {
-    TERMS(
-        title = "Términos y condiciones",
-        body = "Al utilizar Trobat, aceptás nuestros términos de servicio. Esta aplicación tiene como finalidad colaborar con la búsqueda de personas desaparecidas. El uso indebido de la plataforma está prohibido y puede resultar en la suspensión de la cuenta."
-    ),
-    PRIVACY(
-        title = "Política de privacidad",
-        body = "Tus datos personales (nombre, email, teléfono y DNI) son utilizados exclusivamente para identificar reportes y coordinar búsquedas. No compartimos tu información con terceros sin consentimiento. Podés solicitar la eliminación de tu cuenta contactándonos."
-    ),
-    HELP(
-        title = "Ayuda y soporte",
-        body = "Para consultas o inconvenientes con la app, contactanos:\n\nEmail: soporte@trobat.com.ar\nTeléfono: 0800-555-TROBAT\n\nDisponible lunes a viernes de 9:00 a 18:00 hs."
-    )
+private enum class ProfileDialog(@StringRes val titleRes: Int, @StringRes val bodyRes: Int) {
+    TERMS(R.string.profile_terms_title, R.string.profile_terms_body),
+    PRIVACY(R.string.profile_privacy_title, R.string.profile_privacy_body),
+    HELP(R.string.profile_help_title, R.string.profile_help_body)
 }
 
 @Composable
@@ -97,20 +88,20 @@ fun ProfileScreen(
             onDismissRequest = { activeDialog = null },
             title = {
                 Text(
-                    text = dialog.title,
+                    text = stringResource(dialog.titleRes),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = dialog.body,
+                    text = stringResource(dialog.bodyRes),
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
             confirmButton = {
                 TextButton(onClick = { activeDialog = null }) {
-                    Text("Entendido")
+                    Text(stringResource(R.string.accion_entendido))
                 }
             }
         )
@@ -126,7 +117,7 @@ fun ProfileScreen(
     ) {
         ProfileHeader(name = uiState.name, email = uiState.email)
 
-        SectionLabel("Mi cuenta")
+        SectionLabel(stringResource(R.string.profile_section_mi_cuenta))
         AccountInfoCard(
             name = uiState.name,
             email = uiState.email,
@@ -134,49 +125,49 @@ fun ProfileScreen(
             phone = uiState.phone
         )
 
-        SectionLabel("Configuración")
+        SectionLabel(stringResource(R.string.profile_section_configuracion))
         SettingsCard {
             SettingsToggleRow(
                 icon = Icons.Outlined.DarkMode,
-                label = "Modo oscuro",
+                label = stringResource(R.string.profile_dark_mode),
                 checked = uiState.darkModeEnabled,
                 onToggle = { viewModel.onEvent(ProfileEvent.DarkModeToggled(it)) }
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             SettingsInfoRow(
                 icon = Icons.Outlined.Info,
-                label = "Versión de la app",
-                value = "1.0.0"
+                label = stringResource(R.string.profile_version_label),
+                value = stringResource(R.string.profile_version_value)
             )
         }
 
-        SectionLabel("Notificaciones")
+        SectionLabel(stringResource(R.string.profile_section_notificaciones))
         SettingsCard {
             SettingsToggleRow(
                 icon = Icons.Outlined.Notifications,
-                label = "Alertas",
+                label = stringResource(R.string.profile_alertas),
                 checked = uiState.notificationsEnabled,
                 onToggle = { viewModel.onEvent(ProfileEvent.NotificationsToggled(it)) }
             )
         }
 
-        SectionLabel("Información")
+        SectionLabel(stringResource(R.string.profile_section_informacion))
         SettingsCard {
             SettingsNavRow(
                 icon = Icons.Outlined.Gavel,
-                label = "Términos y condiciones",
+                label = stringResource(R.string.profile_terminos),
                 onClick = { activeDialog = ProfileDialog.TERMS }
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             SettingsNavRow(
                 icon = Icons.Outlined.Security,
-                label = "Política de privacidad",
+                label = stringResource(R.string.profile_privacidad),
                 onClick = { activeDialog = ProfileDialog.PRIVACY }
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             SettingsNavRow(
                 icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                label = "Ayuda y soporte",
+                label = stringResource(R.string.profile_ayuda),
                 onClick = { activeDialog = ProfileDialog.HELP }
             )
         }
@@ -197,7 +188,7 @@ fun ProfileScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Cerrar sesión",
+                text = stringResource(R.string.profile_cerrar_sesion),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -233,7 +224,7 @@ private fun ProfileHeader(name: String, email: String) {
             )
         }
         Text(
-            text = name.ifEmpty { "Usuario" },
+            text = name.ifEmpty { stringResource(R.string.profile_nombre_fallback) },
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -274,13 +265,13 @@ private fun AccountInfoCard(
         )
     ) {
         Column(modifier = Modifier.padding(4.dp)) {
-            AccountField(icon = Icons.Outlined.Person, label = "Nombre", value = name)
+            AccountField(icon = Icons.Outlined.Person, label = stringResource(R.string.profile_field_nombre), value = name)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            AccountField(icon = Icons.Outlined.Email, label = "Email", value = email)
+            AccountField(icon = Icons.Outlined.Email, label = stringResource(R.string.profile_field_email), value = email)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            AccountField(icon = Icons.Outlined.AssignmentInd, label = "DNI", value = nationalId)
+            AccountField(icon = Icons.Outlined.AssignmentInd, label = stringResource(R.string.profile_field_dni), value = nationalId)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            AccountField(icon = Icons.Outlined.Phone, label = "Teléfono", value = phone)
+            AccountField(icon = Icons.Outlined.Phone, label = stringResource(R.string.profile_field_telefono), value = phone)
         }
     }
 }

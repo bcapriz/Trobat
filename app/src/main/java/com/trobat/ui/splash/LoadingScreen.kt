@@ -1,6 +1,5 @@
 package com.trobat.ui.splash
 
-
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -24,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.trobat.R
 import com.trobat.ui.theme.BackgroundPrincipal
@@ -31,7 +31,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun LoadingScreen() {
-    val loadingText = "Cargando Trobat..."
+    val loadingText = stringResource(R.string.loading_texto)
 
     val infiniteTransition = rememberInfiniteTransition(label = "loading_text")
 
@@ -75,7 +75,7 @@ fun LoadingScreen() {
 
                 Image(
                     painter = painterResource(id = R.drawable.trobatlogo),
-                    contentDescription = "Logo de Trobat durante la carga",
+                    contentDescription = stringResource(R.string.loading_logo_desc),
                     modifier = Modifier.size(92.dp)
                 )
             }

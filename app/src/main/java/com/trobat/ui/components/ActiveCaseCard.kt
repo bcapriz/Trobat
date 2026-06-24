@@ -27,7 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.trobat.R
 import com.trobat.data.model.MissingPersonCase
 import com.trobat.utils.formatLastSeenDate
 
@@ -56,12 +58,12 @@ fun ActiveCaseCard(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.PersonSearch,
-                    contentDescription = "Persona buscada",
+                    contentDescription = stringResource(R.string.component_persona_buscada),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "${case.fullName}, ${case.age} años",
+                    text = stringResource(R.string.case_nombre_edad, case.fullName, case.age),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -87,7 +89,7 @@ fun ActiveCaseCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Visto por última vez: ${case.lastSeenLocation}",
+                        text = stringResource(R.string.visto_ultima_vez, case.lastSeenLocation),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
