@@ -1,6 +1,6 @@
 package com.trobat.ui.notifications
 
-import com.trobat.data.local.PendingReportEntity
+import com.trobat.data.local.db.entity.PendingReportEntity
 
 data class PendingReportItem(
     val entity: PendingReportEntity,

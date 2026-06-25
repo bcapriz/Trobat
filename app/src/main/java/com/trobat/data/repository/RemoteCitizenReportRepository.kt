@@ -5,8 +5,8 @@ import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
 import com.trobat.data.TWO_DAYS_MS
-import com.trobat.data.local.PendingReportDao
-import com.trobat.data.local.PendingReportEntity
+import com.trobat.data.local.db.dao.PendingReportDao
+import com.trobat.data.local.db.entity.PendingReportEntity
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.ReportStatus
 import com.trobat.data.remote.TrobatApi

@@ -2,8 +2,8 @@ package com.trobat.data.repository
 
 import androidx.room.withTransaction
 import com.trobat.data.TWO_DAYS_MS
-import com.trobat.data.local.NotificationEntity
-import com.trobat.data.local.TrobatDatabase
+import com.trobat.data.local.db.entity.NotificationEntity
+import com.trobat.data.local.db.TrobatDatabase
 import kotlinx.coroutines.flow.Flow
 
 private const val MAX_NOTIFICATIONS = 10

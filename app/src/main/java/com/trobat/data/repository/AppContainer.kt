@@ -3,9 +3,12 @@ package com.trobat.data.repository
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.trobat.data.local.LastLocationPrefs
-import com.trobat.data.local.SessionManager
-import com.trobat.data.local.TrobatDatabase
+import com.trobat.data.local.prefs.LastLocationPrefs
+import com.trobat.data.local.prefs.SessionManager
+import com.trobat.data.local.db.TrobatDatabase
+import com.trobat.data.local.prefs.OnboardingPrefs
+import com.trobat.data.local.prefs.ReportDraftPrefs
+import com.trobat.data.local.prefs.TermsPrefs
 import com.trobat.data.remote.NetworkProvider
 import java.io.File
 
@@ -29,10 +32,13 @@ object AppContainer {
     lateinit var lastLocationPrefs: LastLocationPrefs
         private set
 
-    lateinit var reportDraftPrefs: com.trobat.data.local.ReportDraftPrefs
+    lateinit var reportDraftPrefs: ReportDraftPrefs
         private set
 
-    lateinit var onboardingPrefs: com.trobat.data.local.OnboardingPrefs
+    lateinit var onboardingPrefs: OnboardingPrefs
+        private set
+
+    lateinit var termsPrefs: TermsPrefs
         private set
 
     private fun createEncryptedPrefs(context: Context): android.content.SharedPreferences {
@@ -69,8 +75,9 @@ object AppContainer {
         val db = TrobatDatabase.build(context.applicationContext)
 
         lastLocationPrefs = LastLocationPrefs(context.applicationContext)
-        reportDraftPrefs = com.trobat.data.local.ReportDraftPrefs(context.applicationContext)
-        onboardingPrefs = com.trobat.data.local.OnboardingPrefs(context.applicationContext)
+        reportDraftPrefs = ReportDraftPrefs(context.applicationContext)
+        onboardingPrefs = OnboardingPrefs(context.applicationContext)
+        termsPrefs = TermsPrefs(context.applicationContext)
         val remoteAuth = RemoteAuthRepository(api, sessionManager, db, lastLocationPrefs, context.applicationContext)
         authRepository = remoteAuth
         userPreferencesRepository = remoteAuth

@@ -1,4 +1,4 @@
-package com.trobat.data.local
+package com.trobat.data.local.prefs
 
 import android.content.Context
 import android.net.Uri

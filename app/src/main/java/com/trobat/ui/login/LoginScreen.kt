@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.R
+import com.trobat.ui.components.TermsAndConditionsDialog
 import com.trobat.ui.theme.BackgroundPrincipal
 import com.trobat.ui.theme.TrobatBackground
 import com.trobat.ui.theme.TrobatOutline
@@ -71,6 +72,13 @@ fun LoginScreen(
                 LoginEffect.NavigateToRegister -> onNavigateToRegister()
             }
         }
+    }
+
+    if (uiState.showTermsDialog) {
+        TermsAndConditionsDialog(
+            onAccept = { viewModel.onEvent(LoginEvent.TermsAccepted) },
+            onReject = { viewModel.onEvent(LoginEvent.TermsRejected) }
+        )
     }
 
     Surface(

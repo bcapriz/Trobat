@@ -1,6 +1,6 @@
 package com.trobat.ui.notifications
 
-import com.trobat.data.local.NotificationEntity
+import com.trobat.data.local.db.entity.NotificationEntity
 import com.trobat.data.repository.FakeCaseRepository
 import com.trobat.data.repository.FakeCitizenReportRepository
 import com.trobat.data.repository.NotificationRepository
