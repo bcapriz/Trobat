@@ -16,7 +16,7 @@ Trobat es un sistema de tres componentes que se comunican vía API REST:
 |---|---|---|---|
 | App Android (esta repo) | `Trobat/` | Kotlin · Jetpack Compose · MVVM+MVI | APK |
 | Backend API | `trobat-api/` | Ktor · MongoDB Atlas · Firebase Admin SDK | Railway |
-| Panel web policial | `trobatWeb/` | React · TypeScript · Vite · Zustand | — |
+| Panel web policial | `trobatWeb/` | React · TypeScript · Vite · Zustand | Vercel |
 
 **Backend:** `https://trobatapi-production.up.railway.app`
 
