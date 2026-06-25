@@ -1,6 +1,6 @@
 package com.trobat.ui.splash
 
-import com.trobat.data.local.OnboardingPrefs
+import com.trobat.data.local.prefs.OnboardingPrefs
 import com.trobat.helpers.FakeAuthRepository
 import com.trobat.helpers.setAppContainerField
 import io.mockk.every

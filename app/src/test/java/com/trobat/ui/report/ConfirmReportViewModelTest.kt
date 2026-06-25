@@ -2,7 +2,7 @@ package com.trobat.ui.report
 
 import android.app.Application
 import android.net.Uri
-import com.trobat.data.local.ReportDraftPrefs
+import com.trobat.data.local.prefs.ReportDraftPrefs
 import com.trobat.data.repository.CitizenReportRepository
 import com.trobat.data.repository.FakeCaseRepository
 import com.trobat.helpers.FakeAuthRepository

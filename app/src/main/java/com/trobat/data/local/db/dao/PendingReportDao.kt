@@ -1,14 +1,15 @@
-package com.trobat.data.local
+package com.trobat.data.local.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.trobat.data.local.db.entity.PendingReportEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PendingReportDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insert(report: PendingReportEntity)
 
     @Query("SELECT * FROM pending_reports ORDER BY createdAt DESC")

@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trobat.R
-import com.trobat.data.local.NotificationEntity
+import com.trobat.data.local.db.entity.NotificationEntity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

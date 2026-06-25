@@ -1,6 +1,6 @@
 package com.trobat.data.repository
 
-import com.trobat.data.local.PendingReportEntity
+import com.trobat.data.local.db.entity.PendingReportEntity
 import com.trobat.data.model.CitizenReport
 import com.trobat.data.model.ReportStatus
 import kotlinx.coroutines.flow.Flow
