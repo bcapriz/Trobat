@@ -1,8 +1,8 @@
 package com.trobat.data.repository
 
-import com.trobat.data.local.TrobatDatabase
-import com.trobat.data.local.toDomain
-import com.trobat.data.local.toEntity
+import com.trobat.data.local.db.TrobatDatabase
+import com.trobat.data.local.db.entity.toDomain
+import com.trobat.data.local.db.entity.toEntity
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.repository.mapper.toDomain
 import com.trobat.data.model.MissingPersonCase

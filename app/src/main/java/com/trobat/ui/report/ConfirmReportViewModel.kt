@@ -5,6 +5,7 @@ import android.location.Geocoder
 import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.trobat.data.local.prefs.ReportDraftPrefs
 import com.trobat.data.model.CitizenReport
 import com.trobat.ui.capture.CapturedEvidenceHolder
 import com.trobat.data.model.MissingPersonCase
@@ -171,7 +172,8 @@ class ConfirmReportViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun saveDraft() {
         val s = _uiState.value
-        draftPrefs.save(com.trobat.data.local.ReportDraftPrefs.Draft(
+        draftPrefs.save(
+            ReportDraftPrefs.Draft(
             photoUriString = s.photoUri?.toString(),
             latitude = s.latitude,
             longitude = s.longitude,

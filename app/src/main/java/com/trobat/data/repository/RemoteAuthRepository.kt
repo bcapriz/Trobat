@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.trobat.TrobatApplication
-import com.trobat.data.local.LastLocationPrefs
-import com.trobat.data.local.SessionManager
-import com.trobat.data.local.TrobatDatabase
+import com.trobat.data.local.prefs.LastLocationPrefs
+import com.trobat.data.local.prefs.SessionManager
+import com.trobat.data.local.db.TrobatDatabase
 import com.trobat.data.remote.TrobatApi
 import com.trobat.data.remote.dto.LoginRequestDto
 import com.trobat.data.remote.dto.LogoutRequestDto

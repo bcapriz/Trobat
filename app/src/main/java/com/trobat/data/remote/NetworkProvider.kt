@@ -1,7 +1,7 @@
 package com.trobat.data.remote
 
 import com.trobat.BuildConfig
-import com.trobat.data.local.SessionManager
+import com.trobat.data.local.prefs.SessionManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
