@@ -5,4 +5,6 @@ sealed interface LoginEvent {
     data class PasswordChanged(val value: String) : LoginEvent
     data object LoginClicked : LoginEvent
     data object RegisterClicked : LoginEvent
+    data object TermsAccepted : LoginEvent
+    data object TermsRejected : LoginEvent
 }

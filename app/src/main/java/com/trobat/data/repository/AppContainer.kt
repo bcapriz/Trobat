@@ -35,6 +35,9 @@ object AppContainer {
     lateinit var onboardingPrefs: com.trobat.data.local.OnboardingPrefs
         private set
 
+    lateinit var termsPrefs: com.trobat.data.local.TermsPrefs
+        private set
+
     private fun createEncryptedPrefs(context: Context): android.content.SharedPreferences {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -71,6 +74,7 @@ object AppContainer {
         lastLocationPrefs = LastLocationPrefs(context.applicationContext)
         reportDraftPrefs = com.trobat.data.local.ReportDraftPrefs(context.applicationContext)
         onboardingPrefs = com.trobat.data.local.OnboardingPrefs(context.applicationContext)
+        termsPrefs = com.trobat.data.local.TermsPrefs(context.applicationContext)
         val remoteAuth = RemoteAuthRepository(api, sessionManager, db, lastLocationPrefs, context.applicationContext)
         authRepository = remoteAuth
         userPreferencesRepository = remoteAuth
